@@ -11,7 +11,7 @@ public class AiRecommandation2 {
 
     public static String chatGPT(String message) {
         String url = "https://api.openai.com/v1/chat/completions";
-        String apiKey = "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"; // API key
+        String apiKey = "Api-key-here-"; // API key - Not wanting to publish the real one
         String model = "gpt-3.5-turbo"; // current model of chatgpt api
 
         try {
