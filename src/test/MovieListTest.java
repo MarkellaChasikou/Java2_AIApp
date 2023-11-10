@@ -1,4 +1,7 @@
+package test;
 import java.util.Scanner;
+
+import main.MovieList;
 
 public class MovieListTest {
 
