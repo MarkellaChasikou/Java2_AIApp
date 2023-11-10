@@ -9,11 +9,6 @@ import java.net.URL;
 
 public class AiRecommandation2 {
 
-    public static void main(String[] args) {
-        System.out.println(chatGPT("hello, how are you?"));
-        // Prints out a response to the question.
-    }
-
     public static String chatGPT(String message) {
         String url = "https://api.openai.com/v1/chat/completions";
         String apiKey = "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"; // API key
