@@ -5,6 +5,8 @@ public class Review {
     private float rating;
     private String reviewText;
     private boolean isSpoiler;
+    
+//Constructor
     public Review(int reviewID, int userID, int movieID, float rating, String reviewTextext, boolean isSpoiler) {
         this.reviewID = reviewID;
         this.userID = userID;
