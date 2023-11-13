@@ -14,7 +14,7 @@ public class MovieList {
     }
 
     // Προσθήκη ταινίας στη λίστα
-    public void AddMovie(String movieName) {
+    public void addMovie(String movieName) {
         if (!movies.stream().anyMatch(movieName::equalsIgnoreCase)) {
             movies.add(movieName);
             System.out.println(movieName + " added to the list.");
@@ -24,22 +24,18 @@ public class MovieList {
     }
 
     // Αφαίρεση ταινίας από τη λίστα
-    public void RemoveMovie(String movieName) {
-        try {   
-            if (movies.contains(movieName)) {
-                movies.remove(movieName);
-                System.out.println(movieName + " removed from the list.");
-            } else {
-                System.out.println(movieName + " is not in the list.");
-                throw new IndexOutOfBoundsException();
-            } 
-        } catch (IndexOutOfBoundsException e) {
-            System.err.println("Error: Index out of bounds.");
-        }
+    public void removeMovie(String movieName) {
+           
+        if (movies.contains(movieName)) {
+            movies.remove(movieName);
+            System.out.println(movieName + " removed from the list.");
+        } else {
+            System.out.println(movieName + " is not in the list.");
+        } 
     }
 
     // Εμφάνιση των ταινιών στη λίστα
-    public void DisplayMovies() {
+    public void displayMovies() {
         System.out.println("Movies in the list: " + movies);
     }
 }
