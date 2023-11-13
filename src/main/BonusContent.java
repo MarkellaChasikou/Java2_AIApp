@@ -1,4 +1,4 @@
-package test;
+package main;
 import java.io.IOException;
 import java.util.Scanner;
 import org.jsoup.Jsoup;
