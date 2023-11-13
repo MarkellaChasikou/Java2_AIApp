@@ -4,7 +4,7 @@ import java.util.List;
 
 public class MovieList {
     private String listType; // Τύπος λίστας (public ή private)
-    private String creatorId; // ID του δημιουργού της λίστας
+    private final String creatorId; // ID του δημιουργού της λίστας
     private List<String> movies; // Λίστα των ταινιών
 
     public MovieList(String listType, String creatorId) {
