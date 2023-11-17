@@ -1,4 +1,4 @@
-package main;
+package gr.aueb;
 import java.io.IOException;
 import java.util.Scanner;
 import org.jsoup.Jsoup;
