@@ -1,4 +1,4 @@
-package main;
+package gr.aueb;
 
 import java.io.BufferedReader;
 import java.io.IOException;
