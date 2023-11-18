@@ -1,4 +1,4 @@
-package gr.aueb;
+package main;
 
 import java.util.Arrays;
 

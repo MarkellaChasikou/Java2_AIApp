@@ -1,4 +1,4 @@
-package gr.aueb;
+package main;
 
 public class Cast {
     private String name;

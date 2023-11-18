@@ -1,5 +1,5 @@
+package main;
 
-package gr.aueb;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -67,4 +67,3 @@ public class App
 
     }
 }
-
