@@ -1,40 +1,64 @@
 package test;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import java.io.IOException;
-import java.util.Scanner;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 public class BonusContent {
-       
-	Movie movie = new Movie();//dhmioyrgia antikeimenoy klashs Movie
 
-    
-    String movieName = movie.getMovieId();//Pairnw to movie id apo thn klash Movie
-       
-       //apo edw k katw skip
+    public static void main(String[] args) {
+        String movieTitle = "Pulp Fiction";
+        searchAndPrintVideo(movieTitle + " fun facts movie", "Fun Facts");
+        searchAndPrintVideo(movieTitle + " behind the scenes movie", "Behind the Scenes");
+        searchAndPrintVideo(movieTitle + " interviews movie", "Interviews");
+    }
 
-        public void BonusContent() {
-            try {
-               
-                Document document = Jsoup.connect("https://www.google.com/" + movieName).get();// tha xrhsimopoihsw brave
+    public static void searchAndPrintVideo(String searchQuery, String category) {
+        try {
+            String apiKey = ""; // το κλειδι Api που εχω δημιουργησει
 
-               
-               
-                Elements funFacts = document.select(".fun-facts");
+            String searchUrl = "https://www.googleapis.com/youtube/v3/search?part=snippet&q=" +
+                    URLEncoder.encode(searchQuery, StandardCharsets.UTF_8) +
+                    "&type=video&key=" + apiKey;
 
-                if (!funFacts.isEmpty()) {
-                    System.out.println("Βρέθηκαν Fun Facts: " + funFacts.text());
-                   
+            InputStream input = new URL(searchUrl).openStream();
+            JsonArray items = JsonParser.parseReader(new InputStreamReader(input)).getAsJsonObject().getAsJsonArray("items");
+
+            if (items.size() > 0) {
+                System.out.println("Βίντεο για την κατηγορία '" + category + "':");
+
+                for (int i = 0; i < Math.min(3, items.size()); i++) {
+                    JsonObject item = items.get(i).getAsJsonObject();
+                    JsonObject snippet = item.getAsJsonObject("snippet");
+
+                    
+                    JsonObject idObject = item.getAsJsonObject("id");
+
+                    if (idObject != null) {
+                        String videoId = idObject.get("videoId").getAsString();
+                        String videoUrl = "https://www.youtube.com/watch?v=" + videoId;
+
+                        String videoTitle = snippet.get("title").getAsString();
+                        System.out.println(category + " " + (i + 1) + ": " + videoTitle + " - " + videoUrl);
+                    } else {
+                        System.out.println("Δεν βρέθηκε αναγνωριστικό βίντεο για την κατηγορία '" + category + "'.");
+                    }
+                    
+
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+            } else {
+                System.out.println("Δεν βρέθηκαν βίντεο για την κατηγορία '" + category + "'.");
             }
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
+}
+// to fix: δεν βγαζει μερικες φορες σωστα τις λεξεις στους τιτλους πχ: στο doesn't βγαινει λαθος το '
