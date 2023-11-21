@@ -38,15 +38,15 @@ public class MovieListTest {
                 } else if (userInput.equals("remove")) {
                     System.out.print("Enter the movie name to remove: ");
                     String movieToRemove = scanner.nextLine();
-                    movieList.RemoveMovie(movieToRemove);
+                    movieList.removeMovie(movieToRemove);
                 } else if ( userInput.equals("ls")) {
-                    movieList.DisplayMovies();
+                    movieList.displayMovies();
                 } else {
-                    movieList.AddMovie(userInput);
+                    movieList.addMovie(userInput);
                 }
         }
         // Εμφάνιση των ταινιών στη λίστα
-        movieList.DisplayMovies();
+        movieList.displayMovies();
         scanner.close();
     }
 }

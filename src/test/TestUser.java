@@ -1,5 +1,7 @@
 package test;
 import java.util.Scanner;
+import main.User;
+import main.UserNotFoundException;
 
 public class TestUser {
     public static void main(String[] args) {
