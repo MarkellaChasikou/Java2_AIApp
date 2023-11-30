@@ -1,4 +1,4 @@
-package main;
+package gr.aueb;
 
 
 import java.net.URI;
