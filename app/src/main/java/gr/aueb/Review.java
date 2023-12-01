@@ -1,4 +1,4 @@
-package main;
+package gr.aueb;
 public class Review {
     private int reviewID;
     private int userID;
