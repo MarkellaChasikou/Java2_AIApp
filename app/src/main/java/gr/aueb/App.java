@@ -1,6 +1,9 @@
 package gr.aueb;
 
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -16,11 +19,16 @@ public class App
         
         Scanner sc = new Scanner(System.in);
         Gson gson = new Gson();
-        
-        String apiKey;
-        System.out.println("Insert api key"); //Temporary
-        apiKey = sc.nextLine();
-        
+        File f1 = new File("C:\\Users\\Nick\\api_keys\\tmdb_api_key.txt");
+        String apiKey = null;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(f1))) {
+            apiKey = br.readLine();
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+
+
         System.out.println("Search for a movie");
         String searchInput = sc.nextLine();        
         ArrayList<Integer> ids = Movie.movieSearch(searchInput, apiKey);

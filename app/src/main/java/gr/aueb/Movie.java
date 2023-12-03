@@ -18,8 +18,8 @@ public class Movie {
     private String release_date;
     private String runtime;
     private float vote_average;
-    private transient float avgRating;
-    private transient ArrayList<Float> ratings;
+    private float avgRating;
+    private ArrayList<Float> ratings;
    
 
     private Cast[] cast;
