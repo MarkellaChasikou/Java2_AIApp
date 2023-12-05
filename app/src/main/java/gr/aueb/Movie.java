@@ -5,7 +5,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Arrays;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -20,8 +19,6 @@ public class Movie {
     private float vote_average;
     private float avgRating;
     private ArrayList<Float> ratings;
-   
-
     private Cast[] cast;
     private Crew[] crew;
     
@@ -154,7 +151,7 @@ public class Movie {
             int originalId = resultsArray.getJSONObject(i).getInt("id");
             originalIdsArray.add(originalId);
             //Prints the title of each result 
-            System.out.println(i+1 + "   " + resultsArray.getJSONObject(i).getString("original_title"));
+            System.out.println(i+1 + "\t" + resultsArray.getJSONObject(i).getString("original_title"));
         }
         return originalIdsArray;
     }
@@ -175,12 +172,37 @@ public class Movie {
         
     }
     
-    //TODO: better form
     @Override
     public String toString() {
-        return "Movie [genres=" + Arrays.toString(genres) + ", id=" + id + ", original_title=" + original_title
-                + ", overview=" + overview + ", release_date=" + release_date + ", runtime=" + runtime
-                + ", vote_average=" + vote_average + ", avgRating=" + avgRating + ", ratings=" + ratings + ", cast="
-                + Arrays.toString(cast) + ", crew=" + Arrays.toString(crew) + "]";
+        String gens = new String();
+        String ca = new String();
+        String cr = new String();
+        
+        for (int i = 0; i < genres.length; i++ ) {
+            gens += genres[i].toString();
+            if (i < genres.length-1) {
+                gens += ", ";
+            }
+        }
+
+        for (Cast c : cast) {
+            ca += c.toString();
+        }
+
+        for (Crew c : crew) {
+            cr += c.toString();
+        }
+        
+        return "\n" + overview + "\n \n"
+            + "Title: " + original_title + "\n"
+            + "Runtime: " + runtime + "m" + "\n"
+            + "Genres: " + gens + "\n"
+            + "Release Date: " + release_date +"\n"
+            + "Tmdb Rating: " + vote_average + "\n \n \n"
+            + "Movie Contributors: \n \n" 
+            + "Cast: \n"  
+            + ca + "\n \n"
+            + "Crew: \n" 
+            + cr;
     }
 }

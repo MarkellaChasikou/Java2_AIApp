@@ -1,9 +1,7 @@
 package gr.aueb;
 
-import java.util.Arrays;
-
 public class Contributors {
-     private String id;
+    private String id;
     public Cast[] cast;
     private Crew[] crew;
     
@@ -31,11 +29,4 @@ public class Contributors {
     public void setCrew(Crew[] crew) {
         this.crew = crew;
     }
-    
-    //TODO: better form
-    @Override
-    public String toString() {
-        return "Contributors [id=" + id + ", cast=" + Arrays.toString(cast) + ", crew=" + Arrays.toString(crew) + "]";
-    }
-
 }
