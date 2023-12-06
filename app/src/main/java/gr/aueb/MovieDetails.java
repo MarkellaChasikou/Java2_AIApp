@@ -1,6 +1,5 @@
 package gr.aueb;
 
-import java.util.Arrays;
 
 public class MovieDetails {
     private Genre[] genres;
@@ -76,12 +75,5 @@ public class MovieDetails {
 
     public void setVote_average(float vote_average) {
         this.vote_average = vote_average;
-    }
-
-    @Override
-    public String toString() {
-        return "MovieDetails [genres=" + Arrays.toString(genres) + ", id=" + id + ", original_title=" + original_title
-                + ", overview=" + overview + ", release_date=" + release_date + ", runtime=" + runtime
-                + ", vote_average=" + vote_average + "]";
     }
 }

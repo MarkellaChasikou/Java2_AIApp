@@ -29,10 +29,10 @@ public class App
         }
 
 
-        System.out.println("Search for a movie");
+        System.out.println("Search for a movie. \n");
         String searchInput = sc.nextLine();        
         ArrayList<Integer> ids = Movie.movieSearch(searchInput, apiKey);
-        System.out.println("Choose your title");
+        System.out.println("\nChoose your title. \n");
         int answer = sc.nextInt();
         boolean exists = Movie.localSearch(ids.get(answer - 1));
         

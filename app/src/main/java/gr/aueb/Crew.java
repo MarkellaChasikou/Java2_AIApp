@@ -22,6 +22,6 @@ public class Crew {
     }
     @Override
     public String toString() {
-        return "Crew [name=" + name + ", job=" + job + "]";
+        return String.format("Name: %-30s\tJob: %s", name, job + "\n");
     }
 }

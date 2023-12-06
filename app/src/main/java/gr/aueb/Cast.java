@@ -19,7 +19,8 @@ public class Cast {
     }
     @Override
     public String toString() {
-        return "actor: [name=" + name + ", character=" + character + "]";
+        
+        return String.format("Name: %-30s\tCharacter Name: %s", name, character + "\n");
     }
     
 }
