@@ -9,7 +9,7 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URISyntaxException;
 
-public class AiRecommandation2 {
+public class AiRecommendation2 {
 
     public static void main(String[] args) {
         // Get user input
