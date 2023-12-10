@@ -7,6 +7,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import com.google.gson.Gson;
 
 public class Movie {
     
@@ -129,6 +130,43 @@ public class Movie {
         return false;
     }
 
+    //Creates new Movie Object if movie doesn't already exist
+    public static void createMovie(int id, String apiKey) throws Exception{
+        boolean exists = Movie.localSearch(id);
+        
+        if(exists) {
+            //print details from project's data base 
+        } else {
+            //responce for movie credits
+             HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.themoviedb.org/3/movie/" + id + "/credits?language=en-US"))
+                .header("accept", "application/json")
+                .header("Authorization", "Bearer " + apiKey)
+                .method("GET", HttpRequest.BodyPublishers.noBody())
+                .build();
+            HttpResponse<String> response1 = HttpClient.newHttpClient()
+                .send(request, HttpResponse.BodyHandlers.ofString());
+        
+            //responce for movie details
+            request = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.themoviedb.org/3/movie/" + id + "?language=en-US"))
+                .header("accept", "application/json")
+                .header("Authorization", "Bearer " + apiKey)
+                .method("GET", HttpRequest.BodyPublishers.noBody())
+                .build();
+            HttpResponse<String> response2 = HttpClient.newHttpClient()
+                .send(request, HttpResponse.BodyHandlers.ofString());
+
+            Gson gson = new Gson();
+            Contributors creditsResponse = gson.fromJson(response1.body(), Contributors.class);
+            MovieDetails movieDetailsResponse = gson.fromJson(response2.body(), MovieDetails.class);
+
+
+            Movie movie = new Movie(creditsResponse, movieDetailsResponse);
+            System.out.println(movie);
+        }
+    }
+
     //Searches for a movie in TMDB data base, returns arraylist with the ids of all the matches and prints their titles (only page 1)
     //TODO: sort arraylist based on popularity, fix foreign characters, make custom search options
     public static ArrayList<Integer> movieSearch(String searchInput, String apiKey) throws Exception {  //TODO: handle exceptions  
@@ -145,16 +183,22 @@ public class Movie {
         //Get the results array from the JSON object
         JSONArray resultsArray = jsonResponse.getJSONArray("results");
         ArrayList<Integer> originalIdsArray = new ArrayList<Integer>();
+        ArrayList<String> originalTitlesArray = new ArrayList<String>();
 
         //Iterate through the existing array and extract original ids
+        System.out.println();
         for (int i = 0; i < resultsArray.length(); i++) {
             int originalId = resultsArray.getJSONObject(i).getInt("id");
             originalIdsArray.add(originalId);
             //Prints the title of each result 
-            System.out.println(i+1 + "\t" + resultsArray.getJSONObject(i).getString("original_title"));
+            String originalTitle = resultsArray.getJSONObject(i).getString("original_title");
+            originalTitlesArray.add(originalTitle);
+            System.out.printf("%2d. %s%n", i + 1, originalTitle);
         }
         return originalIdsArray;
     }
+
+
 
     public void updateRating(float rating) {
         ratings.add(rating);
