@@ -1,77 +1,170 @@
 package gr.aueb;
 
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class App 
-{
-    public static void main( String[] args ) throws Exception
-    {
-        
-        Scanner sc = new Scanner(System.in);
-        Gson gson = new Gson();
-        File f1 = new File("C:\\Users\\Nick\\api_keys\\tmdb_api_key.txt");
-        String apiKey = null;
+public class App {
 
-        try (BufferedReader br = new BufferedReader(new FileReader(f1))) {
-            apiKey = br.readLine();
+    private static String currentUser;
+    private static String tmdbApiKey;
+    private static String chatgptApiKey;
+    private static String youtubeApiKey; 
+
+    public static void main(String[] args) throws Exception {
+        loadApiKeys(); // Load API keys from files
+
+        Scanner scanner = new Scanner(System.in);
+
+        while (true) {
+            displayStartMenu();
+
+            int startChoice = scanner.nextInt();
+            scanner.nextLine(); // consume the newline character
+
+            switch (startChoice) {
+                case 1:
+                    //login
+                    break;
+                case 2:
+                    //sign up
+                    break;
+                case 3:
+                    // Continue as a guest
+                    currentUser = "Guest";
+                    break;
+                case 4:
+                    System.out.println("Exiting the application.");
+                    System.exit(0);
+                default:
+                    System.out.println("Invalid choice. Please enter a valid option.");
+            }
+
+            // If the user is logged in, display the main menu
+            if (isLoggedIn()) {
+                while (true) {
+                    displayMainMenu();
+
+                    int choice = scanner.nextInt();
+                    scanner.nextLine(); // consume the newline character
+
+                    switch (choice) {
+                        case 1:
+                            getAIRecommendation(scanner);
+                            break;
+                        case 2:
+                            searchForMovie(scanner);
+
+                            break;
+                        case 3:
+                            if(currentUser != "Guest") {
+                                logOut();
+                            } else {
+                                displayStartMenu();
+                                choice = scanner.nextInt();
+                                scanner.nextLine(); // consume the newline character
+                            }
+                            break;
+                        case 4:
+                            System.out.println("Exiting the application. Goodbye!");
+                            System.exit(0);
+                        default:
+                            System.out.println("Invalid choice. Please enter a valid option.");
+                    }
+                }
+            }
+        }
+    }
+
+    private static void loadApiKeys() {
+        File tmdbFile = new File("C:\\Users\\Nick\\api_keys\\tmdb_api_key.txt");
+        File chatgptFile = new File("C:\\Users\\Nick\\api_keys\\chat_gpt_key.txt");
+        File youtubeFile = new File("C:\\Users\\Nick\\api_keys\\youtube_key.txt");
+
+        try (BufferedReader br = new BufferedReader(new FileReader(tmdbFile))) {
+            tmdbApiKey = br.readLine();
         } catch (Exception e) {
-            // TODO: handle exception
+            System.err.println("Error reading TMDB API key file.");
+            System.exit(1);
         }
 
+        try (BufferedReader br = new BufferedReader(new FileReader(chatgptFile))) {
+            chatgptApiKey = br.readLine();
+        } catch (Exception e) {
+            System.err.println("Error reading ChatGPT API key file.");
+            System.exit(1);
+        }
 
-        System.out.println("Search for a movie. \n");
-        String searchInput = sc.nextLine();        
-        ArrayList<Integer> ids = Movie.movieSearch(searchInput, apiKey);
-        System.out.println("\nChoose your title. \n");
-        int answer = sc.nextInt();
-        boolean exists = Movie.localSearch(ids.get(answer - 1));
-        
-        if(exists) {
-            //print details from project's data base 
+        try (BufferedReader br = new BufferedReader(new FileReader(youtubeFile))) {
+            youtubeApiKey = br.readLine();
+        } catch (Exception e) {
+            System.err.println("Error reading ChatGPT API key file.");
+            System.exit(1);
+        }
+    }
+
+    private static void displayStartMenu() {
+        System.out.println("\nStart Menu:");
+        System.out.println("1. Login");
+        System.out.println("2. Sign Up");
+        System.out.println("3. Continue as a Guest");
+        System.out.println("4. Exit");
+        System.out.print("Enter your choice: ");
+    }
+
+    private static void displayMainMenu() {
+        System.out.println("\nMain Menu:");
+        System.out.println("1. Get AI recommendation for a movie");
+        System.out.println("2. Search for a movie");
+        if(currentUser != "Guest") {
+            System.out.println("3. Log Out");
+            
         } else {
-            //responce for movie credits
-             HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://api.themoviedb.org/3/movie/" + ids.get(answer - 1) + "/credits?language=en-US"))
-                .header("accept", "application/json")
-                .header("Authorization", "Bearer " + apiKey)
-                .method("GET", HttpRequest.BodyPublishers.noBody())
-                .build();
-            HttpResponse<String> response1 = HttpClient.newHttpClient()
-                .send(request, HttpResponse.BodyHandlers.ofString());
-        
-            //responce for movie details
-            request = HttpRequest.newBuilder()
-                .uri(URI.create("https://api.themoviedb.org/3/movie/" + ids.get(answer - 1) + "?language=en-US"))
-                .header("accept", "application/json")
-                .header("Authorization", "Bearer " + apiKey)
-                .method("GET", HttpRequest.BodyPublishers.noBody())
-                .build();
-            HttpResponse<String> response2 = HttpClient.newHttpClient()
-                .send(request, HttpResponse.BodyHandlers.ofString());
-
-        
-            Contributors creditsResponse = gson.fromJson(response1.body(), Contributors.class);
-            MovieDetails movieDetailsResponse = gson.fromJson(response2.body(), MovieDetails.class);
-
-            //System.out.println(creditsResponse);
-            //System.out.println(movieDetailsResponse);
-
-            Movie movie = new Movie(creditsResponse, movieDetailsResponse);
-            System.out.println(movie);
-            //add in project's data base
+            System.out.println("3. Login");
         }
-        
-        sc.close();
+        System.out.println("4. Exit");
+        System.out.print("Enter your choice: ");
+    }
 
+    private static boolean isLoggedIn() {
+        return currentUser != null;
+    }
+
+    private static void logOut() {
+        currentUser = null;
+        System.out.println("Logged out successfully.");
+    }
+
+    private static void getAIRecommendation(Scanner scanner) throws Exception {
+        System.out.println("\nType your preferences for movie recommendations.");
+        String userMessage = scanner.nextLine();
+        AiRecommendation2.testChatCompletions(userMessage + " (Only movie titles, no description or other movie details, no apologies for your previous responses or things you can't do as an AI.)", chatgptApiKey);
+        System.out.println("\nChoose your title");
+        scanner.nextInt();
+        //Temporary
+        Movie.createMovie(157336,tmdbApiKey);
+
+    }
+
+    private static void searchForMovie(Scanner scanner) throws Exception {
+        System.out.println("\nType your search. \n");
+        String userMessage = scanner.nextLine();
+        ArrayList<Integer> ids = Movie.movieSearch(userMessage, tmdbApiKey);
+        System.out.println("\nChoose your title. \n");
+        int answer = scanner.nextInt();
+        Movie.createMovie(ids.get(answer - 1), tmdbApiKey);
+        System.out.println("\nDo you want bonus content for your movie? (yes/no)");
+        scanner.nextLine(); // consume the newline character
+        String bonusContentChoice = scanner.nextLine();
+        if (bonusContentChoice.equals("yes")) {
+           // BonusContent.printBonusContent();
+        }
+}
+    public static void printBonusContent(String movieTitle) {
+        BonusContent.searchAndPrintVideo(movieTitle + " fun facts movie", "Fun Facts");
+        BonusContent.searchAndPrintVideo(movieTitle + " behind the scenes movie", "Behind the Scenes");
+        BonusContent.searchAndPrintVideo(movieTitle + " interviews movie", "Interviews");
     }
 }

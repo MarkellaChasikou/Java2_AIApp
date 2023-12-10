@@ -7,25 +7,15 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
 import java.net.URISyntaxException;
 
 public class AiRecommendation2 {
 
-    public static void main(String[] args) {
-        // Get user input
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        System.out.println("Enter a user message:");
-        try {
-            String userMessage = reader.readLine();
-            testChatCompletions(userMessage);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void testChatCompletions(String userMessage) {
+    public static void testChatCompletions(String userMessage, String apiKey) {
         String url = "https://api.openai.com/v1/chat/completions";
-        String apiKey = "-"; // Actual api key will be read from a file
         String model = "gpt-3.5-turbo";
         int maxRetries = 3;
 
@@ -62,6 +52,7 @@ public class AiRecommendation2 {
 
                 // Get the response
                 int responseCode = con.getResponseCode();
+                
                 if (responseCode == HttpURLConnection.HTTP_OK) {
                     BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
                     String inputLine;
@@ -70,9 +61,9 @@ public class AiRecommendation2 {
                         response.append(inputLine);
                     }
                     in.close();
-
+                    
                     // Print the response
-                    System.out.println("ChatGPT Response: " + response.toString());
+                    AiRecommendation2.aiMessage(response);
                     break; // Successful response, exit the retry loop
                 } else if (responseCode == 429) {
                     // Retry after the specified duration
@@ -94,4 +85,18 @@ public class AiRecommendation2 {
             }
         }
     }
+     
+     
+    public static void aiMessage(StringBuilder response) {
+        Gson gson = new Gson();
+        JsonObject jo = gson.fromJson(response.toString(), JsonObject.class);
+
+        String content = jo.getAsJsonArray("choices")
+                .get(0).getAsJsonObject()
+                .getAsJsonObject("message")
+                .get("content").getAsString();
+
+        System.out.println("\n\n" + content);
+    }
+    
 }
