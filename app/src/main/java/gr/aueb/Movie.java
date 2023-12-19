@@ -19,13 +19,12 @@ public class Movie {
     private String runtime;
     private float vote_average;
     private float avgRating;
-    private ArrayList<Float> ratings;
     private Cast[] cast;
     private Crew[] crew;
+    private String poster_path;
     
     public Movie(Contributors creditsResponse, MovieDetails movieDetailsResponse) {
         avgRating = 0;
-        ratings = new ArrayList<Float>();
         genres = movieDetailsResponse.getGenres();
         id = movieDetailsResponse.getId();
         original_title = movieDetailsResponse.getOriginal_title();
@@ -35,6 +34,7 @@ public class Movie {
         vote_average = movieDetailsResponse.getVote_average();
         cast = creditsResponse.getCast();
         crew = creditsResponse.getCrew();
+        poster_path = movieDetailsResponse.getPoster_path();
     }
     
     public Genre[] getGenres() {
@@ -116,13 +116,13 @@ public class Movie {
     public void setCrew(Crew[] crew) {
         this.crew = crew;
     }
-
-     public ArrayList<Float> getRatings() {
-        return ratings;
+    
+    public String getPoster_path() {
+        return poster_path;
     }
 
-    public void setRatings(ArrayList<Float> ratings) {
-        this.ratings = ratings;
+    public void setPoster_path(String poster_path) {
+        this.poster_path = poster_path;
     }
 
     //Searches for a movie id in project's data base UNFINISHED
@@ -198,18 +198,6 @@ public class Movie {
         return originalIdsArray;
     }
 
-
-
-    public void updateRating(float rating) {
-        ratings.add(rating);
-        float sum = 0;
-        int count = 0;
-        for(int i = 0; i < ratings.size(); i++) {
-            sum += ratings.get(i);
-            count++;
-        }
-        avgRating = (float) sum / count;
-    }
     
     // //Searches for all reviews of a specific movie in project's data base and prints them UNFINISHED
     public void getReviews() {

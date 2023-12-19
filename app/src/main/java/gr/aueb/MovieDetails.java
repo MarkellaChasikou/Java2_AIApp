@@ -9,9 +9,10 @@ public class MovieDetails {
     private String release_date;
     private String runtime;
     private float vote_average;
+    private String poster_path;
     
     public MovieDetails(Genre[] genres, String id, String original_title, String overview, String release_date,
-            String runtime, float vote_average) {
+            String runtime, float vote_average, String poster_path) {
         this.genres = genres;
         this.id = id;
         this.original_title = original_title;
@@ -19,6 +20,7 @@ public class MovieDetails {
         this.release_date = release_date;
         this.runtime = runtime;
         this.vote_average = vote_average;
+        this.poster_path = poster_path;
     }
 
     public Genre[] getGenres() {
@@ -75,5 +77,13 @@ public class MovieDetails {
 
     public void setVote_average(float vote_average) {
         this.vote_average = vote_average;
+    }
+
+    public String getPoster_path() {
+        return poster_path;
+    }
+
+    public void setPoster_path(String poster_path) {
+        this.poster_path = poster_path;
     }
 }
