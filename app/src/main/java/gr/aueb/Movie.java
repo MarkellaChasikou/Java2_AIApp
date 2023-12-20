@@ -5,6 +5,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.LocalDate;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.google.gson.Gson;
@@ -19,13 +21,12 @@ public class Movie {
     private String runtime;
     private float vote_average;
     private float avgRating;
-    private ArrayList<Float> ratings;
     private Cast[] cast;
     private Crew[] crew;
+    private String poster_path;
     
     public Movie(Contributors creditsResponse, MovieDetails movieDetailsResponse) {
         avgRating = 0;
-        ratings = new ArrayList<Float>();
         genres = movieDetailsResponse.getGenres();
         id = movieDetailsResponse.getId();
         original_title = movieDetailsResponse.getOriginal_title();
@@ -35,6 +36,7 @@ public class Movie {
         vote_average = movieDetailsResponse.getVote_average();
         cast = creditsResponse.getCast();
         crew = creditsResponse.getCrew();
+        poster_path = movieDetailsResponse.getPoster_path();
     }
     
     public Genre[] getGenres() {
@@ -116,15 +118,15 @@ public class Movie {
     public void setCrew(Crew[] crew) {
         this.crew = crew;
     }
-
-     public ArrayList<Float> getRatings() {
-        return ratings;
+    
+    public String getPoster_path() {
+        return poster_path;
     }
 
-    public void setRatings(ArrayList<Float> ratings) {
-        this.ratings = ratings;
+    public void setPoster_path(String poster_path) {
+        this.poster_path = poster_path;
     }
-
+    
     //Searches for a movie id in project's data base UNFINISHED
     public static boolean localSearch(int id){
         return false;
@@ -169,7 +171,9 @@ public class Movie {
 
     //Searches for a movie in TMDB data base, returns arraylist with the ids of all the matches and prints their titles (only page 1)
     //TODO: sort arraylist based on popularity, fix foreign characters, make custom search options
-    public static ArrayList<Integer> movieSearch(String searchInput, String apiKey) throws Exception {  //TODO: handle exceptions  
+    public static ArrayList<?> movieSearch(String searchInput, String apiKey, String returnType) throws Exception {  //TODO: handle exceptions  
+        ArrayList<?> result;
+        
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create("https://api.themoviedb.org/3/search/movie?query=" + searchInput + "&include_adult=true&language=en-US&page=1"))
             .header("accept", "application/json")
@@ -183,33 +187,35 @@ public class Movie {
         //Get the results array from the JSON object
         JSONArray resultsArray = jsonResponse.getJSONArray("results");
         ArrayList<Integer> originalIdsArray = new ArrayList<Integer>();
+        ArrayList<Integer> yearsArray = new ArrayList<Integer>();
         ArrayList<String> originalTitlesArray = new ArrayList<String>();
 
         //Iterate through the existing array and extract original ids
         System.out.println();
         for (int i = 0; i < resultsArray.length(); i++) {
             int originalId = resultsArray.getJSONObject(i).getInt("id");
-            originalIdsArray.add(originalId);
-            //Prints the title of each result 
             String originalTitle = resultsArray.getJSONObject(i).getString("original_title");
+            String originalReleaseDate = resultsArray.getJSONObject(i).getString("release_date");
+            LocalDate date = LocalDate.parse(originalReleaseDate);
+            int year = date.getYear();
+            originalIdsArray.add(originalId);
             originalTitlesArray.add(originalTitle);
-            System.out.printf("%2d. %s%n", i + 1, originalTitle);
+            yearsArray.add(year);
+            if(returnType.equals("title")) System.out.printf("%2d. %s (%d)%n", i + 1, originalTitle, year);
         }
-        return originalIdsArray;
+        
+        if (returnType.equals("title")) {
+            result = originalTitlesArray;
+            return result;
+        } else if (returnType.equals("id")) {
+            result = originalIdsArray;
+            return result;
+        } else {
+            result = yearsArray;
+            return result;
+        }
     }
 
-
-
-    public void updateRating(float rating) {
-        ratings.add(rating);
-        float sum = 0;
-        int count = 0;
-        for(int i = 0; i < ratings.size(); i++) {
-            sum += ratings.get(i);
-            count++;
-        }
-        avgRating = (float) sum / count;
-    }
     
     // //Searches for all reviews of a specific movie in project's data base and prints them UNFINISHED
     public void getReviews() {
@@ -236,7 +242,7 @@ public class Movie {
         for (Crew c : crew) {
             cr += c.toString();
         }
-        
+
         return "\n" + overview + "\n \n"
             + "Title: " + original_title + "\n"
             + "Runtime: " + runtime + "m" + "\n"
@@ -249,4 +255,8 @@ public class Movie {
             + "Crew: \n" 
             + cr;
     }
+
+    
 }
+
+

@@ -12,16 +12,9 @@ import java.nio.charset.StandardCharsets;
 
 public class BonusContent {
 
-    public static void main(String[] args) {
-        String movieTitle = "Pulp Fiction";
-        searchAndPrintVideo(movieTitle + " fun facts movie", "Fun Facts");
-        searchAndPrintVideo(movieTitle + " behind the scenes movie", "Behind the Scenes");
-        searchAndPrintVideo(movieTitle + " interviews movie", "Interviews");
-    }
 
-    public static void searchAndPrintVideo(String searchQuery, String category) {
+    public static void searchAndPrintVideo(String searchQuery, String category, String apiKey) {
         try {
-            String apiKey = ""; // το κλειδι Api που εχω δημιουργησει
 
             String searchUrl = "https://www.googleapis.com/youtube/v3/search?part=snippet&q=" +
                     URLEncoder.encode(searchQuery, StandardCharsets.UTF_8) +
@@ -62,3 +55,4 @@ public class BonusContent {
     }
 }
 // to fix: δεν βγαζει μερικες φορες σωστα τις λεξεις στους τιτλους πχ: στο doesn't βγαινει λαθος το '
+
