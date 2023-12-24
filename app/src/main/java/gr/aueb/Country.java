@@ -1,7 +1,16 @@
 package gr.aueb;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
-
+import java.util.HashMap;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.annotations.SerializedName;
 
 public class Country {
@@ -55,6 +64,32 @@ public class Country {
 
     public void setRent(ArrayList<Prov> rent) {
         this.rent = rent;
+    }
+
+    public static HashMap<String, String> allCountriesNames(String apiKey) throws IOException, InterruptedException {
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create("https://api.themoviedb.org/3/watch/providers/regions?language=en-US"))
+            .header("accept", "application/json")
+            .header("Authorization", "Bearer " + apiKey)
+            .method("GET", HttpRequest.BodyPublishers.noBody())
+            .build();
+        HttpResponse<String> response = HttpClient.newHttpClient()
+            .send(request, HttpResponse.BodyHandlers.ofString());
+        
+        JsonElement element = JsonParser.parseString(response.body());
+        JsonObject jsonObject = element.getAsJsonObject();
+        JsonArray resultsArray = jsonObject.getAsJsonArray("results");
+
+        HashMap<String, String> countries = new HashMap<>();
+
+        for (JsonElement countryElement : resultsArray) {
+            JsonObject countryObject = countryElement.getAsJsonObject();
+            String code = countryObject.get("iso_3166_1").getAsString();
+            String name = countryObject.get("english_name").getAsString();
+
+            countries.put(code, name);
+        }
+        return countries;
     }
 
     @Override
