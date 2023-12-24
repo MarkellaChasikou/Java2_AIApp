@@ -26,7 +26,7 @@ public class Movie {
     private String poster_path;
     private String imdb_id;
     
-    public Movie(Contributors creditsResponse, MovieDetails movieDetailsResponse) {
+    public Movie(Contributors creditsResponse, MovieDetails movieDetailsResponse, Availability availabilityResponse) {
         avgRating = 0;
         genres = movieDetailsResponse.getGenres();
         id = movieDetailsResponse.getId();
@@ -129,6 +129,15 @@ public class Movie {
         this.poster_path = poster_path;
     }
     
+    public String getImdb_id() {
+        return imdb_id;
+    }
+
+    public void setImdb_id(String imdb_id) {
+        this.imdb_id = imdb_id;
+    }
+    
+    
     //Searches for a movie id in project's data base UNFINISHED
     public static boolean localSearch(int id){
         return false;
@@ -161,12 +170,24 @@ public class Movie {
             HttpResponse<String> response2 = HttpClient.newHttpClient()
                 .send(request, HttpResponse.BodyHandlers.ofString());
 
+            //responce for movie availability
+            request = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.themoviedb.org/3/movie/" + id + "/watch/providers"))
+                .header("accept", "application/json")
+                .header("Authorization", "Bearer " + apiKey)
+                .method("GET", HttpRequest.BodyPublishers.noBody())
+                .build();
+            HttpResponse<String> response3 = HttpClient.newHttpClient()
+                .send(request, HttpResponse.BodyHandlers.ofString());
+
+            
             Gson gson = new Gson();
             Contributors creditsResponse = gson.fromJson(response1.body(), Contributors.class);
             MovieDetails movieDetailsResponse = gson.fromJson(response2.body(), MovieDetails.class);
+            Availability availabilityResponse = gson.fromJson(response3.body(), Availability.class);
 
 
-            Movie movie = new Movie(creditsResponse, movieDetailsResponse);
+            Movie movie = new Movie(creditsResponse, movieDetailsResponse, availabilityResponse);
             System.out.println(movie);
         }
     }
@@ -258,13 +279,7 @@ public class Movie {
             + cr;
     }
 
-    public String getImdb_id() {
-        return imdb_id;
-    }
-
-    public void setImdb_id(String imdb_id) {
-        this.imdb_id = imdb_id;
-    }
+    
 
     
 }
