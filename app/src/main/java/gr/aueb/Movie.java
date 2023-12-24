@@ -24,6 +24,7 @@ public class Movie {
     private Cast[] cast;
     private Crew[] crew;
     private String poster_path;
+    private String imdb_id;
     
     public Movie(Contributors creditsResponse, MovieDetails movieDetailsResponse) {
         avgRating = 0;
@@ -37,6 +38,7 @@ public class Movie {
         cast = creditsResponse.getCast();
         crew = creditsResponse.getCrew();
         poster_path = movieDetailsResponse.getPoster_path();
+        imdb_id = movieDetailsResponse.getImdb_id();
     }
     
     public Genre[] getGenres() {
@@ -254,6 +256,14 @@ public class Movie {
             + ca + "\n \n"
             + "Crew: \n" 
             + cr;
+    }
+
+    public String getImdb_id() {
+        return imdb_id;
+    }
+
+    public void setImdb_id(String imdb_id) {
+        this.imdb_id = imdb_id;
     }
 
     
