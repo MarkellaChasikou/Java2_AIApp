@@ -14,73 +14,33 @@ public class Availability {
 
     public void setResults(HashMap<String, Country> results) {
         this.results = results;
+    }
 
+    public String formatAvailability(String category, ArrayList<Prov> providers) {
+        if (providers != null && !providers.isEmpty()) {
+            StringBuilder formatted = new StringBuilder(category + ": ");
+            for (Prov provider : providers) {
+                formatted.append(provider).append(", ");
+            }
+
+            formatted.setLength(formatted.length() - 2);
+            formatted.append("\n\n");
+            return formatted.toString();
+        }
+        return "";
     }
 
 
-    public String toString(boolean allCountries, boolean myServices, Country c) {
-        String free = null;
-        String ads = null;
-        String buy = null;
-        String flatrate = null;
-        String rent = null;
-
-        if(allCountries == false && myServices == false) {
-            if(!c.getFree().isEmpty()) {
-                free = "Free: \n";
-                for (Prov f : c.getFree()) {
-                    free += f.toString();
-                }
-            }
-            
-            if(!c.getAds().isEmpty()) {
-                ads = "Ads: \n";
-                for (Prov a : c.getAds()) {
-                    ads += a.toString();
-                }
-            }
-            
-            if(!c.getBuy().isEmpty()) {
-                buy = "Buy: \n";
-                for (Prov b : c.getBuy()) {
-                    buy += b.toString();
-                } 
-            }
-
-            if(!c.getFlatrate().isEmpty()) {
-                flatrate = "Stream: ";
-                for (Prov s : c.getFlatrate()) {
-                    flatrate += s.toString();
-                }
-            }
-            
-            
-            if(!c.getAds().isEmpty()) {
-                rent = "Rent: ";
-                for (Prov r : c.getRent()) {
-                    rent += r.toString();
-                }
-            }
-
-            if(free == null && ads == null && buy == null && flatrate == null && rent == null) {
-                return "Not available in " + c;
-            } else return "";
-            
-        
-            //Unfinished
-        
-        } else if(allCountries == true && myServices == false) {
-            for (Country co : results.values()) {
-                for (Prov f : c.getFree()) {
-                    
-                }
-            }
-            
-            return "";
-        } else if(allCountries == false && myServices == false) {
-            return "";
-        } else {
-            return "";
-        }
+    public void printAvailability(String country) {
+        StringBuilder result = new StringBuilder();
+        Country c = results.get(country);
+        if(results.containsKey(country)) {
+            result.append(formatAvailability("Free", c.getFree()));
+            result.append(formatAvailability("Ads", c.getAds()));
+            result.append(formatAvailability("Buy", c.getBuy()));
+            result.append(formatAvailability("Stream", c.getFlatrate()));                
+            result.append(formatAvailability("Rent", c.getRent()));
+            System.out.println(result);
+        } else System.out.println("Not available in " + country);
     }
 }
