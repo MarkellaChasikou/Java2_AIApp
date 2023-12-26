@@ -106,49 +106,40 @@ public class Movie {
     
     @Override
     public String toString() {
-        String gens = new String();
-        String ca = new String();
-        String cr = new String();
-        
-        for (int i = 0; i < this.md.getGenres().length; i++ ) {
-            gens += this.md.getGenres()[i].toString();
-            if (i < this.md.getGenres().length-1) {
-                gens += ", ";
+        StringBuilder gens = new StringBuilder();
+        StringBuilder ca = new StringBuilder();
+        StringBuilder cr = new StringBuilder();
+
+        // Genres
+        Genre[] genres = this.md.getGenres();
+        for (int i = 0; i < genres.length; i++) {
+            gens.append(genres[i]);
+            if (i < genres.length - 1) {
+                gens.append(", ");
             }
         }
 
+        // Cast
         for (Cast c : this.co.getCast()) {
-            ca += c.toString();
+            ca.append(c);
         }
 
+        // Crew
         for (Crew c : this.co.getCrew()) {
-            cr += c.toString();
+            cr.append(c);
         }
 
         return "\n" + this.md.getOverview() + "\n \n"
             + "Title: " + this.md.getOriginal_title() + "\n"
-            + "Runtime: " + this.md.getRuntime()+ "m" + "\n"
+            + "Runtime: " + this.md.getRuntime() + "m" + "\n"
             + "Genres: " + gens + "\n"
-            + "Release Date: " + this.md.getRelease_date() +"\n"
+            + "Release Date: " + this.md.getRelease_date() + "\n"
             + "Tmdb Rating: " + this.md.getVote_average() + "\n \n \n"
-            + "Movie Contributors: \n \n" 
-            + "Cast: \n"  
+            + "Movie Contributors: \n \n"
+            + "Cast: \n"
             + ca + "\n \n"
-            + "Crew: \n" 
-            + cr;
+            + "Crew: \n"
+            + cr + "\n\n";
+            //+ this.av.toString(null)
     }
-
-    public Availability getAv() {
-        return av;
-    }
-
-    public Contributors getCo() {
-        return co;
-    }
-
-    public MovieDetails getMd() {
-        return md;
-    }    
 }
-
-
