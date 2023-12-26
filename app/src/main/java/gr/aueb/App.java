@@ -166,8 +166,14 @@ public class App {
         }
 }
     public static void printBonusContent(String movieTitle, int year) {
+        if(year != -1) {
             BonusContent.searchAndPrintVideo(movieTitle + " fun facts movie " + year, "Fun Facts", youtubeApiKey);
             BonusContent.searchAndPrintVideo(movieTitle + " behind the scenes movie " + year, "Behind the Scenes", youtubeApiKey);
             BonusContent.searchAndPrintVideo(movieTitle + " interviews movie " + year, "Interviews", youtubeApiKey);
+        } else{
+            BonusContent.searchAndPrintVideo(movieTitle + " fun facts movie ", "Fun Facts", youtubeApiKey);
+            BonusContent.searchAndPrintVideo(movieTitle + " behind the scenes movie ", "Behind the Scenes", youtubeApiKey);
+            BonusContent.searchAndPrintVideo(movieTitle + " interviews movie ", "Interviews", youtubeApiKey);
+        }
     }
 }
