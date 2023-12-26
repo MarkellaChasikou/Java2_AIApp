@@ -143,8 +143,6 @@ public class App {
         AiRecommendation2.testChatCompletions(userMessage + " (Only movie titles, no description or other movie details, no apologies for your previous responses or things you can't do as an AI.)", chatgptApiKey);
         System.out.println("\nChoose your title");
         scanner.nextInt();
-        //Temporary
-        Movie.createMovie(157336,tmdbApiKey);
 
     }
 
@@ -156,7 +154,8 @@ public class App {
         ArrayList<?> years = Movie.movieSearch(userMessage, tmdbApiKey, "year");
         System.out.println("\nChoose your title. \n");
         int answer = scanner.nextInt();
-        Movie.createMovie((int)ids.get(answer - 1), tmdbApiKey);
+        Movie m = new Movie((int)ids.get(answer - 1), tmdbApiKey);
+        System.out.println(m);
         System.out.println("\nDo you want bonus content for your movie? (yes/no)");
         scanner.nextLine(); // consume the newline character
         String bonusContentChoice = scanner.nextLine();
