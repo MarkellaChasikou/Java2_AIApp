@@ -103,6 +103,7 @@ public class Movie {
         }
     }
 
+
     
     @Override
     public String toString() {
@@ -134,12 +135,28 @@ public class Movie {
             + "Runtime: " + this.md.getRuntime() + "m" + "\n"
             + "Genres: " + gens + "\n"
             + "Release Date: " + this.md.getRelease_date() + "\n"
-            + "Tmdb Rating: " + this.md.getVote_average() + "\n \n \n"
+            + "Tmdb Rating: " + this.md.getVote_average() + "\n"
+            + "Imdb Rating: " + this.md.getImdb_rating() + "\n \n \n" 
             + "Movie Contributors: \n \n"
             + "Cast: \n"
             + ca + "\n \n"
             + "Crew: \n"
             + cr + "\n\n";
             //+ this.av.toString(null)
+    }
+
+
+    public Availability getAv() {
+        return av;
+    }
+
+
+    public Contributors getCo() {
+        return co;
+    }
+
+
+    public MovieDetails getMd() {
+        return md;
     }
 }
