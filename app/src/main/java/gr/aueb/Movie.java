@@ -7,6 +7,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.google.gson.Gson;
@@ -79,18 +81,28 @@ public class Movie {
 
         //Iterate through the existing array and extract original ids
         System.out.println();
+        
         for (int i = 0; i < resultsArray.length(); i++) {
             int originalId = resultsArray.getJSONObject(i).getInt("id");
             String originalTitle = resultsArray.getJSONObject(i).getString("original_title");
             String originalReleaseDate = resultsArray.getJSONObject(i).getString("release_date");
-            LocalDate date = LocalDate.parse(originalReleaseDate);
-            int year = date.getYear();
             originalIdsArray.add(originalId);
             originalTitlesArray.add(originalTitle);
-            yearsArray.add(year);
-            if(returnType.equals("title")) System.out.printf("%2d. %s (%d)%n", i + 1, originalTitle, year);
+                if(!originalReleaseDate.isEmpty()) {
+                    LocalDate date = LocalDate.parse(originalReleaseDate);
+                    int year = date.getYear();
+                    yearsArray.add(year);
+                    if(returnType.equals("title")) {
+                        System.out.printf("%2d. %s (%d)%n", i + 1, originalTitle, year);
+                    }      
+                 } else {
+                    yearsArray.add(-1);
+                    if(returnType.equals("title")) {
+                        System.out.printf("%2d. %s (%s)%n", i + 1, originalTitle, "Release date not available");
+                    } 
+                }
         }
-        
+    
         if (returnType.equals("title")) {
             result = originalTitlesArray;
             return result;
