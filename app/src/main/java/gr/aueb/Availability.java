@@ -24,14 +24,13 @@ public class Availability {
             }
 
             formatted.setLength(formatted.length() - 2);
-            formatted.append("\n\n");
+            formatted.append("\n");
             return formatted.toString();
         }
         return "";
     }
 
-
-    public void printAvailability(String country) {
+    public String toString(String country) {
         StringBuilder result = new StringBuilder();
         Country c = results.get(country);
         if(results.containsKey(country)) {
@@ -40,7 +39,7 @@ public class Availability {
             result.append(formatAvailability("Buy", c.getBuy()));
             result.append(formatAvailability("Stream", c.getFlatrate()));                
             result.append(formatAvailability("Rent", c.getRent()));
-            System.out.println(result);
-        } else System.out.println("Not available in " + country);
+            return result.toString();
+        } else return "Not available in " + country;
     }
 }
