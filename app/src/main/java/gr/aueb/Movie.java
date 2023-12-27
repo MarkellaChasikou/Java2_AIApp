@@ -1,14 +1,14 @@
 package gr.aueb;
 
 import java.util.ArrayList;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.google.gson.Gson;
@@ -18,6 +18,7 @@ public class Movie {
     private Availability av;
     private Contributors co;
     private MovieDetails md;
+    private double imdbRating;
             
     public Movie(int id, String apiKey) throws IOException, InterruptedException {
         //responce for movie credits
@@ -55,6 +56,8 @@ public class Movie {
         av = gson.fromJson(response3.body(), Availability.class);
         co = gson.fromJson(response1.body(), Contributors.class);
         md = gson.fromJson(response2.body(), MovieDetails.class);
+
+        imdbRating = getImdbRatingFromID(this.md.getImdb_id());
     }  
             
 
@@ -148,7 +151,8 @@ public class Movie {
             + "Genres: " + gens + "\n"
             + "Release Date: " + this.md.getRelease_date() + "\n"
             + "Tmdb Rating: " + this.md.getVote_average() + "\n"
-            + "Imdb Rating: " + this.md.getImdb_rating() + "\n \n \n" 
+            //+ "Imdb Rating: " + this.md.getImdbRatingFromID(this.md.getImdb_id()) + "\n \n \n"
+            + "Imdb Rating: " + this.getImdbRating() + "\n \n \n" 
             + "Movie Contributors: \n \n"
             + "Cast: \n"
             + ca + "\n \n"
@@ -170,5 +174,10 @@ public class Movie {
 
     public MovieDetails getMd() {
         return md;
+    }
+
+
+    public double getImdbRating() {
+        return imdbRating;
     }
 }
