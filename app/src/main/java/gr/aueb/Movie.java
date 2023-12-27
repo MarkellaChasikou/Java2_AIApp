@@ -1,6 +1,10 @@
 package gr.aueb;
 
 import java.util.ArrayList;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -52,6 +56,32 @@ public class Movie {
 
         Gson gson = new Gson();
 
+
+        public double getImdbRatingFromID(String imdbID) {
+        String filePath = "C:\\Users\\George\\Desktop\\imdb data\\title.rating.tsv"; // Replace this with your file path
+        String line;
+        double imdbRating = -1; // Default value if the ID is not found
+
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            while ((line = br.readLine()) != null) {
+                String[] data = line.split("\t");
+
+                if (data.length >= 3 && data[0].equals(imdbID)) {
+                    imdbRating = Double.parseDouble(data[1]);
+                    break;
+                }
+            }
+        } catch (IOException | NumberFormatException e) {
+            e.printStackTrace();
+        }
+
+        return imdbRating;
+    }
+
+    //Searches for a movie id in project's data base UNFINISHED
+    public static boolean localSearch(int id){
+        return false;
+    }
         av = gson.fromJson(response3.body(), Availability.class);
         co = gson.fromJson(response1.body(), Contributors.class);
         md = gson.fromJson(response2.body(), MovieDetails.class);
