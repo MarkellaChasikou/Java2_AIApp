@@ -12,10 +12,6 @@ public class Availability {
         return results;
     }
 
-    public void setResults(HashMap<String, Country> results) {
-        this.results = results;
-    }
-
     public String formatAvailability(String category, ArrayList<Prov> providers) {
         if (providers != null && !providers.isEmpty()) {
             StringBuilder formatted = new StringBuilder(category + ": ");

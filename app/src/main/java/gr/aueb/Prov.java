@@ -10,10 +10,6 @@ public class Prov {
         return provider_name;
     }
 
-    public void setProvider_name(String provider_name) {
-        this.provider_name = provider_name;
-    }
-
     @Override
     public String toString() {
         return provider_name;
