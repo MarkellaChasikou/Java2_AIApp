@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Chatroom {
+    //βαζουμε και ονομα στο τσατρουμ + set get μεθοδους με queries kai kataskevastis
     private String roomId;
     private List<String> memberIds;
     private List<String> messages;

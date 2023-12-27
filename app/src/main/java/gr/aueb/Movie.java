@@ -1,131 +1,61 @@
 package gr.aueb;
 
 import java.util.ArrayList;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
+import com.google.gson.Gson;
 
 public class Movie {
     
-    private Genre[] genres;
-    private String id;
-    private String original_title;
-    private String overview;
-    private String release_date;
-    private String runtime;
-    private float vote_average;
-    private float avgRating;
-    private ArrayList<Float> ratings;
-    private Cast[] cast;
-    private Crew[] crew;
-    
-    public Movie(Contributors creditsResponse, MovieDetails movieDetailsResponse) {
-        avgRating = 0;
-        ratings = new ArrayList<Float>();
-        genres = movieDetailsResponse.getGenres();
-        id = movieDetailsResponse.getId();
-        original_title = movieDetailsResponse.getOriginal_title();
-        overview = movieDetailsResponse.getOverview();
-        release_date = movieDetailsResponse.getRelease_date();
-        runtime = movieDetailsResponse.getRuntime();
-        vote_average = movieDetailsResponse.getVote_average();
-        cast = creditsResponse.getCast();
-        crew = creditsResponse.getCrew();
-    }
-    
-    public Genre[] getGenres() {
-        return genres;
-    }
+    private Availability av;
+    private Contributors co;
+    private MovieDetails md;
+            
+    public Movie(int id, String apiKey) throws IOException, InterruptedException {
+        //responce for movie credits
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create("https://api.themoviedb.org/3/movie/" + id + "/credits?language=en-US"))
+            .header("accept", "application/json")
+            .header("Authorization", "Bearer " + apiKey)
+            .method("GET", HttpRequest.BodyPublishers.noBody())                
+            .build();
+        HttpResponse<String> response1 = HttpClient.newHttpClient()
+            .send(request, HttpResponse.BodyHandlers.ofString());
+        
+        //responce for movie details
+        request = HttpRequest.newBuilder()
+            .uri(URI.create("https://api.themoviedb.org/3/movie/" + id + "?language=en-US"))
+            .header("accept", "application/json")
+            .header("Authorization", "Bearer " + apiKey)
+            .method("GET", HttpRequest.BodyPublishers.noBody())
+            .build();
+        HttpResponse<String> response2 = HttpClient.newHttpClient()
+            .send(request, HttpResponse.BodyHandlers.ofString());
 
-    public void setGenres(Genre[] genres) {
-        this.genres = genres;
-    }
+        //responce for movie availability
+        request = HttpRequest.newBuilder()
+            .uri(URI.create("https://api.themoviedb.org/3/movie/" + id + "/watch/providers"))
+            .header("accept", "application/json")
+            .header("Authorization", "Bearer " + apiKey)
+            .method("GET", HttpRequest.BodyPublishers.noBody())
+            .build();
+        HttpResponse<String> response3 = HttpClient.newHttpClient()
+            .send(request, HttpResponse.BodyHandlers.ofString());
 
-    public String getId() {
-        return id;
-    }
+        Gson gson = new Gson();
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getOriginal_title() {
-        return original_title;
-    }
-
-    public void setOriginal_title(String original_title) {
-        this.original_title = original_title;
-    }
-
-    public String getOverview() {
-        return overview;
-    }
-
-    public void setOverview(String overview) {
-        this.overview = overview;
-    }
-
-    public String getRelease_date() {
-        return release_date;
-    }
-
-    public void setRelease_date(String release_date) {
-        this.release_date = release_date;
-    }
-
-    public String getRuntime() {
-        return runtime;
-    }
-
-    public void setRuntime(String runtime) {
-        this.runtime = runtime;
-    }
-
-    public double getVote_average() {
-        return vote_average;
-    }
-
-    public void setVote_average(float vote_average) {
-        this.vote_average = vote_average;
-    }
-
-    public float getAvgRating() {
-        return avgRating;
-    }
-
-    public void setAvgRating(float rating) {
-        this.avgRating = rating;
-    }
-
-    public Cast[] getCast() {
-        return cast;
-    }
-
-    public void setCast(Cast[] cast) {
-        this.cast = cast;
-    }
-
-    public Crew[] getCrew() {
-        return crew;
-    }
-
-    public void setCrew(Crew[] crew) {
-        this.crew = crew;
-    }
-
-     public ArrayList<Float> getRatings() {
-        return ratings;
-    }
-
-    public void setRatings(ArrayList<Float> ratings) {
-        this.ratings = ratings;
-    }
 
         public double getImdbRatingFromID(String imdbID) {
         String filePath = "C:\\Users\\George\\Desktop\\imdb data\\title.rating.tsv"; // Replace this with your file path
@@ -152,10 +82,17 @@ public class Movie {
     public static boolean localSearch(int id){
         return false;
     }
+        av = gson.fromJson(response3.body(), Availability.class);
+        co = gson.fromJson(response1.body(), Contributors.class);
+        md = gson.fromJson(response2.body(), MovieDetails.class);
+    }  
+            
 
     //Searches for a movie in TMDB data base, returns arraylist with the ids of all the matches and prints their titles (only page 1)
     //TODO: sort arraylist based on popularity, fix foreign characters, make custom search options
-    public static ArrayList<Integer> movieSearch(String searchInput, String apiKey) throws Exception {  //TODO: handle exceptions  
+    public static ArrayList<?> movieSearch(String searchInput, String apiKey, String returnType) throws Exception {  //TODO: handle exceptions  
+        ArrayList<?> result;
+        
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create("https://api.themoviedb.org/3/search/movie?query=" + searchInput + "&include_adult=true&language=en-US&page=1"))
             .header("accept", "application/json")
@@ -169,64 +106,99 @@ public class Movie {
         //Get the results array from the JSON object
         JSONArray resultsArray = jsonResponse.getJSONArray("results");
         ArrayList<Integer> originalIdsArray = new ArrayList<Integer>();
+        ArrayList<Integer> yearsArray = new ArrayList<Integer>();
+        ArrayList<String> originalTitlesArray = new ArrayList<String>();
 
         //Iterate through the existing array and extract original ids
+        System.out.println();
+        
         for (int i = 0; i < resultsArray.length(); i++) {
             int originalId = resultsArray.getJSONObject(i).getInt("id");
+            String originalTitle = resultsArray.getJSONObject(i).getString("original_title");
+            String originalReleaseDate = resultsArray.getJSONObject(i).getString("release_date");
             originalIdsArray.add(originalId);
-            //Prints the title of each result 
-            System.out.println(i+1 + "\t" + resultsArray.getJSONObject(i).getString("original_title"));
+            originalTitlesArray.add(originalTitle);
+                if(!originalReleaseDate.isEmpty()) {
+                    LocalDate date = LocalDate.parse(originalReleaseDate);
+                    int year = date.getYear();
+                    yearsArray.add(year);
+                    if(returnType.equals("title")) {
+                        System.out.printf("%2d. %s (%d)%n", i + 1, originalTitle, year);
+                    }      
+                 } else {
+                    yearsArray.add(-1);
+                    if(returnType.equals("title")) {
+                        System.out.printf("%2d. %s (%s)%n", i + 1, originalTitle, "Release date not available");
+                    } 
+                }
         }
-        return originalIdsArray;
+    
+        if (returnType.equals("title")) {
+            result = originalTitlesArray;
+            return result;
+        } else if (returnType.equals("id")) {
+            result = originalIdsArray;
+            return result;
+        } else {
+            result = yearsArray;
+            return result;
+        }
     }
 
-    public void updateRating(float rating) {
-        ratings.add(rating);
-        float sum = 0;
-        int count = 0;
-        for(int i = 0; i < ratings.size(); i++) {
-            sum += ratings.get(i);
-            count++;
-        }
-        avgRating = (float) sum / count;
-    }
-    
-    // //Searches for all reviews of a specific movie in project's data base and prints them UNFINISHED
-    public void getReviews() {
-        
-    }
+
     
     @Override
     public String toString() {
-        String gens = new String();
-        String ca = new String();
-        String cr = new String();
-        
-        for (int i = 0; i < genres.length; i++ ) {
-            gens += genres[i].toString();
-            if (i < genres.length-1) {
-                gens += ", ";
+        StringBuilder gens = new StringBuilder();
+        StringBuilder ca = new StringBuilder();
+        StringBuilder cr = new StringBuilder();
+
+        // Genres
+        Genre[] genres = this.md.getGenres();
+        for (int i = 0; i < genres.length; i++) {
+            gens.append(genres[i]);
+            if (i < genres.length - 1) {
+                gens.append(", ");
             }
         }
 
-        for (Cast c : cast) {
-            ca += c.toString();
+        // Cast
+        for (Cast c : this.co.getCast()) {
+            ca.append(c);
         }
 
-        for (Crew c : crew) {
-            cr += c.toString();
+        // Crew
+        for (Crew c : this.co.getCrew()) {
+            cr.append(c);
         }
-        
-        return "\n" + overview + "\n \n"
-            + "Title: " + original_title + "\n"
-            + "Runtime: " + runtime + "m" + "\n"
+
+        return "\n" + this.md.getOverview() + "\n \n"
+            + "Title: " + this.md.getOriginal_title() + "\n"
+            + "Runtime: " + this.md.getRuntime() + "m" + "\n"
             + "Genres: " + gens + "\n"
-            + "Release Date: " + release_date +"\n"
-            + "Tmdb Rating: " + vote_average + "\n \n \n"
-            + "Movie Contributors: \n \n" 
-            + "Cast: \n"  
+            + "Release Date: " + this.md.getRelease_date() + "\n"
+            + "Tmdb Rating: " + this.md.getVote_average() + "\n"
+            + "Imdb Rating: " + this.md.getImdb_rating() + "\n \n \n" 
+            + "Movie Contributors: \n \n"
+            + "Cast: \n"
             + ca + "\n \n"
-            + "Crew: \n" 
-            + cr;
+            + "Crew: \n"
+            + cr + "\n\n";
+            //+ this.av.toString(null)
+    }
+
+
+    public Availability getAv() {
+        return av;
+    }
+
+
+    public Contributors getCo() {
+        return co;
+    }
+
+
+    public MovieDetails getMd() {
+        return md;
     }
 }
