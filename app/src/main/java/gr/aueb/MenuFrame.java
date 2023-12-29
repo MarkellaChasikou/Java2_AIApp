@@ -1,3 +1,4 @@
+package gr.aueb;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,6 +10,11 @@ import java.awt.event.ComponentEvent;
 
 public class MenuFrame extends JFrame implements ActionListener {
 
+  public static void main(String[] args) {
+
+    MenuFrame a = new MenuFrame();
+  }
+
   private static final long serialVersionUID = 1L;
   JLabel menuMess = new JLabel("MENU");
   JLabel logoMess = new JLabel("YOUR AI MOVIE SOULMATE");
@@ -19,7 +25,7 @@ public class MenuFrame extends JFrame implements ActionListener {
   DarkButton category3 = new DarkButton("ENTER AS A GUEST");
 
 
-  JLabel picLabel = new JLabel(new ImageIcon("logo.png")); //IMAGE
+  JLabel picLabel = new JLabel(new ImageIcon("Filmbro_Logo.png")); //IMAGE
 
   String username;
 
