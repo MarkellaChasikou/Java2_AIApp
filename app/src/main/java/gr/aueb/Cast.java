@@ -1,22 +1,21 @@
 package gr.aueb;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Cast {
+    @SerializedName("name")
     private String name;
+    @SerializedName("chsaracter")
     private String character;
     
     public String getName() {
         return name;
     }
-    public void setName(String name) {
-        this.name = name;
-    }
     
     public String getCharacter() {
         return character;
     }
-    public void setCharacter(String character) {
-        this.character = character;
-    }
+    
     @Override
     public String toString() {
         

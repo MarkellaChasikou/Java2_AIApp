@@ -24,47 +24,7 @@ public class Country {
     private ArrayList<Prov> flatrate;
     @SerializedName("rent")
     private ArrayList<Prov> rent;
-    
 
-    public ArrayList<Prov> getFree() {
-        return free;
-    }
-
-    public void setFree(ArrayList<Prov> free) {
-        this.free = free;
-    }
-
-    public ArrayList<Prov> getAds() {
-        return ads;
-    }
-
-    public void setAds(ArrayList<Prov> ads) {
-        this.ads = ads;
-    }
-
-    public ArrayList<Prov> getBuy() {
-        return buy;
-    }
-
-    public void setBuy(ArrayList<Prov> buy) {
-        this.buy = buy;
-    }
-
-    public ArrayList<Prov> getFlatrate() {
-        return flatrate;
-    }
-
-    public void setFlatrate(ArrayList<Prov> flatrate) {
-        this.flatrate = flatrate;
-    }
-
-    public ArrayList<Prov> getRent() {
-        return rent;
-    }
-
-    public void setRent(ArrayList<Prov> rent) {
-        this.rent = rent;
-    }
 
     public static HashMap<String, String> allCountriesNames(String apiKey) throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
@@ -92,12 +52,23 @@ public class Country {
         return countries;
     }
 
-    @Override
-    public String toString() {
-        return "Country [free=" + free + ", ads=" + ads + ", buy=" + buy + ", flatrate=" + flatrate + ", rent=" + rent
-                + "]";
+    public ArrayList<Prov> getFree() {
+        return free;
     }
 
-    
+    public ArrayList<Prov> getAds() {
+        return ads;
+    }
 
+    public ArrayList<Prov> getBuy() {
+        return buy;
+    }
+
+    public ArrayList<Prov> getFlatrate() {
+        return flatrate;
+    }
+
+    public ArrayList<Prov> getRent() {
+        return rent;
+    }
 }
