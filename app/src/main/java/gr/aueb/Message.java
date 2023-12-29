@@ -6,7 +6,7 @@ public class Message {
     private boolean spoiler;
     private String text;
     private String sender;
-    private List<String> receivers;
+    private List<String> receivers;//to vgazoyme giati tha sindeetai me to chatroom
     private String roomId;
 
     public Message(boolean spoiler, String text, String sender,
