@@ -21,7 +21,7 @@ public class MenuFrame extends JFrame implements ActionListener {
   DarkButton category3 = new DarkButton("ENTER AS A GUEST");
 
 
-  JLabel picLabel = new JLabel(new ImageIcon("Filmbro_Logo.png")); //IMAGE
+  JLabel picLabel = new JLabel(new ImageIcon("logo.png")); //IMAGE
 
   String username;
 
