@@ -10,11 +10,7 @@ import java.awt.event.ComponentEvent;
 
 public class MenuFrame extends JFrame implements ActionListener {
 
-  public static void main(String[] args) {
-
-    MenuFrame a = new MenuFrame();
-  }
-
+  
   private static final long serialVersionUID = 1L;
   JLabel menuMess = new JLabel("MENU");
   JLabel logoMess = new JLabel("YOUR AI MOVIE SOULMATE");
