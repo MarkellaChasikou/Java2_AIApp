@@ -1,23 +1,25 @@
-package gr.aueb;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
 
 public class MenuFrame extends JFrame implements ActionListener {
 
   private static final long serialVersionUID = 1L;
   JLabel menuMess = new JLabel("MENU");
+  JLabel logoMess = new JLabel("YOUR AI MOVIE SOULMATE");
   Container container = getContentPane();
 
-  JButton category1 = new JButton("LOGIN");
-  JButton category2 = new JButton("REGISTER");
-  JButton category3 = new JButton("ENTER AS A GUEST");
+  DarkButton category1 = new DarkButton("LOGIN");
+  DarkButton category2 = new DarkButton("REGISTER");
+  DarkButton category3 = new DarkButton("ENTER AS A GUEST");
 
 
-  JLabel picLabel = new JLabel(new ImageIcon()); //IMAGE
+  JLabel picLabel = new JLabel(new ImageIcon("logo.png")); //IMAGE
 
   String username;
 
@@ -31,9 +33,9 @@ public class MenuFrame extends JFrame implements ActionListener {
 	    initComponents();
  }
   private void initComponents() {
-    setTitle("Java");
+    setTitle("Filmbro");
     setVisible(true);
-    setBounds(10, 10, 370, 600);
+    setBounds(10, 10, 600, 600);
 
     setLocationRelativeTo(null); //centers the application window
     setLayoutManager();
@@ -43,7 +45,13 @@ public class MenuFrame extends JFrame implements ActionListener {
 
     addActionEvent();
     setFont();
-     setBackground(251, 174, 210);
+    setBackground(153,153,153);
+    addComponentListener(new ComponentAdapter() {
+	     @Override
+	     public void componentResized(ComponentEvent e) {
+	         resizeComponents();
+	     }
+});
 
 
   }
@@ -55,12 +63,16 @@ public class MenuFrame extends JFrame implements ActionListener {
 
   void setFont() {
     menuMess.setFont(new Font("Tahoma", 0, 16));
+    menuMess.setForeground(new Color(230, 120, 50));
+    logoMess.setFont(new Font("Tahoma", 0, 13));
+    logoMess.setForeground(new Color(230, 120, 50));
+
   }
 
 
 
   void setBackground(int a, int b, int c) {
-    container.setBackground(new Color(241, 156, 187));
+    container.setBackground(new Color(20,20,20));
   }
 
 
@@ -78,6 +90,7 @@ public class MenuFrame extends JFrame implements ActionListener {
     container.add(category2);
     container.add(category3);
     container.add(picLabel);
+    container.add(logoMess);
   }
 
 
@@ -92,13 +105,13 @@ public class MenuFrame extends JFrame implements ActionListener {
   public void actionPerformed(ActionEvent e) {
 
     if (e.getSource() == category1) {
-		LoginFrame a = new LoginFrame();
+		MenuBar m = new MenuBar( new LoginFrame());
     	dispose();
  	 }
 
     if (e.getSource() == category2) {
-		RegisterFrame a = new RegisterFrame();
-      dispose();
+		MenuBar m = new MenuBar( new RegisterFrame());
+       dispose();
   }
 
 
@@ -109,4 +122,16 @@ public class MenuFrame extends JFrame implements ActionListener {
 
 
 }
+
+
+void resizeComponents() {
+    menuMess.setBounds(getWidth() / 2 - 30, 100, 200, 150);
+    logoMess.setBounds(getWidth() / 2 - 85, 50, 200, 150);
+    category1.setBounds(getWidth() / 2 - 75, 200, 150, 30);
+    category2.setBounds(getWidth() / 2 - 75, 250, 150, 30);
+    category3.setBounds(getWidth() / 2 - 75, 300, 150, 30);
+    picLabel.setBounds(getWidth() / 2 - 75, 20, 150, 90);
+}
+
+
 }

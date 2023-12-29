@@ -1,4 +1,3 @@
-package gr.aueb;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -7,7 +6,7 @@ import java.awt.event.*;
 public class RegisterFrame extends JFrame implements ActionListener {
 
   static String username;
-  JFrame frm = new JFrame("Java");
+  JFrame frm = new JFrame("Filmbro");
   JLabel welcomeMess = new JLabel("Sign up");
   Container container = getContentPane();
   JLabel userLabel = new JLabel("Username:");
@@ -16,10 +15,10 @@ public class RegisterFrame extends JFrame implements ActionListener {
   JPasswordField confField = new JPasswordField();
   JTextField userTextField = new JTextField(" e.g. nikosDask1992");
   JPasswordField passwordField = new JPasswordField();
-  JButton loginButton = new JButton("REGISTER");
-  JButton backButton = new JButton("BACK");
+  DarkButton loginButton = new DarkButton("REGISTER");
+  DarkButton backButton = new DarkButton("BACK");
   //JCheckBox showPassword = new JCheckBox("Show Password");
-  JLabel picLabel = new JLabel(new ImageIcon());  //image
+  JLabel picLabel = new JLabel(new ImageIcon("logo.png"));  //image
   JMenuBar mb = new JMenuBar();
 
 
@@ -30,7 +29,7 @@ public class RegisterFrame extends JFrame implements ActionListener {
 
   private void initComponents() {
     setTitle("Java");
-    setBounds(10, 10, 370, 600);
+    setBounds(10, 10, 600, 600);
     frm.setJMenuBar(mb);
     setLocationRelativeTo(null); // center the application window
     setVisible(true);
@@ -38,8 +37,14 @@ public class RegisterFrame extends JFrame implements ActionListener {
     setLocationAndSize();
     addComponentsToContainer();
     addActionEvent();
-    setBackground(241, 156, 187);
+    setBackground(20,20,20);
     setFont();
+     addComponentListener(new ComponentAdapter() {
+		     @Override
+		     public void componentResized(ComponentEvent e) {
+		         resizeComponents();
+		     }
+});
   }
 
 
@@ -56,6 +61,10 @@ public class RegisterFrame extends JFrame implements ActionListener {
 
   private void setFont() {
     welcomeMess.setFont(new Font("Tahoma", 0, 16));
+    welcomeMess.setForeground(new Color(230, 120, 50));
+    userLabel.setForeground(new Color(230, 120, 50));
+    passwordLabel.setForeground(new Color(230, 120, 50));
+    confLabel.setForeground(new Color(230, 120, 50));
   }
 
 
@@ -106,8 +115,31 @@ public class RegisterFrame extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) {
 
 	if (e.getSource() == backButton) {
-		MenuFrame a = new MenuFrame();
+		MenuBar m = new MenuBar(new MenuFrame());
 		dispose();
 	}
   }
+
+
+  void resizeComponents() {
+    int width = this.getWidth();
+    int centerOffset = width / 4;
+
+    userLabel.setBounds(centerOffset, 145, 100, 30);
+    userTextField.setBounds(centerOffset + 100, 145, 150, 30);
+    passwordLabel.setBounds(centerOffset, 180, 100, 30);
+    passwordField.setBounds(centerOffset + 100, 180, 150, 30);
+    confLabel.setBounds(centerOffset, 215, 150, 30);
+    confField.setBounds(centerOffset + 100, 215, 150, 30);
+
+
+    loginButton.setBounds(centerOffset + 74, 270, 140, 30);
+    welcomeMess.setBounds(centerOffset + 105, 50, 250, 150);
+    picLabel.setBounds(centerOffset + 60, 10, 150, 90);
+    backButton.setBounds(20, 490, 80, 30);
+
+
+
+}
+
 }
