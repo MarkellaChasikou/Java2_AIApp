@@ -53,9 +53,14 @@ public class Movie {
 
         Gson gson = new Gson();
 
+        av = gson.fromJson(response3.body(), Availability.class);
+        co = gson.fromJson(response1.body(), Contributors.class);
+        md = gson.fromJson(response2.body(), MovieDetails.class);
 
-        public double getImdbRatingFromID(String imdbID) {
-        String filePath = "C:\\Users\\George\\Desktop\\imdb data\\title.rating.tsv"; // Replace this with your file path
+        imdbRating = getImdbRatingFromID(md.getImdb_id());
+    }
+    public static double getImdbRatingFromID(String imdbID) {
+        String filePath = "C:\\Users\\Nick\\api_keys\\title.rating.tsv"; // Replace this with your file path
         String line;
         double imdbRating = -1; // Default value if the ID is not found
 
@@ -75,20 +80,8 @@ public class Movie {
         return imdbRating;
     }
 
-    //Searches for a movie id in project's data base UNFINISHED
-    public static boolean localSearch(int id){
-        return false;
-    }
-        av = gson.fromJson(response3.body(), Availability.class);
-        co = gson.fromJson(response1.body(), Contributors.class);
-        md = gson.fromJson(response2.body(), MovieDetails.class);
-
-        imdbRating = getImdbRatingFromID(this.md.getImdb_id());
-    }  
-            
-
+        
     //Searches for a movie in TMDB data base, returns arraylist with the ids of all the matches and prints their titles (only page 1)
-    //TODO: sort arraylist based on popularity, fix foreign characters, make custom search options
     public static ArrayList<?> movieSearch(String searchInput, String apiKey, String returnType) throws Exception {  //TODO: handle exceptions  
         ArrayList<?> result;
         
