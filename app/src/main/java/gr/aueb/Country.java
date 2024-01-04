@@ -15,60 +15,70 @@ import com.google.gson.annotations.SerializedName;
 
 public class Country {
     @SerializedName("free")
-    private ArrayList<Prov> free;
+    private ArrayList<Provider> free;
     @SerializedName("ads")
-    private ArrayList<Prov> ads;
+    private ArrayList<Provider> ads;
     @SerializedName("buy")
-    private ArrayList<Prov> buy;
+    private ArrayList<Provider> buy;
     @SerializedName("flatrate")
-    private ArrayList<Prov> flatrate;
+    private ArrayList<Provider> flatrate;
     @SerializedName("rent")
-    private ArrayList<Prov> rent;
+    private ArrayList<Provider> rent;
 
 
-    public static HashMap<String, String> allCountriesNames(String apiKey) throws IOException, InterruptedException {
+    public static HashMap<String, String> allCountriesNames(String apiKey)  {
+        HashMap<String, String> countries = new HashMap<>();
+        
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create("https://api.themoviedb.org/3/watch/providers/regions?language=en-US"))
             .header("accept", "application/json")
             .header("Authorization", "Bearer " + apiKey)
             .method("GET", HttpRequest.BodyPublishers.noBody())
             .build();
-        HttpResponse<String> response = HttpClient.newHttpClient()
-            .send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response;
+        try {
+            response = HttpClient.newHttpClient()
+                .send(request, HttpResponse.BodyHandlers.ofString());
+            JsonElement element = JsonParser.parseString(response.body());
+            JsonObject jsonObject = element.getAsJsonObject();
+            JsonArray resultsArray = jsonObject.getAsJsonArray("results");
+
+            for (JsonElement countryElement : resultsArray) {
+                JsonObject countryObject = countryElement.getAsJsonObject();
+                String code = countryObject.get("iso_3166_1").getAsString();
+                String name = countryObject.get("english_name").getAsString();
+
+                countries.put(code, name);
+            }
+
+        } catch (IOException e) {
+            System.err.println("Check your internet connection!");
+            e.printStackTrace();
         
-        JsonElement element = JsonParser.parseString(response.body());
-        JsonObject jsonObject = element.getAsJsonObject();
-        JsonArray resultsArray = jsonObject.getAsJsonArray("results");
-
-        HashMap<String, String> countries = new HashMap<>();
-
-        for (JsonElement countryElement : resultsArray) {
-            JsonObject countryObject = countryElement.getAsJsonObject();
-            String code = countryObject.get("iso_3166_1").getAsString();
-            String name = countryObject.get("english_name").getAsString();
-
-            countries.put(code, name);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+        
         return countries;
     }
 
-    public ArrayList<Prov> getFree() {
+    public ArrayList<Provider> getFree() {
         return free;
     }
 
-    public ArrayList<Prov> getAds() {
+    public ArrayList<Provider> getAds() {
         return ads;
     }
 
-    public ArrayList<Prov> getBuy() {
+    public ArrayList<Provider> getBuy() {
         return buy;
     }
 
-    public ArrayList<Prov> getFlatrate() {
+    public ArrayList<Provider> getFlatrate() {
         return flatrate;
     }
 
-    public ArrayList<Prov> getRent() {
+    public ArrayList<Provider> getRent() {
         return rent;
     }
 }
