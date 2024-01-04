@@ -3,6 +3,9 @@ package gr.aueb;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -149,6 +152,7 @@ public class App {
     private static void searchForMovie(Scanner scanner) throws Exception {
         System.out.println("\nType your search. \n");
         String userMessage = scanner.nextLine();
+        userMessage = encodeMovieTitle(userMessage);
         ArrayList<?> ids = Movie.movieSearch(userMessage, tmdbApiKey, "id");
         ArrayList<?> titles = Movie.movieSearch(userMessage, tmdbApiKey, "title");
         ArrayList<?> years = Movie.movieSearch(userMessage, tmdbApiKey, "year");
@@ -174,6 +178,15 @@ public class App {
             BonusContent.searchAndPrintVideo(movieTitle + "  movie ", "Fun Facts", youtubeApiKey);
             BonusContent.searchAndPrintVideo(movieTitle + "  movie ", "Behind the Scenes", youtubeApiKey);
             BonusContent.searchAndPrintVideo(movieTitle + "  movie ", "Interviews", youtubeApiKey);
+        }
+    }
+
+    private static String encodeMovieTitle(String title) {
+        try {
+            return URLEncoder.encode(title, StandardCharsets.UTF_8.toString());
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return title;
         }
     }
 }
