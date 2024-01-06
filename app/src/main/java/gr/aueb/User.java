@@ -9,7 +9,7 @@ public class User {
     private String username;
     private String password;
     private String country;
-    
+
 //Constructors
     public User(String username, String password, String country) {
         this.username = username;
@@ -23,9 +23,9 @@ public class User {
         this.password = password;
         this.country = country;
         }
- 
+
     // Setters
-    
+
     public void setUsername(String username) {
         this.username = username;
     }
@@ -54,7 +54,7 @@ public class User {
     public String getCountry() {
         return country;
     }
-    
+
 // Login Method
     public static User login(String username, String password) throws Exception {
         DB db = new DB();
@@ -86,7 +86,7 @@ public class User {
             try {
                 db.close();
             } catch (Exception e) {
-            
+
             }
         }
     }
@@ -120,13 +120,38 @@ public class User {
             try {
                 db.close();
             } catch (Exception e) {
-                
+
             }
         }
 }
+//Get all users method
+    public static List<String> getAllUsers() throws Exception {
+        List<String> users = new ArrayList<String>();
+        DB db = new DB();
+        Connection con = null;
+        String query = "SELECT username from appuser;";
+        try {
+            con = db.getConnection();
+            PreparedStatement stmt = con.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                users.add(rs.getString("username"));
+            }
+            rs.close();
+            stmt.close();
+            return users;
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        } finally {
+            try {
+                db.close();
+            } catch (Exception e) {
+            }
+        }
+    }
 
 //Follow user
-    public static void followUser(User user, String follow_user) {
+    public void followUser(String follow_user) {
         DB db = new DB();
         Connection con = null;
         String query = "SELECT * FROM AppUser WHERE username=?";
@@ -145,23 +170,24 @@ public class User {
             int follow_id = rs.getInt("userId");
             PreparedStatement stmt2 = con.prepareStatement(sql);
 			stmt2.setInt(1, follow_id);
-			stmt2.setInt(2, user.getId());
+			stmt2.setInt(2, id);
 			stmt2.executeUpdate();
+            System.out.println("You follow " + follow_user);
 			stmt2.close();
         } catch (Exception e) {
-           
+
         } finally {
         try {
             db.close();
         } catch (Exception e) {
-            
+
         }
     }
-        
+
     } 
 
 //Unfollow user
-    public static void unfollowUser(User user, String unfollow_user) {
+    public void unfollowUser(String unfollow_user) {
         DB db = new DB();
         Connection con = null;
         String query = "SELECT * FROM AppUser WHERE username=?;";
@@ -180,21 +206,22 @@ public class User {
             int unfollow_id = rs.getInt("userId");
             PreparedStatement stmt2 = con.prepareStatement(sql);
 			stmt2.setInt(1, unfollow_id);
-			stmt2.setInt(2, user.getId());
+			stmt2.setInt(2, id);
 			stmt2.executeUpdate();
+            System.out.println("You have just unfollow " + unfollow_user);
 			stmt2.close();
         } catch (Exception e) {
-           
+
         } finally {
             try {
             db.close();
             } catch (Exception e) {
-            
+
             }
         }    
     } 
 //Get Followings Method
-    public static List<String> getFollowing(User user) throws Exception {
+    public List<String> getFollowing() throws Exception {
         List<String> followings = new ArrayList<String>();
         DB db = new DB();
         Connection con = null;
@@ -204,7 +231,7 @@ public class User {
         try {
             con = db.getConnection();
             PreparedStatement stmt = con.prepareStatement(query);
-            stmt.setInt(1, user.getId());
+            stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 followings.add(rs.getString("username"));
@@ -219,13 +246,13 @@ public class User {
             try {
                 db.close();
             } catch (Exception e) {
-            
+
             }
         }    
     } 
 
 //Get Followers Method
-    public static List<String> getFollowers(User user) throws Exception {
+    public List<String> getFollowers() throws Exception {
         List<String> followers = new ArrayList<String>();
         DB db = new DB();
         Connection con = null;
@@ -235,7 +262,7 @@ public class User {
         try {
             con = db.getConnection();
             PreparedStatement stmt = con.prepareStatement(query);
-            stmt.setInt(1, user.getId());
+            stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 followers.add(rs.getString("username"));
@@ -250,12 +277,12 @@ public class User {
             try {
                 db.close();
             } catch (Exception e) {
-            
+
             }
         }    
     }
 //Create List Method
-    public static void createList(String listType, String listName, User user) throws Exception {
+    public void createList(String listType, String listName) throws Exception {
         DB db = new DB();
         Connection con = null;
         String query = "SELECT * FROM list WHERE name=? AND userId=?;";
@@ -264,7 +291,7 @@ public class User {
             con = db.getConnection();
             PreparedStatement stmt1 = con.prepareStatement(query);
             stmt1.setString(1, listName);
-            stmt1.setInt(2,user.getId());
+            stmt1.setInt(2, id);
             ResultSet rs = stmt1.executeQuery();
             if (rs.next()) {
                 rs.close();
@@ -274,8 +301,9 @@ public class User {
             PreparedStatement stmt = con.prepareStatement(sql);
             stmt.setString(1,listType);
             stmt.setString(2, listName);
-            stmt.setInt(3,user.getId());
+            stmt.setInt(3, id);
             stmt.executeUpdate();
+            System.out.println("List: " + listName + " created successfully");
             stmt.close();
         } catch (Exception e) {
             throw new Exception(e.getMessage());
@@ -283,12 +311,12 @@ public class User {
             try {
                 db.close();
             } catch (Exception e) {
-                
+
             }
         }
     }
 //Get List Method
-    public static List<String> getLists(User user) throws Exception {
+    public List<String> getLists() throws Exception {
         List<String> lists = new ArrayList<String>();
         DB db = new DB();
         Connection con = null;
@@ -296,9 +324,9 @@ public class User {
         try {
             con = db.getConnection();
             PreparedStatement stmt = con.prepareStatement(query);
-            stmt.setInt(1, user.getId());
+            stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
-           
+
             while(rs.next()) {
                 lists.add(rs.getString("name"));
             }
@@ -311,13 +339,13 @@ public class User {
             try {
                 db.close();
             } catch (Exception e) {
-            
+
             }
         }
     }
 
 // Add to List Method 
-    public static void addToList(String listName, String movieName, String movieId, User user) throws Exception {
+    public void addToList(String listName, String movieName, String movieId) throws Exception {
         int listId;
         DB db = new DB();
         Connection con = null;
@@ -327,7 +355,7 @@ public class User {
                 con = db.getConnection();
                 PreparedStatement stmt = con.prepareStatement(query);
                 stmt.setString(1, listName);
-                stmt.setInt(2,user.getId());
+                stmt.setInt(2, id);
                 ResultSet rs = stmt.executeQuery();
                 rs.next();
                 listId = rs.getInt("list_id");
@@ -338,6 +366,7 @@ public class User {
                 stmt1.setString(2, movieName);
                 stmt1.setString(3, movieId);
                 stmt1.executeUpdate();
+                System.out.println(movieName + "added to your list " +listName);
                 stmt1.close();
                 } catch (Exception e) {
                     throw new Exception(e.getMessage());
@@ -345,13 +374,13 @@ public class User {
                 try {
                     db.close();
                 } catch (Exception e) {
-                
+
                 }
             }
     }
-    
+
 // Get Movies From List Method
-    public static List<String> getMoviesFromList(String listName, User user) throws Exception {
+    public List<String> getMoviesFromList(String listName) throws Exception {
         int listId;
         List<String> movies = new ArrayList<String>();
         DB db = new DB();
@@ -362,7 +391,7 @@ public class User {
             con = db.getConnection();
             PreparedStatement stmt1 = con.prepareStatement(query1);
             stmt1.setString(1, listName);
-            stmt1.setInt(2, user.getId());
+            stmt1.setInt(2, id);
             ResultSet rs1 = stmt1.executeQuery();
             rs1.next();
             listId = rs1.getInt("list_id");
@@ -383,21 +412,22 @@ public class User {
                 try {
                     db.close();
                 } catch (Exception e) {
-                
+
                 }
         }
     }
 // Delete List Method
-    public static void deleteList(String listName, User user) throws Exception {
+    public void deleteList(String listName) throws Exception {
         DB db = new DB();
         Connection con = null;
         String sql = "DELETE FROM list WHERE userId=? AND name=?;";
         try {
             con = db.getConnection();
             PreparedStatement stmt = con.prepareStatement(sql);
-            stmt.setInt(1, user.getId());
+            stmt.setInt(1, id);
             stmt.setString(2, listName);
             stmt.executeUpdate();
+            System.out.println("List: " + listName + " deleted successfully");
             stmt.close();
         } catch (Exception e) {
             throw new Exception(e.getMessage());
@@ -405,12 +435,12 @@ public class User {
             try {
                 db.close();
             } catch (Exception e) {
-                
+
             }
         }
     }
 // Remove movie from List Method
-    public static void removeMovie(String movieName, String listName, User user) throws Exception {
+    public void removeMovie(String movieName, String listName) throws Exception {
         int listId;
         DB db = new DB();
         Connection con = null;
@@ -420,7 +450,7 @@ public class User {
             con = db.getConnection();
             PreparedStatement stmt1 = con.prepareStatement(query);
             stmt1.setString(1, listName);
-            stmt1.setInt(2, user.getId());
+            stmt1.setInt(2, id);
             ResultSet rs1 = stmt1.executeQuery();
             rs1.next();
             listId = rs1.getInt("list_id");
@@ -430,6 +460,7 @@ public class User {
             stmt2.setInt(1, listId);
             stmt2.setString(2, movieName);
             stmt2.executeUpdate();
+            System.out.println("Movie " + movieName + " deleted successfully");
             stmt2.close();
              } catch (Exception e) {
             throw new Exception(e.getMessage());
@@ -437,25 +468,77 @@ public class User {
             try {
                 db.close();
             } catch (Exception e) {
-                
+
             }
         }
     }
+// Update Username Method
+    public void updateUsername(String newUsername) throws Exception {
+        DB db = new DB();
+        Connection con = null;
+        String sql = "UPDATE appuser SET username = ? WHERE userId = ?;";
+        try {
+            con = db.getConnection();
+            PreparedStatement stmt = con.prepareStatement(sql);
+            stmt.setString(1, newUsername);
+            stmt.setInt(2, id);
+            stmt.executeUpdate();
+            this.username = newUsername;
+            System.out.println("Username updated successfully.");
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        } finally {
+            try {
+                db.close();
+            } catch (Exception e) {
+
+            }
+        }
+    }
+// Update Username Method
+    public void updatePassword(String newPassword) throws Exception {
+        DB db = new DB();
+        Connection con = null;
+        String sql = "UPDATE appuser SET pass_word = ? WHERE userId = ?;";
+        try {
+            con = db.getConnection();
+            PreparedStatement stmt = con.prepareStatement(sql);
+            stmt.setString(1, newPassword);
+            stmt.setInt(2, id);
+            stmt.executeUpdate();
+            this.password = newPassword;
+            System.out.println("Password updated successfully.");
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        } finally {
+            try {
+                db.close();
+            } catch (Exception e) {
+
+            }
+        }
+    }
+    // Update Username Method
+    public void updateCountry(String newCountry) throws Exception {
+        DB db = new DB();
+        Connection con = null;
+        String sql = "UPDATE appuser SET country = ? WHERE userId = ?;";
+        try {
+            con = db.getConnection();
+            PreparedStatement stmt = con.prepareStatement(sql);
+            stmt.setString(1, newCountry);
+            stmt.setInt(2, id);
+            stmt.executeUpdate();
+            this.password = newCountry;
+            System.out.println("Country updated successfully.");
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        } finally {
+            try {
+                db.close();
+            } catch (Exception e) {
+
+            }
+        }
+    }        
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
