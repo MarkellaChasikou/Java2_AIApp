@@ -1,26 +1,29 @@
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
 public class Message {
     private int id;
     private boolean spoiler;
     private String text;
+    private int chatroomId;
     private User user;
-    private Chatroom chatroom;
+    
 
-    public Message(boolean spoiler, String text, User user, Chatroom chatroom) {
+    public Message(boolean spoiler, String text, int chatroomId, User user) {
         this.spoiler = spoiler;
         this.text = text;
+        this.chatroomId = chatroomId;
         this.user = user;
-        this.chatroom = chatroom;
     }       
 
-    public Message(int id, boolean spoiler, String text, User user, Chatroom chatroom) {
+    public Message(int id, boolean spoiler, String text, int chatroomId, User user) {
         this.id = id;
         this.spoiler = spoiler;
         this.text = text;
-        this.user = user;
-        this.chatroom = chatroom;
+        this.chatroomId = chatroomId;
+        this.user = user;    
     }
 
     public int getId() {
@@ -47,6 +50,14 @@ public class Message {
         this.text = text;
     }
 
+    public int getChatroomId() {
+        return chatroomId;
+    }
+
+    public void setChatroomId(int chatroomId) {
+        this.chatroomId = chatroomId;
+    }
+
     public User getUser() {
         return user;
     }
@@ -55,28 +66,44 @@ public class Message {
         this.user = user;
     }
 
-    public Chatroom getChatroom() {
-        return chatroom;
-    }
-
-    public void setChatroom(Chatroom chatroom) {
-        this.chatroom = chatroom;
-    }
     
     //Add message Method
-    public static void addMessage(Message message) throws Exception {
+    public void addMessage() throws Exception {
     DB db = new DB();
     Connection con = null;
-    String sql = "INSERT INTO message(roomId, userId, spoiler, text) VALUES(?,?,?,?);";
+    String sql1 = "INSERT INTO message(roomId, userId, spoiler, text) VALUES(?,?,?,?);";
+    String sql2 = "INSERT INTO unseenmessage(userId, roomId, unSeenMessageId) VALUES(?,?,?);";
     try {
         con = db.getConnection();
-        PreparedStatement stmt = con.prepareStatement(sql);
-        stmt.setInt(1, message.getChatroom().getRoomId());
-        stmt.setInt(2, message.getUser().getId());
-        stmt.setBoolean(3, message.isSpoiler());
-        stmt.setString(4, message.getText());
-        stmt.executeUpdate();
-        stmt.close();
+        PreparedStatement stmt1 = con.prepareStatement(sql1,  Statement.RETURN_GENERATED_KEYS);
+        stmt1.setInt(1, chatroomId);
+        stmt1.setInt(2, user.getId());
+        stmt1.setBoolean(3, spoiler);
+        stmt1.setString(4, text);
+        stmt1.executeUpdate();
+        System.out.print("send!");
+        ResultSet generatedKeys = stmt1.getGeneratedKeys();
+        generatedKeys.next();
+        int messageId = generatedKeys.getInt(1);
+        stmt1.close();
+        String sqlRoomMembers = "SELECT userId FROM chatroomuser WHERE roomId=?";
+        PreparedStatement stmt2 = con.prepareStatement(sqlRoomMembers);
+        stmt2.setInt(1, chatroomId);
+        ResultSet rsRoomMembers = stmt2.executeQuery();
+        int excludeUserId = user.getId(); 
+        while (rsRoomMembers.next()) {
+            int roomMemberId = rsRoomMembers.getInt("userId");
+            if (roomMemberId != excludeUserId) {
+                PreparedStatement stmtUnseenMessage = con.prepareStatement(sql2);
+                stmtUnseenMessage.setInt(1, roomMemberId);
+                stmtUnseenMessage.setInt(2, chatroomId);
+                stmtUnseenMessage.setInt(3, messageId);
+                stmtUnseenMessage.executeUpdate();
+                stmtUnseenMessage.close();
+            }
+        }
+        rsRoomMembers.close();
+        stmt2.close();
     } catch (Exception e) {
         throw new Exception(e.getMessage());
     } finally {
@@ -98,6 +125,7 @@ public class Message {
         PreparedStatement stmt = con.prepareStatement(sql);
         stmt.setInt(1, messageId);
         stmt.executeUpdate();
+        System.out.println("Message deleted");
         stmt.close();
     } catch (Exception e) {
         throw new Exception(e.getMessage());
