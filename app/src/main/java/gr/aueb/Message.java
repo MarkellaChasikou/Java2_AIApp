@@ -1,51 +1,112 @@
-package gr.aueb;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 
 public class Message {
+    private int id;
     private boolean spoiler;
     private String text;
-    private String sender;
-    private List<String> receivers;//to vgazoyme giati tha sindeetai me to chatroom
-    private String roomId;
+    private User user;
+    private Chatroom chatroom;
 
-    public Message(boolean spoiler, String text, String sender,
-        List<String> receivers, String roomId) {
-            this.spoiler = spoiler;
-            this.text = text;
-            this.sender = sender;
-            this.receivers = new ArrayList<>();
-            this.roomId = roomId;
+    public Message(boolean spoiler, String text, User user, Chatroom chatroom) {
+        this.spoiler = spoiler;
+        this.text = text;
+        this.user = user;
+        this.chatroom = chatroom;
+    }       
+
+    public Message(int id, boolean spoiler, String text, User user, Chatroom chatroom) {
+        this.id = id;
+        this.spoiler = spoiler;
+        this.text = text;
+        this.user = user;
+        this.chatroom = chatroom;
     }
-    
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public boolean isSpoiler() {
+        return spoiler;
+    }
+
     public void setSpoiler(boolean spoiler) {
         this.spoiler = spoiler;
     }
-    public boolean getSpoiler() {
-        return spoiler;
-    }
-    public void setText(String text) {
-        this.text = text;
-    }
+
     public String getText() {
         return text;
     }
-    public void setSender(String sender) {
-        this.sender = sender;
+
+    public void setText(String text) {
+        this.text = text;
     }
-    public String getSender() {
-        return sender;
+
+    public User getUser() {
+        return user;
     }
-    public void setReceivers(List<String> receivers) {
-        this.receivers = new ArrayList<>();
+
+    public void setUser(User user) {
+        this.user = user;
     }
-    public List<String> getReceivers() {
-        return receivers;
+
+    public Chatroom getChatroom() {
+        return chatroom;
     }
-    public void setRoomId(String roomId) {
-        this.roomId = roomId;
+
+    public void setChatroom(Chatroom chatroom) {
+        this.chatroom = chatroom;
     }
-    public String getRoomId() {
-        return roomId;
+    
+    //Add message Method
+    public static void addMessage(Message message) throws Exception {
+    DB db = new DB();
+    Connection con = null;
+    String sql = "INSERT INTO message(roomId, userId, spoiler, text) VALUES(?,?,?,?);";
+    try {
+        con = db.getConnection();
+        PreparedStatement stmt = con.prepareStatement(sql);
+        stmt.setInt(1, message.getChatroom().getRoomId());
+        stmt.setInt(2, message.getUser().getId());
+        stmt.setBoolean(3, message.isSpoiler());
+        stmt.setString(4, message.getText());
+        stmt.executeUpdate();
+        stmt.close();
+    } catch (Exception e) {
+        throw new Exception(e.getMessage());
+    } finally {
+        try {
+            db.close();
+        } catch (Exception e) {
+            
+        }
+    }   
+    }
+
+    //Delete message Method
+    public static void deleteMessage(int messageId) throws Exception {
+    DB db = new DB();
+    Connection con = null;
+    String sql = "DELETE FROM message WHERE id=?;";
+    try {
+        con = db.getConnection();
+        PreparedStatement stmt = con.prepareStatement(sql);
+        stmt.setInt(1, messageId);
+        stmt.executeUpdate();
+        stmt.close();
+    } catch (Exception e) {
+        throw new Exception(e.getMessage());
+    } finally {
+        try {
+            db.close();
+        } catch (Exception e) {
+            
+        }
+    }   
     }
 }
