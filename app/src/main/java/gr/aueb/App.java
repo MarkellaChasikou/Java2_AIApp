@@ -14,7 +14,9 @@ public class App {
     private static String currentUser;
     private static String tmdbApiKey;
     private static String chatgptApiKey;
-    private static String youtubeApiKey; 
+    private static String youtubeApiKey;
+    private static boolean skipStartMenu;
+    private static boolean guest;
 
     public static void main(String[] args) throws Exception {
         loadApiKeys(); // Load API keys from files
@@ -30,13 +32,16 @@ public class App {
             switch (startChoice) {
                 case 1:
                     //login
+                    skipStartMenu = true;
                     break;
                 case 2:
                     //sign up
+                    skipStartMenu = true;
                     break;
                 case 3:
                     // Continue as a guest
-                    currentUser = "Guest";
+                    skipStartMenu = true;
+                    guest = true;
                     break;
                 case 4:
                     System.out.println("Exiting the application.");
@@ -45,8 +50,8 @@ public class App {
                     System.out.println("Invalid choice. Please enter a valid option.");
             }
 
-            // If the user is logged in, display the main menu
-            if (isLoggedIn()) {
+            // If the user is logged in or a guest, display the main menu
+            if (skipStartMenu) {
                 while (true) {
                     displayMainMenu();
 
@@ -59,19 +64,18 @@ public class App {
                             break;
                         case 2:
                             searchForMovie(scanner);
-
                             break;
                         case 3:
-                            if(currentUser != "Guest") {
-                                logOut();
+                            if(!guest) {
+                                //logout
+                                skipStartMenu = false;
                             } else {
-                                displayStartMenu();
-                                choice = scanner.nextInt();
-                                scanner.nextLine(); // consume the newline character
+                                //register
+                                skipStartMenu = false;
                             }
                             break;
                         case 4:
-                            System.out.println("Exiting the application. Goodbye!");
+                            System.out.println("Exiting the application.");
                             System.exit(0);
                         default:
                             System.out.println("Invalid choice. Please enter a valid option.");
@@ -120,24 +124,46 @@ public class App {
     private static void displayMainMenu() {
         System.out.println("\nMain Menu:");
         System.out.println("1. Get AI recommendation for a movie");
-        System.out.println("2. Search for a movie");
-        if(currentUser != "Guest") {
-            System.out.println("3. Log Out");
-            
+        System.out.println("2. Search for a movie or movie contributor");
+        System.out.println("3. Search for friends");
+        
+        if(!guest) {
+            System.out.println("4. Your profile"); //fix main
+            System.out.println("5. Create list");
+            System.out.println("5. Chatrooms");
+            System.out.println("6. Exit");
         } else {
-            System.out.println("3. Login");
+            System.out.println("4. Login");
         }
-        System.out.println("4. Exit");
         System.out.print("Enter your choice: ");
     }
 
-    private static boolean isLoggedIn() {
-        return currentUser != null;
+    private static void displayProfileMenu() {
+        System.out.println("\nProfile Menu:");
+        System.out.println("1. Logout");
+        System.out.println("2. Your 4 favourite movies");
+        System.out.println("4. Your 4 favourite movie contributors");
+        System.out.println("5. Your 4 favourite genres");
+        System.out.println("5. Watchlist");
+        System.out.println("6. Seen");
+        System.out.println("7. Favourites");
+        System.out.println("8. Your lists");
+        System.out.println("9. Your followers/following");
+        System.out.println("4. Your country");
+        System.out.print("Enter your choice: ");
+    }
+    
+    private static void displayMovieMenu() {
+        System.out.println("1. See reviews");
+        System.out.println("2. Add review");
+        System.out.println("3. Add to list");
+        System.out.println("4. Get Bonus content");
     }
 
-    private static void logOut() {
-        currentUser = null;
-        System.out.println("Logged out successfully.");
+    private static void displayChatroomMenu() {
+        System.out.println("1. Your chatrooms");
+        System.out.println("2. Join chatroom");
+        System.out.println("3. Create chatroom");
     }
 
     private static void getAIRecommendation(Scanner scanner) throws Exception {
@@ -146,7 +172,6 @@ public class App {
         AiRecommendation2.testChatCompletions(userMessage + " (Only movie titles, no description or other movie details, no apologies for your previous responses or things you can't do as an AI.)", chatgptApiKey);
         System.out.println("\nChoose your title");
         scanner.nextInt();
-
     }
 
     private static void searchForMovie(Scanner scanner) throws Exception {
@@ -160,15 +185,17 @@ public class App {
         int answer = scanner.nextInt();
         Movie m = new Movie((int)ids.get(answer - 1), tmdbApiKey);
         System.out.println(m);
-        System.out.println("\nDo you want bonus content for your movie? (yes/no)");
+        /* System.out.println("\nDo you want bonus content for your movie? (yes/no)");
         scanner.nextLine(); // consume the newline character
         String bonusContentChoice = scanner.nextLine();
         if (bonusContentChoice.equals("yes")) {
             String title = (String) titles.get(answer - 1);
             int year = (int) years.get(answer - 1);
             printBonusContent(title, year);
-        }
-}
+        }*/
+    
+    }
+    
     public static void printBonusContent(String movieTitle, int year) {
         if(year != -1) {
             BonusContent.searchAndPrintVideo(movieTitle + "  movie " + year, "Fun Facts", youtubeApiKey);
