@@ -20,7 +20,9 @@ public class Movie {
     private MovieDetails md;
     private double imdbRating;
             
-    public Movie(int id, String apiKey) throws IOException, InterruptedException {
+    public Movie(int id, String apiKey) {
+        Gson gson = new Gson();
+        
         //responce for movie credits
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create("https://api.themoviedb.org/3/movie/" + id + "/credits?language=en-US"))
@@ -28,8 +30,16 @@ public class Movie {
             .header("Authorization", "Bearer " + apiKey)
             .method("GET", HttpRequest.BodyPublishers.noBody())                
             .build();
-        HttpResponse<String> response1 = HttpClient.newHttpClient()
-            .send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response1;
+        try {
+            response1 = HttpClient.newHttpClient()
+                .send(request, HttpResponse.BodyHandlers.ofString());
+            co = gson.fromJson(response1.body(), Contributors.class);
+        } catch (IOException e) {
+            System.err.println("Check your internet connection!");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         
         //responce for movie details
         request = HttpRequest.newBuilder()
@@ -38,8 +48,16 @@ public class Movie {
             .header("Authorization", "Bearer " + apiKey)
             .method("GET", HttpRequest.BodyPublishers.noBody())
             .build();
-        HttpResponse<String> response2 = HttpClient.newHttpClient()
-            .send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response2;
+        try {
+            response2 = HttpClient.newHttpClient()
+                .send(request, HttpResponse.BodyHandlers.ofString());
+            md = gson.fromJson(response2.body(), MovieDetails.class);
+        } catch (IOException e) {
+            
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         //responce for movie availability
         request = HttpRequest.newBuilder()
@@ -48,17 +66,20 @@ public class Movie {
             .header("Authorization", "Bearer " + apiKey)
             .method("GET", HttpRequest.BodyPublishers.noBody())
             .build();
-        HttpResponse<String> response3 = HttpClient.newHttpClient()
-            .send(request, HttpResponse.BodyHandlers.ofString());
-
-        Gson gson = new Gson();
-
-        av = gson.fromJson(response3.body(), Availability.class);
-        co = gson.fromJson(response1.body(), Contributors.class);
-        md = gson.fromJson(response2.body(), MovieDetails.class);
+        HttpResponse<String> response3;
+        try {
+            response3 = HttpClient.newHttpClient()
+                .send(request, HttpResponse.BodyHandlers.ofString());
+            av = gson.fromJson(response3.body(), Availability.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         imdbRating = getImdbRatingFromID(md.getImdb_id());
     }
+    
     public static double getImdbRatingFromID(String imdbID) {
         String filePath = "C:\\Users\\Nick\\api_keys\\title.rating.tsv"; // Replace this with your file path
         String line;
@@ -82,8 +103,11 @@ public class Movie {
 
         
     //Searches for a movie in TMDB data base, returns arraylist with the ids of all the matches and prints their titles (only page 1)
-    public static ArrayList<?> movieSearch(String searchInput, String apiKey, String returnType) throws Exception {  //TODO: handle exceptions  
+    public static ArrayList<?> movieSearch(String searchInput, String apiKey, String returnType) {   
         ArrayList<?> result;
+        ArrayList<Integer> originalIdsArray = new ArrayList<Integer>();
+        ArrayList<Integer> yearsArray = new ArrayList<Integer>();
+        ArrayList<String> originalTitlesArray = new ArrayList<String>();
         
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create("https://api.themoviedb.org/3/search/movie?query=" + searchInput + "&include_adult=true&language=en-US&page=1"))
@@ -91,25 +115,24 @@ public class Movie {
             .header("Authorization", "Bearer " + apiKey)
             .method("GET", HttpRequest.BodyPublishers.noBody())
             .build();
-        HttpResponse<String> response = HttpClient.newHttpClient()
-            .send(request, HttpResponse.BodyHandlers.ofString());
-        //Parsing the JSON response
-        JSONObject jsonResponse = new JSONObject(response.body());
-        //Get the results array from the JSON object
-        JSONArray resultsArray = jsonResponse.getJSONArray("results");
-        ArrayList<Integer> originalIdsArray = new ArrayList<Integer>();
-        ArrayList<Integer> yearsArray = new ArrayList<Integer>();
-        ArrayList<String> originalTitlesArray = new ArrayList<String>();
-
-        //Iterate through the existing array and extract original ids
-        System.out.println();
+        HttpResponse<String> response;
         
-        for (int i = 0; i < resultsArray.length(); i++) {
-            int originalId = resultsArray.getJSONObject(i).getInt("id");
-            String originalTitle = resultsArray.getJSONObject(i).getString("original_title");
-            String originalReleaseDate = resultsArray.getJSONObject(i).getString("release_date");
-            originalIdsArray.add(originalId);
-            originalTitlesArray.add(originalTitle);
+        try {
+            response = HttpClient.newHttpClient()
+                .send(request, HttpResponse.BodyHandlers.ofString());
+            //Parsing the JSON response
+            JSONObject jsonResponse = new JSONObject(response.body());
+            //Get the results array from the JSON object
+            JSONArray resultsArray = jsonResponse.getJSONArray("results");
+            System.out.println();
+            
+            //Iterate through the existing array and extract original ids
+            for (int i = 0; i < resultsArray.length(); i++) {
+                int originalId = resultsArray.getJSONObject(i).getInt("id");
+                String originalTitle = resultsArray.getJSONObject(i).getString("original_title");
+                String originalReleaseDate = resultsArray.getJSONObject(i).getString("release_date");
+                originalIdsArray.add(originalId);
+                originalTitlesArray.add(originalTitle);
                 if(!originalReleaseDate.isEmpty()) {
                     LocalDate date = LocalDate.parse(originalReleaseDate);
                     int year = date.getYear();
@@ -117,14 +140,21 @@ public class Movie {
                     if(returnType.equals("title")) {
                         System.out.printf("%2d. %s (%d)%n", i + 1, originalTitle, year);
                     }      
-                 } else {
+                } else {
                     yearsArray.add(-1);
                     if(returnType.equals("title")) {
                         System.out.printf("%2d. %s (%s)%n", i + 1, originalTitle, "Release date not available");
                     } 
                 }
+            }
+            
+        } catch (IOException e) {
+            if(returnType == "id") System.err.println("Check your internet connection!");
+        
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
-    
+        
         if (returnType.equals("title")) {
             result = originalTitlesArray;
             return result;
@@ -136,8 +166,6 @@ public class Movie {
             return result;
         }
     }
-
-
     
     @Override
     public String toString() {

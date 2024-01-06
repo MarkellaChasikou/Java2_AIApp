@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName;
 public class Cast {
     @SerializedName("name")
     private String name;
-    @SerializedName("chsaracter")
+    @SerializedName("character")
     private String character;
     
     public String getName() {
@@ -18,7 +18,6 @@ public class Cast {
     
     @Override
     public String toString() {
-        
         return String.format("Name: %-30s\tCharacter Name: %s", name, character + "\n");
     }
     

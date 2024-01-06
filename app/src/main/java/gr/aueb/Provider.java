@@ -2,7 +2,7 @@ package gr.aueb;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Prov {
+public class Provider {
     @SerializedName("provider_name")
     private String provider_name;
     

@@ -12,10 +12,10 @@ public class Availability {
         return results;
     }
 
-    public String formatAvailability(String category, ArrayList<Prov> providers) {
+    public String formatAvailability(String category, ArrayList<Provider> providers) {
         if (providers != null && !providers.isEmpty()) {
             StringBuilder formatted = new StringBuilder(category + ": ");
-            for (Prov provider : providers) {
+            for (Provider provider : providers) {
                 formatted.append(provider).append(", ");
             }
 
