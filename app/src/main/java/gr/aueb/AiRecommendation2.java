@@ -1,5 +1,14 @@
 package gr.aueb;
 
+import com.cloudurable.jai.OpenAIClient;
+import com.cloudurable.jai.model.text.completion.chat.ChatRequest;
+import com.cloudurable.jai.model.text.completion.chat.ChatResponse;
+import com.cloudurable.jai.model.text.completion.chat.Message;
+import com.cloudurable.jai.model.text.completion.chat.Role;
+import com.cloudurable.jai.model.text.completion.chat.function.*;
+import com.cloudurable.jai.util.JsonSerializer;
+import io.nats.jparse.node.ObjectNode;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,27 +18,14 @@ import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 
+import javax.management.relation.Role;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import java.net.URISyntaxException;
 
 public class AiRecommendation2 {
-            public static void main(String[] args) {
-        String apiKey = "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"; 
-        String userMessage = "I want movies that are going to make me cry"; 
-
-        OpenAIHandler openAIHandler = new OpenAIHandler(apiKey);
-        HashMap<String, String> movieRecommendations = openAIHandler.getMovieRecommendations(userMessage);
-
-        if (movieRecommendations != null) {
-            // Print or use the movie recommendations and their TMDB IDs from the HashMap
-            for (String movieName : movieRecommendations.keySet()) {
-                String tmdbId = movieRecommendations.get(movieName);
-                System.out.println("Movie Name: " + movieName + ", TMDB ID: " + tmdbId);
-            }
-        }
-    }
 
     public static void testChatCompletions(String userMessage, String apiKey) {
         String url = "https://api.openai.com/v1/chat/completions";
@@ -115,5 +111,14 @@ public class AiRecommendation2 {
 
         System.out.println("\n\n" + content);
     }
-    
+    public static void chatGPT(String userMessage, String apiKey) {
+                
+        final var message = Message.builder().role(Role.USER)
+                .content(userMessage + "I want 10 movies suggestions and their tmdb ids of them").build();
+
+        final var chatBuilder = ChatRequest.builder()
+                .model("gpt-3.5-turbo-0613")
+                .addMessage(message)  
+                .functionalCall(ChatRequest.AUTO);
+    }
 }
