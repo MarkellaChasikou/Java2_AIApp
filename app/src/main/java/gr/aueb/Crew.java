@@ -7,7 +7,15 @@ public class Crew {
     private String name;
     @SerializedName("job")
     private String job;
+    @SerializedName("id")
+    private int id;
+    @SerializedName("title")
+    private String title;
     
+    public String getTitle() {
+        return title;
+    }
+
     public String getName() {
         return name;
     }

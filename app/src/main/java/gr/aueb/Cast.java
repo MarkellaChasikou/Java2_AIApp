@@ -7,7 +7,19 @@ public class Cast {
     private String name;
     @SerializedName("character")
     private String character;
+    @SerializedName("id")
+    private int id;
+    @SerializedName("title")
+    private String title;
     
+    public String getTitle() {
+        return title;
+    }
+
+    public int getId() {
+        return id;
+    }
+
     public String getName() {
         return name;
     }
