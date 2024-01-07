@@ -3,11 +3,25 @@ package gr.aueb;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Scanner;
+
+import javax.xml.crypto.Data;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 public class App {
 
@@ -25,7 +39,6 @@ public class App {
 
         while (true) {
             displayStartMenu();
-
             int startChoice = scanner.nextInt();
             scanner.nextLine(); // consume the newline character
 
@@ -63,7 +76,7 @@ public class App {
                             getAIRecommendation(scanner);
                             break;
                         case 2:
-                            searchForMovie(scanner);
+                            pickResult(scanner);
                             break;
                         case 3:
                             if(!guest) {
@@ -174,26 +187,24 @@ public class App {
         scanner.nextInt();
     }
 
-    private static void searchForMovie(Scanner scanner) throws Exception {
-        System.out.println("\nType your search. \n");
+    private static void pickResult(Scanner scanner) throws Exception {
+        System.out.println("\nType your search.");
         String userMessage = scanner.nextLine();
         userMessage = encodeMovieTitle(userMessage);
-        ArrayList<?> ids = Movie.movieSearch(userMessage, tmdbApiKey, "id");
-        ArrayList<?> titles = Movie.movieSearch(userMessage, tmdbApiKey, "title");
-        ArrayList<?> years = Movie.movieSearch(userMessage, tmdbApiKey, "year");
-        System.out.println("\nChoose your title. \n");
-        int answer = scanner.nextInt();
-        Movie m = new Movie((int)ids.get(answer - 1), tmdbApiKey);
-        System.out.println(m);
-        /* System.out.println("\nDo you want bonus content for your movie? (yes/no)");
-        scanner.nextLine(); // consume the newline character
-        String bonusContentChoice = scanner.nextLine();
-        if (bonusContentChoice.equals("yes")) {
-            String title = (String) titles.get(answer - 1);
-            int year = (int) years.get(answer - 1);
-            printBonusContent(title, year);
-        }*/
-    
+        ArrayList<Integer> ids = search(userMessage);
+        if(!ids.isEmpty()) {
+            System.out.println("Choose your title. \n");
+            int answer = scanner.nextInt();
+            if(ids.get(answer - 1) > 0) {
+                Movie m = new Movie(ids.get(answer - 1), tmdbApiKey);
+                System.out.println(m);
+            } else {
+                Person p = new Person(-ids.get(answer - 1), tmdbApiKey);
+                System.out.println(p);
+            }
+            
+        }
+        
     }
     
     public static void printBonusContent(String movieTitle, int year) {
@@ -215,5 +226,97 @@ public class App {
             e.printStackTrace();
             return title;
         }
+    }
+
+    private static ArrayList<Integer> search(String userMessage) {
+        Gson gson = new Gson();
+        ArrayList<Integer> idsList = new ArrayList<>();
+        ArrayList<String> prints = new ArrayList<>();
+        ArrayList<Float> popularity = new ArrayList<>();
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create("https://api.themoviedb.org/3/search/multi?query="+ userMessage + "&include_adult=false&language=en-US&page=1"))
+            .header("accept", "application/json")
+            .header("Authorization", "Bearer " + tmdbApiKey)
+            .method("GET", HttpRequest.BodyPublishers.noBody())
+            .build();
+        HttpResponse<String> response;
+        try {
+            response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+            
+            JsonObject jsonObject = gson.fromJson(response.body(), JsonObject.class);
+
+            if (jsonObject.has("results") && jsonObject.get("results").isJsonArray()) {
+                JsonArray resultsArray = jsonObject.getAsJsonArray("results");
+
+                if (!resultsArray.isEmpty()) {
+                    int count = 0;
+                    for (int i = 0; i < resultsArray.size(); i++) {
+                        JsonObject resultObject = resultsArray.get(i).getAsJsonObject();
+                        if (resultObject.has("media_type")) {
+                            String mediaType = resultObject.get("media_type").getAsString();
+                            if (mediaType.equals("movie")) {
+                                count++;
+                                String releaseDate = resultObject.get("release_date").getAsString();
+                                if(!releaseDate.isEmpty()) {
+                                    LocalDate date = LocalDate.parse(releaseDate);
+                                    int year = date.getYear();
+                                    prints.add(String.format("%s (%s)", resultObject.get("original_title").getAsString(), "Movie, " + year));
+                                } else {
+                                    prints.add(String.format("%s (%s)", resultObject.get("original_title").getAsString(), "Release date not available"));
+                                } 
+                                idsList.add(resultObject.get("id").getAsInt());
+                                popularity.add(resultObject.get("popularity").getAsFloat());
+                            } else if(mediaType.equals("person")) {
+                                count++;
+                                idsList.add(-resultObject.get("id").getAsInt());
+                                popularity.add(resultObject.get("popularity").getAsFloat());
+                                String job = resultObject.get("known_for_department").getAsString();
+                                if(!job.isEmpty()) {
+                                    prints.add(String.format("%s (%s)", resultObject.get("original_name").getAsString(), job));
+                                } else {
+                                    prints.add(String.format("%s (%s)", resultObject.get("original_name").getAsString(), "Known for department not available"));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            int n = idsList.size();
+            if(n >= 2){
+                for (int i = 1; i <= n - 1; i++) {
+                    for (int j = n - 1; j >= i; j--) {
+                        if(popularity.get(j - 1) < popularity.get(j)) {
+                            float temp1 = popularity.get(j - 1);
+                            popularity.set(j - 1, popularity.get(j));
+                            popularity.set(j, temp1);
+                            int temp2 = idsList.get(j - 1);
+                            idsList.set(j - 1, idsList.get(j));
+                            idsList.set(j, temp2);
+                            String temp3 = prints.get(j - 1);
+                            prints.set(j - 1, prints.get(j));
+                            prints.set(j, temp3);
+                        }
+                    }
+                }
+            }
+
+            if(!prints.isEmpty()) {
+                for (int i = 0; i < prints.size(); i++) {
+                    String newPrint = String.format("%2d. %s", i + 1, prints.get(i));
+                    prints.set(i, newPrint);
+                    System.out.println(prints.get(i));
+                }
+            } else {
+                System.out.println("No results found");
+            }
+        } catch (IOException e) {
+            System.err.println("Check your internet connection!");
+            e.printStackTrace();
+            System.exit(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+        return idsList;
     }
 }
