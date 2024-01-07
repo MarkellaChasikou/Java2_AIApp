@@ -100,3 +100,20 @@ public class OpenAIHandler {
         return movieMap;
     }
 }
+
+
+            public static void main(String[] args) {
+        String apiKey = ""; 
+        String userMessage = "I want to see movies that are going to make me cry"; 
+
+        OpenAIHandler openAIHandler = new OpenAIHandler(apiKey);
+        HashMap<String, String> movieRecommendations = openAIHandler.getMovieRecommendations(userMessage);
+
+        if (movieRecommendations != null) {
+            // Print or use the movie recommendations and their TMDB IDs from the HashMap
+            for (String movieName : movieRecommendations.keySet()) {
+                String tmdbId = movieRecommendations.get(movieName);
+                System.out.println("Movie Name: " + movieName + ", TMDB ID: " + tmdbId);
+            }
+        }
+    }
