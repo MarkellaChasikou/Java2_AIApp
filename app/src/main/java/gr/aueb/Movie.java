@@ -8,9 +8,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.time.LocalDate;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import com.google.gson.Gson;
 
 public class Movie {
@@ -102,71 +99,6 @@ public class Movie {
     }
 
         
-    //Searches for a movie in TMDB data base, returns arraylist with the ids of all the matches and prints their titles (only page 1)
-    public static ArrayList<?> movieSearch(String searchInput, String apiKey, String returnType) {   
-        ArrayList<?> result;
-        ArrayList<Integer> originalIdsArray = new ArrayList<Integer>();
-        ArrayList<Integer> yearsArray = new ArrayList<Integer>();
-        ArrayList<String> originalTitlesArray = new ArrayList<String>();
-        
-        HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create("https://api.themoviedb.org/3/search/movie?query=" + searchInput + "&include_adult=true&language=en-US&page=1"))
-            .header("accept", "application/json")
-            .header("Authorization", "Bearer " + apiKey)
-            .method("GET", HttpRequest.BodyPublishers.noBody())
-            .build();
-        HttpResponse<String> response;
-        
-        try {
-            response = HttpClient.newHttpClient()
-                .send(request, HttpResponse.BodyHandlers.ofString());
-            //Parsing the JSON response
-            JSONObject jsonResponse = new JSONObject(response.body());
-            //Get the results array from the JSON object
-            JSONArray resultsArray = jsonResponse.getJSONArray("results");
-            System.out.println();
-            
-            //Iterate through the existing array and extract original ids
-            for (int i = 0; i < resultsArray.length(); i++) {
-                int originalId = resultsArray.getJSONObject(i).getInt("id");
-                String originalTitle = resultsArray.getJSONObject(i).getString("original_title");
-                String originalReleaseDate = resultsArray.getJSONObject(i).getString("release_date");
-                originalIdsArray.add(originalId);
-                originalTitlesArray.add(originalTitle);
-                if(!originalReleaseDate.isEmpty()) {
-                    LocalDate date = LocalDate.parse(originalReleaseDate);
-                    int year = date.getYear();
-                    yearsArray.add(year);
-                    if(returnType.equals("title")) {
-                        System.out.printf("%2d. %s (%d)%n", i + 1, originalTitle, year);
-                    }      
-                } else {
-                    yearsArray.add(-1);
-                    if(returnType.equals("title")) {
-                        System.out.printf("%2d. %s (%s)%n", i + 1, originalTitle, "Release date not available");
-                    } 
-                }
-            }
-            
-        } catch (IOException e) {
-            if(returnType == "id") System.err.println("Check your internet connection!");
-        
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        
-        if (returnType.equals("title")) {
-            result = originalTitlesArray;
-            return result;
-        } else if (returnType.equals("id")) {
-            result = originalIdsArray;
-            return result;
-        } else {
-            result = yearsArray;
-            return result;
-        }
-    }
-    
     private ArrayList<String> getDirectors() {
         ArrayList<String> directors = new ArrayList<>();
         if(this.co.getCrew() != null) {
