@@ -7,12 +7,29 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.util.HashMap;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import java.net.URISyntaxException;
 
 public class AiRecommendation2 {
+            public static void main(String[] args) {
+        String apiKey = ""; 
+        String userMessage = "User's input goes here"; 
+
+        OpenAIHandler openAIHandler = new OpenAIHandler(apiKey);
+        HashMap<String, String> movieRecommendations = openAIHandler.getMovieRecommendations(userMessage);
+
+        if (movieRecommendations != null) {
+            // Print or use the movie recommendations and their TMDB IDs from the HashMap
+            for (String movieName : movieRecommendations.keySet()) {
+                String tmdbId = movieRecommendations.get(movieName);
+                System.out.println("Movie Name: " + movieName + ", TMDB ID: " + tmdbId);
+            }
+        }
+    }
 
     public static void testChatCompletions(String userMessage, String apiKey) {
         String url = "https://api.openai.com/v1/chat/completions";
