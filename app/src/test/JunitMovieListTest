@@ -1,0 +1,77 @@
+package test;
+
+import static org.junit.Assert.*;
+
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+
+public class JunitMovieListTest 
+{
+
+    private MovieList movieList;
+    
+    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+
+    @Before
+    public void setUp() {
+        // Create a MovieList instance before each test
+        movieList = new MovieList("public", "user123");
+        System.setOut(new PrintStream(outContent));
+    }
+
+    @Test
+    public void testIfMoviesAreAddedCorrectly() {
+        movieList.addMovie("Inception");
+        movieList.addMovie("The Shawshank Redemption");
+
+        // Capture the output and check if the movies are added correctly
+        String output = outContent.toString().trim();
+        assertTrue(output.contains("Inception added to the list."));
+        assertTrue(output.contains("The Shawshank Redemption added to the list."));
+    }
+
+    @Test
+    public void testAddDuplicateMovie() {
+        movieList.addMovie("Inception");
+
+        // Try adding the same movie again
+        movieList.addMovie("Inception");
+
+        String output = outContent.toString().trim();
+        assertTrue(output.contains("Inception added to the list."));
+        assertTrue(output.contains("Movie 'Inception' is already in the list."));
+    }
+
+    @Test
+    public void testIfMoviesAreRemovedCorrectly(){
+        movieList.addMovie("The Dark Knight");
+
+        // Remove a movie and check if it's removed
+        movieList.removeMovie("The Dark Knight");
+
+        String output = outContent.toString().trim();
+        assertTrue(output.contains("The Dark Knight removed from the list."));
+    }
+
+    @Test 
+    public void testRemoveNonExistentMovie() {
+
+        // Try to remove a movie that doesn't exist
+        movieList.removeMovie("The Dark Knight");
+
+        String output = outContent.toString().trim();
+        assertFalse(output.contains("The Dark Knight removed from the list."));
+        assertTrue(output.contains("The Dark Knight is not in the list."));
+    }
+
+    @After
+    public void tearDown() {
+        // Reset the standard output back to its original state
+        System.setOut(System.out);
+    }
+}
