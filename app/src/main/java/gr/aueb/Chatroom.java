@@ -11,12 +11,13 @@ import java.util.List;
 public class Chatroom {
     private int roomId;
     private String name;
-    private User user;
+    private int createorId;
+    //private User user;
     private Message message;
     private List<Integer> users = new ArrayList<Integer>();
 
     //Constructors
-    public Chatroom(String name, User user) {
+    /*public Chatroom(String name, User user) {
         this.name = name;
         this.user = user;
     }
@@ -24,27 +25,23 @@ public class Chatroom {
     public Chatroom(int roomId, String name) {
         this.roomId = roomId;
         this.name = name;
-    }
+    }*/
 
-    public Chatroom(int roomId, String name, User user) {
+    public Chatroom(int roomId, String name, int userid) {
         this.roomId = roomId;
         this.name = name;
-        this.user = user;
+        createorId = userid;
     }
 
-    public Chatroom(int roomId, List<Integer> users) {
+    /*public Chatroom(int roomId, List<Integer> users) {
         this.roomId = roomId;
         this.users = users;
-    }
+    }*/
 
 
     //Setters- Getters
      public int getRoomId() {
         return roomId;
-    }
-
-    public void setRoomId(int roomId) {
-        this.roomId = roomId;
     }
 
     public String getName() {
@@ -53,9 +50,30 @@ public class Chatroom {
 
     public void setName(String name) {
         this.name = name;
+        updateNameInDatabase();
     }
 
-    public User getUser() {
+    private void updateNameInDatabase() {
+        DB db = new DB();
+        try (Connection con = db.getConnection();
+             PreparedStatement stmt = con.prepareStatement("UPDATE Chatroom SET name = ? WHERE roomId = ?")) {
+    
+            stmt.setString(1, name);
+            stmt.setInt(2, roomId);
+            stmt.executeUpdate();
+    
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                db.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    /*public User getUser() {
         return user;
     }
 
@@ -69,20 +87,21 @@ public class Chatroom {
 
     public void setMessage(Message message) {
         this.message = message;
-    }
+    }*/
 
    //Create chatroom method 
-    public Chatroom createChatroom() throws Exception {
-        DB db = new DB();
-        Connection con = null;
-        int roomId;
-        String sql1 = "INSERT INTO Chatroom(name, creatorId) VALUES(?, ?);";
-        String sql2 = "INSERT INTO ChatroomUser VALUES(?,?)";
-        try {
-            con = db.getConnection();
-            PreparedStatement stmt1 = con.prepareStatement(sql1, Statement.RETURN_GENERATED_KEYS);
+   //Gets called immediately after creating a chatroom from constructor
+   public Chatroom createChatroom() throws Exception {
+    DB db = new DB();
+    Connection con = null;
+    int roomId;
+    String sql1 = "INSERT INTO Chatroom(name, creatorId) VALUES(?, ?);";
+    String sql2 = "INSERT INTO ChatroomUser VALUES(?,?)";
+    try {
+        con = db.getConnection();
+        try (PreparedStatement stmt1 = con.prepareStatement(sql1, Statement.RETURN_GENERATED_KEYS)) {
             stmt1.setString(1, name);
-            stmt1.setInt(2, user.getId());
+            stmt1.setInt(2, createorId);
             stmt1.executeUpdate();
             try (ResultSet generatedId = stmt1.getGeneratedKeys()) {
                 if (generatedId.next()) {
@@ -91,207 +110,177 @@ public class Chatroom {
                     throw new Exception("Failed to retrieve generated roomId.");
                 }
             }
-            stmt1.close();
-            try (PreparedStatement stmt2 = con.prepareStatement(sql2)) {
-                stmt2.setInt(1, roomId);
-                stmt2.setInt(2, user.getId());
-                stmt2.executeUpdate();
-                System.out.println("Chatroom " + name + " created successfully");
-            }
-        return new Chatroom(roomId, name, user);
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());    
-        } finally {
-            try {
-                db.close();
-            } catch (Exception e) {
+        }
+        try (PreparedStatement stmt2 = con.prepareStatement(sql2)) {
+            stmt2.setInt(1, roomId);
+            stmt2.setInt(2, createorId);
+            stmt2.executeUpdate();
+            System.out.println("Chatroom " + name + " created successfully");
+        }
 
+        return new Chatroom(roomId, name, createorId);
+    } catch (Exception e) {
+        throw new Exception(e.getMessage());
+    } finally {
+        try {
+            if (con != null) {
+                con.close();
             }
+            db.close();
+        } catch (Exception e) {
+            e.printStackTrace(); 
         }
     }
+}
+
     //Get chatrooms method 
     public static List<Chatroom> getChatrooms() throws Exception {
-        List<Chatroom> chatrooms = new ArrayList<Chatroom>();
+        List<Chatroom> chatrooms = new ArrayList<>();
         DB db = new DB();
         Connection con = null;
-        String query = "SELECT * from chatroom;";
         try {
             con = db.getConnection();
-            PreparedStatement stmt = con.prepareStatement(query);
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                int roomId = rs.getInt("roomId");
-                String name = rs.getString("name");
-                Chatroom chatroom = new Chatroom(roomId, name);
-                chatrooms.add(chatroom);
+            try (PreparedStatement stmt = con.prepareStatement("SELECT * from chatroom;");
+                 ResultSet rs = stmt.executeQuery()) {
+    
+                while (rs.next()) {
+                    int roomId = rs.getInt("roomId");
+                    String name = rs.getString("name");
+                    int creatorId = rs.getInt("creatorId");
+                    Chatroom chatroom = new Chatroom(roomId, name, creatorId);
+                    chatrooms.add(chatroom);
+                }
             }
-            rs.close();
-            stmt.close();
-            return chatrooms;
         } catch (Exception e) {
             throw new Exception(e.getMessage());
         } finally {
             try {
+                if (con != null) {
+                    con.close();
+                }
                 db.close();
             } catch (Exception e) {
+                e.printStackTrace(); 
             }
         }
+        return chatrooms;
     }
+    
 
-    //Join chatroom method
-    public static Chatroom joinChatroom(int chatroomId, User user) throws Exception {
-    List<Integer> members = new ArrayList<>();
-    DB db = new DB();
-    Connection con = null;
-    String sql = "INSERT INTO ChatroomUser VALUES(?,?);";
-    String query = "SELECT * FROM Chatroomuser join chatroom WHERE Chatroomuser.roomId=?";
-    try {
-        con = db.getConnection();
-        PreparedStatement stmt1 = con.prepareStatement(sql);
-        stmt1.setInt(1, chatroomId);
-        stmt1.setInt(2,user.getId());
-        stmt1.executeUpdate();
-        System.out.println("You can know sent messages in chatroom ");
-        stmt1.close();
-        PreparedStatement stmt2 = con.prepareStatement(query);
-        stmt2.setInt(1, chatroomId);
-        ResultSet rs = stmt2.executeQuery();
-        while (rs.next()) {
-            members.add(rs.getInt("userid"));
-        }
 
-    return new Chatroom(chatroomId, members);
-    } catch (Exception e) {
-        throw new Exception(e.getMessage());    
-    } finally {
-        try {
-            db.close();
-        } catch (Exception e) {
-
-        }
-    }
-    } 
-    //Leave chatroom method
-    public static void leaveChatroom(int chatroomId, User user) throws Exception {
-    DB db = new DB();
-    Connection con = null;
-    String sql = "DELETE FROM ChatroomUser WHERE roomId=? AND userId=?;";
-    try {
-        con = db.getConnection();
-        PreparedStatement stmt = con.prepareStatement(sql);
-        stmt.setInt(1, chatroomId);
-        stmt.setInt(2,user.getId());
-        stmt.executeUpdate();
-        stmt.close();
-    } catch (Exception e) {
-        throw new Exception(e.getMessage());    
-    } finally {
-        try {
-            db.close();
-        } catch (Exception e) {
-
-        }
-    }
-    }
 
     //Show chatroom members method
     public static List<String> showChatroomMembers(int chatroomId) throws Exception {
-        ArrayList<String> members = new ArrayList<String>();
+        ArrayList<String> members = new ArrayList<>();
         DB db = new DB();
         Connection con = null;
-        String query = "SELECT AppUser.username FROM AppUser "
-            + "JOIN ChatroomUser ON AppUser.userId = ChatroomUser.userId "
-            + "WHERE ChatroomUser.roomId = ?";
         try {
             con = db.getConnection();
-            PreparedStatement stmt = con.prepareStatement(query);
-            stmt.setInt(1, chatroomId);
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                members.add(rs.getString("username"));
+            try (PreparedStatement stmt = con.prepareStatement(
+                    "SELECT AppUser.username FROM AppUser "
+                            + "JOIN ChatroomUser ON AppUser.userId = ChatroomUser.userId "
+                            + "WHERE ChatroomUser.roomId = ?;")) {
+    
+                stmt.setInt(1, chatroomId);
+                ResultSet rs = stmt.executeQuery();
+    
+                while (rs.next()) {
+                    members.add(rs.getString("username"));
+                }
+    
+            } catch (Exception e) {
+                throw new Exception(e.getMessage());
             }
-            stmt.close();
-            rs.close();
-            return members;
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());    
         } finally {
-        try {
-            db.close();
-        } catch (Exception e) {
-
+            try {
+                if (con != null) {
+                    con.close();
+                }
+                db.close();
+            } catch (Exception e) {
+                e.printStackTrace(); 
+            }
         }
+        return members;
     }
-    }
+    
+    
 
     //Get messages method
     public static List<String> getMessages(int chatroomId) throws Exception {
-        ArrayList<String> messages = new ArrayList<String>();
-        DB db = new DB();
-        Connection con = null;
-        String query = "SELECT text FROM message WHERE roomId=?;";
-        try {
-            con = db.getConnection();
-            PreparedStatement stmt = con.prepareStatement(query);
+        ArrayList<String> messages = new ArrayList<>();
+        try (
+            Connection con = new DB().getConnection();
+            PreparedStatement stmt = con.prepareStatement(
+                    "SELECT message.text, appuser.username " +
+                            "FROM message " +
+                            "JOIN appuser ON message.userId = appuser.userId " +
+                            "WHERE message.roomId=?;");
+        ) {
+    
             stmt.setInt(1, chatroomId);
             ResultSet rs = stmt.executeQuery();
+    
             while (rs.next()) {
-                messages.add(rs.getString("text"));
-            } 
-            stmt.close();
-            rs.close();
-            return messages;
-             } catch (Exception e) {
-            throw new Exception(e.getMessage());    
-        } finally {
-            try {
-                db.close();
-            } catch (Exception e) {
-
+                String messageText = rs.getString("text");
+                String senderUsername = rs.getString("username");
+                messages.add(senderUsername + ": " + messageText);
             }
+    
+            return messages;
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
         }
     }
-
+    
     //Get unseen Messages method
     public static List<String> getUnseenMessage(int chatroomId, User user) throws Exception {
-        ArrayList<String> messages = new ArrayList<String>();
+        ArrayList<String> messages = new ArrayList<>();
         DB db = new DB();
         Connection con = null;
-        String query = "SELECT text FROM message JOIN unseenmessage " +
-            "ON unSeenMessage.unSeenMessageId=message.id where unSeenMessage.userId=? " +
-            "AND unSeenMessage.roomId =?;";
-        String sql = "DELETE FROM unseenmessage WHERE unSeenMessage.userId=? " +
-            "AND unSeenMessage.roomId =?;";
         try {
             con = db.getConnection();
-            PreparedStatement stmt1 = con.prepareStatement(query);
-            stmt1.setInt(1, user.getId());
-            stmt1.setInt(2, chatroomId);
-            ResultSet rs = stmt1.executeQuery();
-            while (rs.next()) {
-                messages.add(rs.getString("text"));
-            }
-            stmt1.close();
-            rs.close();
-            if (rs != null) {
-            PreparedStatement stmt2 = con.prepareStatement(sql);
-            stmt2.setInt(1, user.getId());
-            stmt2.setInt(2, chatroomId);
-            stmt2.executeUpdate();
-            stmt2.close();
-            }
-            return messages;
+            try (PreparedStatement stmt1 = con.prepareStatement(
+                         "SELECT message.text, appuser.username " +
+                                 "FROM message " +
+                                 "JOIN unseenmessage ON unseenmessage.unSeenMessageId = message.id " +
+                                 "JOIN appuser ON message.userId = appuser.userId " +
+                                 "WHERE unseenmessage.userId=? AND unseenmessage.roomId =?;");
+                 PreparedStatement stmt2 = con.prepareStatement(
+                         "DELETE FROM unseenmessage WHERE unseenmessage.userId=? AND unseenmessage.roomId =?;")) {
+    
+                stmt1.setInt(1, user.getId());
+                stmt1.setInt(2, chatroomId);
+                ResultSet rs = stmt1.executeQuery();
+    
+                while (rs.next()) {
+                    String messageText = rs.getString("text");
+                    String senderUsername = rs.getString("username");
+                    messages.add(senderUsername + ": " + messageText);
+                }
+    
+                if (rs != null) {
+                    stmt2.setInt(1, user.getId());
+                    stmt2.setInt(2, chatroomId);
+                    stmt2.executeUpdate();
+                }
+    
             } catch (Exception e) {
-            throw new Exception(e.getMessage());    
+                throw new Exception(e.getMessage());
+            }
         } finally {
             try {
+                if (con != null) {
+                    con.close();
+                }
                 db.close();
             } catch (Exception e) {
-
+                e.printStackTrace(); 
             }
         }
+        return messages;
     }
-
+    
     public String toString() {
         return "Chatroom{" +
                 "roomId: " + roomId +

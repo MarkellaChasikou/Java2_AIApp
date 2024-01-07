@@ -16,8 +16,8 @@ import java.net.URISyntaxException;
 
 public class AiRecommendation2 {
             public static void main(String[] args) {
-        String apiKey = ""; 
-        String userMessage = "User's input goes here"; 
+        String apiKey = "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"; 
+        String userMessage = "I want movies that are going to make me cry"; 
 
         OpenAIHandler openAIHandler = new OpenAIHandler(apiKey);
         HashMap<String, String> movieRecommendations = openAIHandler.getMovieRecommendations(userMessage);

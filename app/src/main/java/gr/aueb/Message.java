@@ -13,12 +13,12 @@ public class Message {
     private User user;
 
 
-    public Message(boolean spoiler, String text, int chatroomId, User user) {
+    /*public Message(boolean spoiler, String text, int chatroomId, User user) {
         this.spoiler = spoiler;
         this.text = text;
         this.chatroomId = chatroomId;
         this.user = user;
-    }       
+    } */     
 
     public Message(int id, boolean spoiler, String text, int chatroomId, User user) {
         this.id = id;
@@ -32,111 +32,195 @@ public class Message {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public boolean isSpoiler() {
+    public boolean getSpoiler() {
         return spoiler;
     }
 
-    public void setSpoiler(boolean spoiler) {
+    public void setSpoiler(boolean spoiler) throws Exception {
         this.spoiler = spoiler;
+        updateSpoilerInDatabase();
     }
+    public void updateSpoilerInDatabase() throws Exception {
+        DB db = new DB();
+        Connection con = null;
+        PreparedStatement stmt = null;
+    
+        try {
+            con = db.getConnection();
+            stmt = con.prepareStatement("UPDATE message SET spoiler=? WHERE id=?");
+            stmt.setBoolean(1, spoiler);
+            stmt.setInt(2, id); 
+            stmt.executeUpdate();
+            System.out.println("Spoiler updated in the database");
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        } finally {
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (con != null) {
+                    con.close();
+                }
+                if (db != null) {
+                    db.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
 
     public String getText() {
         return text;
     }
 
-    public void setText(String text) {
+    public void setText(String text) throws Exception {
         this.text = text;
+        updateTextInDatabase();
     }
+    public void updateTextInDatabase() throws Exception {
+        DB db = null;
+        Connection con = null;
+        PreparedStatement stmt = null;
+    
+        try {
+            db = new DB();
+            con = db.getConnection();
+            stmt = con.prepareStatement("UPDATE message SET text=? WHERE id=?");
+            stmt.setString(1, text);
+            stmt.setInt(2, id);
+            stmt.executeUpdate();
+            System.out.println("Text updated in the database");
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        } finally {
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (con != null) {
+                    con.close();
+                }
+                if (db != null) {
+                    db.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
 
     public int getChatroomId() {
         return chatroomId;
     }
 
-    public void setChatroomId(int chatroomId) {
-        this.chatroomId = chatroomId;
-    }
 
     public User getUser() {
         return user;
     }
 
-    public void setUser(User user) {
-        this.user = user;
-    }
-
 
     //Add message Method
-    public void addMessage() throws Exception {
-    DB db = new DB();
-    Connection con = null;
-    String sql1 = "INSERT INTO message(roomId, userId, spoiler, text) VALUES(?,?,?,?);";
-    String sql2 = "INSERT INTO unseenmessage(userId, roomId, unSeenMessageId) VALUES(?,?,?);";
-    try {
-        con = db.getConnection();
-        PreparedStatement stmt1 = con.prepareStatement(sql1,  Statement.RETURN_GENERATED_KEYS);
-        stmt1.setInt(1, chatroomId);
-        stmt1.setInt(2, user.getId());
-        stmt1.setBoolean(3, spoiler);
-        stmt1.setString(4, text);
-        stmt1.executeUpdate();
-        System.out.print("send!");
-        ResultSet generatedKeys = stmt1.getGeneratedKeys();
-        generatedKeys.next();
-        int messageId = generatedKeys.getInt(1);
-        stmt1.close();
-        String sqlRoomMembers = "SELECT userId FROM chatroomuser WHERE roomId=?";
-        PreparedStatement stmt2 = con.prepareStatement(sqlRoomMembers);
-        stmt2.setInt(1, chatroomId);
-        ResultSet rsRoomMembers = stmt2.executeQuery();
-        int excludeUserId = user.getId(); 
-        while (rsRoomMembers.next()) {
-            int roomMemberId = rsRoomMembers.getInt("userId");
-            if (roomMemberId != excludeUserId) {
-                PreparedStatement stmtUnseenMessage = con.prepareStatement(sql2);
-                stmtUnseenMessage.setInt(1, roomMemberId);
-                stmtUnseenMessage.setInt(2, chatroomId);
-                stmtUnseenMessage.setInt(3, messageId);
-                stmtUnseenMessage.executeUpdate();
-                stmtUnseenMessage.close();
+    //Gets called always when constructor is used
+    public Message addMessage() throws Exception {
+        DB db = new DB();
+        try (Connection con = db.getConnection();
+             PreparedStatement stmt1 = con.prepareStatement("INSERT INTO message(roomId, userId, spoiler, text) VALUES(?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+             PreparedStatement stmt2 = con.prepareStatement("INSERT INTO unseenmessage(userId, roomId, unSeenMessageId) VALUES(?,?,?)");
+             PreparedStatement stmtRoomMembers = con.prepareStatement("SELECT userId FROM chatroomuser WHERE roomId=?")) {
+    
+            stmt1.setInt(1, chatroomId);
+            stmt1.setInt(2, user.getId());
+            stmt1.setBoolean(3, spoiler);
+            stmt1.setString(4, text);
+    
+            int affectedRows = stmt1.executeUpdate();
+    
+            if (affectedRows > 0) {
+                try (ResultSet generatedKeys = stmt1.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        int messageId = generatedKeys.getInt(1);
+    
+                        stmtRoomMembers.setInt(1, chatroomId);
+                        try (ResultSet rsRoomMembers = stmtRoomMembers.executeQuery()) {
+                            int excludeUserId = user.getId();
+                            while (rsRoomMembers.next()) {
+                                int roomMemberId = rsRoomMembers.getInt("userId");
+                                if (roomMemberId != excludeUserId) {
+                                    stmt2.setInt(1, roomMemberId);
+                                    stmt2.setInt(2, chatroomId);
+                                    stmt2.setInt(3, messageId);
+                                    stmt2.executeUpdate();
+                                }
+                            }
+                        }
+    
+                        // Retrieve the message details from the database using the generated message ID
+                        String retrieveMessageQuery = "SELECT * FROM message WHERE id=?";
+                        try (PreparedStatement stmtRetrieveMessage = con.prepareStatement(retrieveMessageQuery)) {
+                            stmtRetrieveMessage.setInt(1, messageId);
+                            try (ResultSet rsMessage = stmtRetrieveMessage.executeQuery()) {
+                                if (rsMessage.next()) {
+                                    int id = rsMessage.getInt("id");
+                                    boolean retrievedSpoiler = rsMessage.getBoolean("spoiler");
+                                    String messageText = rsMessage.getString("text");
+                                    int retrievedChatroomId = rsMessage.getInt("roomId");
+    
+                                    // Create and return the Message object
+                                    return new Message(id, retrievedSpoiler, messageText, retrievedChatroomId, user);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        } finally {
+            try {
+                db.close();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
-        rsRoomMembers.close();
-        stmt2.close();
-    } catch (Exception e) {
-        throw new Exception(e.getMessage());
-    } finally {
-        try {
-            db.close();
-        } catch (Exception e) {
-
-        }
-    }   
+    
+        // Return null in case of an error or no message is retrieved
+        return null;
     }
-
+            
     //Delete message Method
     public static void deleteMessage(int messageId) throws Exception {
-    DB db = new DB();
-    Connection con = null;
-    String sql = "DELETE FROM message WHERE id=?;";
-    try {
-        con = db.getConnection();
-        PreparedStatement stmt = con.prepareStatement(sql);
-        stmt.setInt(1, messageId);
-        stmt.executeUpdate();
-        System.out.println("Message deleted");
-        stmt.close();
-    } catch (Exception e) {
-        throw new Exception(e.getMessage());
-    } finally {
+        DB db = null;
+        Connection con = null;
+        PreparedStatement stmt = null;
+    
         try {
-            db.close();
+            db = new DB();
+            con = db.getConnection();
+            stmt = con.prepareStatement("DELETE FROM message WHERE id=?");
+            stmt.setInt(1, messageId);
+            stmt.executeUpdate();
+            System.out.println("Message deleted");
         } catch (Exception e) {
-
+            throw new Exception(e.getMessage());
+        } finally {
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (con != null) {
+                    con.close();
+                }
+                if (db != null) {
+                    db.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-    }   
     }
+        
 }

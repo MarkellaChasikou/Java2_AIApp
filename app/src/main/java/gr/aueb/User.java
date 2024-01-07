@@ -541,4 +541,59 @@ public class User {
             }
         }
     }        
+    //Leave chatroom method
+    public static void leaveChatroom(int chatroomId, User user) throws Exception {
+        DB db = new DB();
+        Connection con = null;
+        String sql = "DELETE FROM ChatroomUser WHERE roomId=? AND userId=?;";
+        try {
+            con = db.getConnection();
+            PreparedStatement stmt = con.prepareStatement(sql);
+            stmt.setInt(1, chatroomId);
+            stmt.setInt(2,user.getId());
+            stmt.executeUpdate();
+            stmt.close();
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());    
+        } finally {
+            try {
+                db.close();
+            } catch (Exception e) {
+    
+            }
+        }
+        }
+    //Join chatroom method
+    public static Chatroom joinChatroom(int chatroomId, User user) throws Exception {
+        List<Integer> members = new ArrayList<>();
+        DB db = new DB();
+        Connection con = null;
+        String sql = "INSERT INTO ChatroomUser VALUES(?,?);";
+        String query = "SELECT * FROM Chatroomuser join chatroom WHERE Chatroomuser.roomId=?";
+        try {
+            con = db.getConnection();
+            PreparedStatement stmt1 = con.prepareStatement(sql);
+            stmt1.setInt(1, chatroomId);
+            stmt1.setInt(2,user.getId());
+            stmt1.executeUpdate();
+            System.out.println("You can know sent messages in chatroom ");
+            stmt1.close();
+            PreparedStatement stmt2 = con.prepareStatement(query);
+            stmt2.setInt(1, chatroomId);
+            ResultSet rs = stmt2.executeQuery();
+            while (rs.next()) {
+                members.add(rs.getInt("userid"));
+            }
+    
+        return new Chatroom(chatroomId, members);
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());    
+        } finally {
+            try {
+                db.close();
+            } catch (Exception e) {
+    
+            }
+        }
+        }     
 }

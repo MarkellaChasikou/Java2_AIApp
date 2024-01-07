@@ -98,12 +98,6 @@ public class Review {
         System.out.println("Thank you for your rating!");
     }
 
-    public void writeReview() {
-        System.out.println("Please write your review:");
-        String userInput = Rscanner.nextLine();
-        setReviewText(userInput);
-        System.out.println("Thank you for your review!");
-    }
 
     public void editUserRating() {
         System.out.println("Current Rating: " + userRating);
