@@ -33,4 +33,16 @@ public class PersonCredits {
         }
         return returnString.toString();
     }
+
+    public Cast[] getCast() {
+        return cast;
+    }
+
+    public Crew[] getCrew() {
+        return crew;
+    }
+
+    public int getId() {
+        return id;
+    }
 }

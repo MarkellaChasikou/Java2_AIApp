@@ -11,7 +11,13 @@ public class Cast {
     private int id;
     @SerializedName("title")
     private String title;
+    @SerializedName("release_date")
+    private String release_date;
     
+    public String getRelease_date() {
+        return release_date;
+    }
+
     public String getTitle() {
         return title;
     }
