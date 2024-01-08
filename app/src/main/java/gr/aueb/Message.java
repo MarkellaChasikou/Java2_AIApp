@@ -40,7 +40,7 @@ public class Message {
         this.spoiler = spoiler;
         updateSpoilerInDatabase();
     }
-    public void updateSpoilerInDatabase() throws Exception {
+    private void updateSpoilerInDatabase() throws Exception {
         DB db = new DB();
         Connection con = null;
         PreparedStatement stmt = null;
