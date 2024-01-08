@@ -1,5 +1,5 @@
 package gr.aueb;
-
+/*
 import com.cloudurable.jai.OpenAIClient;
 import com.cloudurable.jai.model.text.completion.chat.ChatRequest;
 import com.cloudurable.jai.model.text.completion.chat.ChatResponse;
@@ -7,7 +7,7 @@ import com.cloudurable.jai.model.text.completion.chat.Message;
 import com.cloudurable.jai.model.text.completion.chat.Role;
 import com.cloudurable.jai.model.text.completion.chat.function.*;
 import com.cloudurable.jai.util.JsonSerializer;
-import io.nats.jparse.node.ObjectNode;
+import io.nats.jparse.node.ObjectNode;*/
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -111,7 +111,7 @@ public class AiRecommendation2 {
 
         System.out.println("\n\n" + content);
     }
-    public static void chatGPT(String userMessage, String apiKey) {
+   /* public static void chatGPT(String userMessage, String apiKey) {
                 
         final var message = Message.builder().role(Role.USER)
                 .content(userMessage + "I want 10 movies suggestions and their tmdb ids of them").build();
@@ -120,5 +120,5 @@ public class AiRecommendation2 {
                 .model("gpt-3.5-turbo-0613")
                 .addMessage(message)  
                 .functionalCall(ChatRequest.AUTO);
-    }
+    }*/
 }
