@@ -1,6 +1,7 @@
 package gr.aueb;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -16,9 +17,17 @@ public class Movie {
     private Contributors co;
     private MovieDetails md;
     private double imdbRating;
+    private ArrayList<Integer> peopleId;
+    private ArrayList<String> peopleName;
+    private ArrayList<String> peopleJob;
+    private HashMap<Integer, String[]> people;
             
     public Movie(int id, String apiKey) {
         Gson gson = new Gson();
+        peopleId = new ArrayList<>();
+        peopleName = new ArrayList<>();
+        peopleJob = new ArrayList<>();
+        people = new HashMap<>();
         
         //responce for movie credits
         HttpRequest request = HttpRequest.newBuilder()
@@ -75,6 +84,35 @@ public class Movie {
         }
 
         imdbRating = getImdbRatingFromID(md.getImdb_id());
+
+        if(co.getCast() != null) {
+            String temp[]; 
+            for (Cast c : co.getCast()) {
+                temp = new String[2];
+                temp[0] = c.getName();
+                temp[1] = "Acting";
+                people.put(c.getId(), temp);
+            }
+        }
+
+        if(co.getCrew() != null) {
+            String temp[]; 
+            for (Crew c : co.getCrew()) {
+                temp = new String[2];
+                temp[0] = c.getName();
+                temp[1] = c.getJob();
+                people.put(c.getId(), temp);
+            }
+        }
+ 
+        for (Integer i : people.keySet()) {
+            peopleId.add(i);
+        }
+
+        for (String[] i : people.values()) {
+            peopleName.add(i[0]);
+            peopleJob.add(i[1]);
+        }
     }
     
     public static double getImdbRatingFromID(String imdbID) {
@@ -115,7 +153,7 @@ public class Movie {
         ArrayList<String> writers = new ArrayList<>();
         if(this.co.getCrew() != null) {
             for (Crew c : this.co.getCrew()) {
-                if(c.getJob().equals("Writer")) {
+                if(c.getDepartment().equals("Writing")) {
                     writers.add(c.getName());
                 }
             }
@@ -209,6 +247,26 @@ public class Movie {
         return returnString.toString();
     }
 
+    public void printFullCast() {
+        StringBuilder ca = new StringBuilder();
+        StringBuilder cr = new StringBuilder();
+
+        // Cast
+        for (Cast c : this.co.getCast()) {
+            ca.append(c);
+        }
+
+        // Crew
+        for (Crew c : this.co.getCrew()) {
+            cr.append(c);
+        }
+
+        System.out.println("Cast:");
+        System.out.println(ca + "\n");
+        System.out.println("Crew:");
+        System.out.println(cr + "\n");
+    }
+
     @Override
     public String toString() {
         String s = printResult();
@@ -233,5 +291,21 @@ public class Movie {
 
     public double getImdbRating() {
         return imdbRating;
+    }
+
+    public ArrayList<Integer> getPeopleId() {
+        return peopleId;
+    }
+
+    public ArrayList<String> getPeopleName() {
+        return peopleName;
+    }
+
+    public ArrayList<String> getPeopleJob() {
+        return peopleJob;
+    }
+
+    public HashMap<Integer, String[]> getPeople() {
+        return people;
     }
 }
