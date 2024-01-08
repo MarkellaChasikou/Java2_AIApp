@@ -8,12 +8,7 @@ public class Crew {
     @SerializedName("job")
     private String job;
     @SerializedName("department")
-    private String department;
-    public String getDepartment() {
-        return department;
-    }
-
-
+    private String department;    
     @SerializedName("id")
     private int id;
     @SerializedName("title")
@@ -23,6 +18,10 @@ public class Crew {
     
     public String getRelease_date() {
         return release_date;
+    }
+
+    public String getDepartment() {
+        return department;
     }
 
     public String getTitle() {
