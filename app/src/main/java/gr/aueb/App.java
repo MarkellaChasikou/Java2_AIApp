@@ -67,6 +67,7 @@ public class App {
     }
 
     public static void mainCase(Scanner scanner) throws Exception  {
+        
         // If the user is logged in or a guest, display the main menu
         if (skipStartMenu) {
             while (true) {
@@ -78,7 +79,10 @@ public class App {
                         getAIRecommendation(scanner);
                         break;
                     case 2:
-                        mainCase2(scanner);
+                        boolean flag = true;
+                        while (flag) {
+                            flag = mainCase2(scanner);
+                        }
                         break;
                     case 3:
                         break;
@@ -92,52 +96,77 @@ public class App {
         }
     }
 
-    public static void mainCase2(Scanner scanner) throws Exception {
+    /*public static void mainCase2(Scanner scanner) throws Exception {
+        int choice2;
+        int choice3 = 1;
+        String userMessage;
+            System.out.println("\nType your search or press 0 to retun to main menu ");
+            userMessage = scanner.nextLine();
+            userMessage = encodeMovieTitle(userMessage);
+            boolean firstTime = true;
+            ArrayList<Integer> ids = search(userMessage);
+
+            if(!ids.isEmpty()) {
+                do {
+                    if(!firstTime) ids = search(userMessage);
+                    Object o = pick(scanner, ids);
+                        do {
+                            System.out.println(o);
+                            if(o.equals(0)) {
+                                choice2 = 0;
+                                //choice3 = 0;
+                            } else if(o instanceof Movie) {
+                                displayMovieMenu();
+                                // check for input
+                                choice2 = scanner.nextInt();
+                                scanner.nextLine();
+                                movieCase(scanner, choice2, o);
+                            } else {
+                                displayPersonMenu();
+                                choice2 = scanner.nextInt();
+                                scanner.nextLine();
+                                personCase(scanner, choice2, o);
+                            }                       
+                        } while (choice2 != 0);
+                        firstTime = false;
+                } while (choice3 != 0);
+            }
+    }*/
+
+    private static boolean mainCase2(Scanner scanner) throws Exception {
+        int choice = 0;
         int choice2;
         System.out.println("\nType your search or press 0 to retun to main menu ");
         String userMessage = scanner.nextLine();
         userMessage = encodeMovieTitle(userMessage);
-        while(!userMessage.equals("0")) {
-            ArrayList<Integer> ids = search(userMessage);
-            if(!ids.isEmpty()) {
-                Object o = pick(scanner, ids);
-                if(o.equals(0)) break;
-                do {
-                    System.out.println(o);
-                    int choice3;
-                    if(o.equals(0)) {
-                        choice2 = 0;
-                    } else if(o instanceof Movie) {
-                        displayMovieMenu();
-                        // check for input
-                        choice2 = scanner.nextInt();
-                        scanner.nextLine();
-                        movieCase(scanner, choice2, o);
-                        /* 
-                        if(choice2 !=0) {
-                            do {
-                                System.out.println("0. Back");
-                                choice3 = scanner.nextInt();
+        
+        if(!userMessage.equals("0")) {
+            do {
+                ArrayList<Integer> ids = search(userMessage);
+                if(!ids.isEmpty()) {
+                    Object o = pick(scanner, ids);
+                    if(!o.equals(0)){
+                        System.out.println(o);
+                        do {
+                            System.out.println(o);
+                            if(o instanceof Movie) {
+                                displayMovieMenu();
+                                // check for input
+                                choice2 = scanner.nextInt();
                                 scanner.nextLine();
-                            } while (choice3 != 0);
-                        } */
-                    } else {
-                        displayPersonMenu();
-                        choice2 = scanner.nextInt();
-                        scanner.nextLine();
-                        personCase(scanner, choice2, o);
-                        /* 
-                        if(choice2 !=0) {
-                            do {
-                                System.out.println("0. Back");
-                                choice3 = scanner.nextInt();
+                                movieCase(scanner, choice2, o);
+                            } else {
+                                displayPersonMenu();
+                                choice2 = scanner.nextInt();
                                 scanner.nextLine();
-                            } while (choice3 != 0);
-                        } */
-                    }                       
-                } while (choice2 != 0);
-            }
-        }
+                                personCase(scanner, choice2, o);
+                            }                       
+                        } while (choice2 != 0);
+                    } else break;
+                }       
+            } while(choice == 0);
+        } else return false;
+        return true;
     }
 
     public static void personCase(Scanner scanner, int choice2, Object o) throws Exception {
@@ -288,7 +317,7 @@ public class App {
             System.out.println("6. Exit");
         } else {
             System.out.println("4. Login");
-            System.out.println("Exit");
+            System.out.println("5. Exit");
         }
         System.out.print("Enter your choice ");
     }
@@ -482,34 +511,7 @@ public class App {
                     }
                 }
             }
-            
-            int n = idsList.size();
-            if(n >= 2){
-                for (int i = 1; i <= n - 1; i++) {
-                    for (int j = n - 1; j >= i; j--) {
-                        if(popularity.get(j - 1) < popularity.get(j)) {
-                            float temp1 = popularity.get(j - 1);
-                            popularity.set(j - 1, popularity.get(j));
-                            popularity.set(j, temp1);
-                            int temp2 = idsList.get(j - 1);
-                            idsList.set(j - 1, idsList.get(j));
-                            idsList.set(j, temp2);
-                            String temp3 = prints.get(j - 1);
-                            prints.set(j - 1, prints.get(j));
-                            prints.set(j, temp3);
-                        }
-                    }
-                }
-            }
-
-            if(!prints.isEmpty()) {
-                System.out.println();
-                for (int i = 0; i < prints.size(); i++) {
-                    String newPrint = String.format("%2d. %s", i + 1, prints.get(i));
-                    prints.set(i, newPrint);
-                    System.out.println(prints.get(i));
-                }
-            }
+            idsList = sortResultsOnPopul(idsList, prints, popularity);
 
         } catch (IOException e) {
             System.err.println("Check your internet connection!");
@@ -519,6 +521,40 @@ public class App {
             e.printStackTrace();
             System.exit(1);
         }
+        return idsList;
+    }
+
+    private static void printResults(ArrayList<String> prints) {
+        if(!prints.isEmpty()) {
+            System.out.println();
+            for (int i = 0; i < prints.size(); i++) {
+                String newPrint = String.format("%2d. %s", i + 1, prints.get(i));
+                prints.set(i, newPrint);
+                System.out.println(prints.get(i));
+            }
+        }
+    }
+
+    private static ArrayList<Integer> sortResultsOnPopul(ArrayList<Integer> idsList, ArrayList<String> prints, ArrayList<Float> popularity) {
+        int n = idsList.size();
+        if(n >= 2){
+            for (int i = 1; i <= n - 1; i++) {
+                for (int j = n - 1; j >= i; j--) {
+                    if(popularity.get(j - 1) < popularity.get(j)) {
+                        float temp1 = popularity.get(j - 1);
+                        popularity.set(j - 1, popularity.get(j));
+                        popularity.set(j, temp1);
+                        int temp2 = idsList.get(j - 1);
+                        idsList.set(j - 1, idsList.get(j));
+                        idsList.set(j, temp2);
+                        String temp3 = prints.get(j - 1);
+                        prints.set(j - 1, prints.get(j));
+                        prints.set(j, temp3);
+                    }
+                }
+            }
+        }
+        printResults(prints);
         return idsList;
     }
 
