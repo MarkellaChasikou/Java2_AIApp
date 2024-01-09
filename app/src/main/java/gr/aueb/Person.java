@@ -93,7 +93,7 @@ public class Person {
 
     @Override
     public String toString() {
-        return pd.toString() + pc.toString();
+        return "\n\n" + pd.toString() + pc.toString();
     }
 
     public PersonDetails getPd() {
