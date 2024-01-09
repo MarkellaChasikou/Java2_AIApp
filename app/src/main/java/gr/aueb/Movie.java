@@ -261,7 +261,7 @@ public class Movie {
             cr.append(c);
         }
 
-        System.out.println("Cast:");
+        System.out.println("\n\nCast:");
         System.out.println(ca + "\n");
         System.out.println("Crew:");
         System.out.println(cr + "\n");
@@ -270,7 +270,7 @@ public class Movie {
     @Override
     public String toString() {
         String s = printResult();
-        return s;
+        return "\n\n" + s;
     }
 
 

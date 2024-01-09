@@ -19,7 +19,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 public class App {
-
+// να φτιαξω τη στοιχιση για αποτελεσματα 100+
     private static User currentUser;
     private static String tmdbApiKey;
     private static String chatgptApiKey;
@@ -32,6 +32,11 @@ public class App {
 
         Scanner scanner = new Scanner(System.in);
 
+        startCase(scanner);
+    }
+    
+
+    public static void startCase(Scanner scanner) throws Exception {
         while (true) {
             displayStartMenu();
             int startChoice = scanner.nextInt();
@@ -55,92 +60,213 @@ public class App {
                     System.out.println("Exiting the application.");
                     System.exit(0);
                 default:
-                    System.out.println("Invalid choice. Please enter a valid option.");
+                    System.out.println("Invalid choice. Please enter a valid option");
             }
+            mainCase(scanner);
+        }
+    }
 
-            // If the user is logged in or a guest, display the main menu
-            if (skipStartMenu) {
-                while (true) {
-                    displayMainMenu();
-
-                    int choice = scanner.nextInt();
-                    int choice2;
-                    scanner.nextLine(); // consume the newline character
-
-                    switch (choice) {
-                        case 1:
-                            getAIRecommendation(scanner);
-                            break;
-                        case 2:
-                            System.out.println("\nType your search or press 0 to retun to main menu.");
-                            String userMessage = scanner.nextLine();
-                            userMessage = encodeMovieTitle(userMessage);
-                            while(!userMessage.equals("0")) {
-                                ArrayList<Integer> ids = search(userMessage);
-                                if(!ids.isEmpty()) {
-                                    Object o = pick(scanner, ids);
-                                    System.out.println(o);
-                                    do {
-                                        if(o instanceof Movie) {
-                                            displayMovieMenu();
-                                            // check for input
-                                            choice2 = scanner.nextInt();
-                                            scanner.nextLine();
-                                        } else {
-                                            displayPersonMenu();
-                                            choice2 = scanner.nextInt();
-                                            scanner.nextLine();
-                                            switch (choice2) {
-                                                case 0:
-                                                    break;
-                                                case 1: 
-                                                    ArrayList<Integer> ids2 = ((Person)o).getMovieIds();
-                                                    ArrayList<String> titles = ((Person)o).getMovieTitles();
-                                                    ArrayList<String> dates = ((Person)o).getMovieDates();
-                                                    for (int i = 0; i < ids2.size(); i++) {
-                                                        if(!dates.get(i).isEmpty()) {
-                                                            int year = extractYear(dates.get(i));
-                                                            System.out.printf("%2d. %s (%d)\n", i + 1, titles.get(i), year);
-                                                        } else {
-                                                            System.out.printf("%2d. %s (%s)\n", i + 1, titles.get(i), "Release date not available");
-                                                        }
-                                                    }   
-                                                    Movie m = (Movie)pick(scanner, ids2);
-                                                    System.out.println(m);
-                                                    
-
-                                                    break;
-                                                default:
-                                                    System.out.println("Invalid choice. Please enter a valid option.");
-                                                    break;
-                                            }
-                                        }
-                                    } while (choice2 != 0);
-                                    System.out.println("\nType your search or press 0 to retun to main menu.");
-                                    userMessage = scanner.nextLine();
-                                    userMessage = encodeMovieTitle(userMessage);
-                                }
-                            }
-                            break;
-                        case 3:
-                            if(!guest) {
-                                //logout
-                                skipStartMenu = false;
-                            } else {
-                                //register
-                                skipStartMenu = false;
-                            }
-                            break;
-                        case 4:
-                            System.out.println("Exiting the application.");
-                            System.exit(0);
-                        default:
-                            System.out.println("Invalid choice. Please enter a valid option.");
-                    }
+    public static void mainCase(Scanner scanner) throws Exception  {
+        
+        // If the user is logged in or a guest, display the main menu
+        if (skipStartMenu) {
+            while (true) {
+                displayMainMenu();
+                int choice = scanner.nextInt();
+                scanner.nextLine(); // consume the newline character
+                switch (choice) {
+                    case 1:
+                        getAIRecommendation(scanner);
+                        break;
+                    case 2:
+                        boolean flag = true;
+                        while (flag) {
+                            flag = mainCase2(scanner);
+                        }
+                        break;
+                    case 3:
+                        break;
+                    case 4:
+                        System.out.println("Exiting the application.");
+                        System.exit(0);
+                    default:
+                        System.out.println("Invalid choice. Please enter a valid option");
                 }
             }
         }
     }
+
+    /*public static void mainCase2(Scanner scanner) throws Exception {
+        int choice2;
+        int choice3 = 1;
+        String userMessage;
+            System.out.println("\nType your search or press 0 to retun to main menu ");
+            userMessage = scanner.nextLine();
+            userMessage = encodeMovieTitle(userMessage);
+            boolean firstTime = true;
+            ArrayList<Integer> ids = search(userMessage);
+
+            if(!ids.isEmpty()) {
+                do {
+                    if(!firstTime) ids = search(userMessage);
+                    Object o = pick(scanner, ids);
+                        do {
+                            System.out.println(o);
+                            if(o.equals(0)) {
+                                choice2 = 0;
+                                //choice3 = 0;
+                            } else if(o instanceof Movie) {
+                                displayMovieMenu();
+                                // check for input
+                                choice2 = scanner.nextInt();
+                                scanner.nextLine();
+                                movieCase(scanner, choice2, o);
+                            } else {
+                                displayPersonMenu();
+                                choice2 = scanner.nextInt();
+                                scanner.nextLine();
+                                personCase(scanner, choice2, o);
+                            }                       
+                        } while (choice2 != 0);
+                        firstTime = false;
+                } while (choice3 != 0);
+            }
+    }*/
+
+    private static boolean mainCase2(Scanner scanner) throws Exception {
+        int choice = 0;
+        int choice2;
+        System.out.println("\nType your search or press 0 to retun to main menu ");
+        String userMessage = scanner.nextLine();
+        userMessage = encodeMovieTitle(userMessage);
+        
+        if(!userMessage.equals("0")) {
+            do {
+                ArrayList<Integer> ids = search(userMessage);
+                if(!ids.isEmpty()) {
+                    Object o = pick(scanner, ids);
+                    if(!o.equals(0)){
+                        System.out.println(o);
+                        do {
+                            System.out.println(o);
+                            if(o instanceof Movie) {
+                                displayMovieMenu();
+                                // check for input
+                                choice2 = scanner.nextInt();
+                                scanner.nextLine();
+                                movieCase(scanner, choice2, o);
+                            } else {
+                                displayPersonMenu();
+                                choice2 = scanner.nextInt();
+                                scanner.nextLine();
+                                personCase(scanner, choice2, o);
+                            }                       
+                        } while (choice2 != 0);
+                    } else break;
+                }       
+            } while(choice == 0);
+        } else return false;
+        return true;
+    }
+
+    public static void personCase(Scanner scanner, int choice2, Object o) throws Exception {
+        switch (choice2) {
+            case 0:
+                break;
+            case 1: 
+                ArrayList<Integer> ids2 = ((Person)o).getMovieIds();
+                ArrayList<String> titles = ((Person)o).getMovieTitles();
+                ArrayList<String> dates = ((Person)o).getMovieDates();
+                int choice3;
+                int choice4 = 1;
+                do {
+                    for (int i = 0; i < ids2.size(); i++) {
+                        if(!dates.get(i).isEmpty()) {
+                            int year = extractYear(dates.get(i));
+                            System.out.printf("%2d. %s (%d)\n", i + 1, titles.get(i), year);
+                        } else {
+                            System.out.printf("%2d. %s (%s)\n", i + 1, titles.get(i), "Release date not available");
+                        }
+                    }   
+                    Object ob = pick(scanner, ids2);
+                    if(ob instanceof Movie) {
+                        Movie m = (Movie)ob;
+                        System.out.println(m);
+                        do {
+                            displayMovieMenu();
+                            choice3 = scanner.nextInt();
+                            scanner.nextLine();
+                            movieCase(scanner, choice3, ob);
+                        } while (choice3 != 0);
+                    } else choice4 = 0;
+                } while(choice4 != 0 );
+                
+                
+                break;
+            default:
+                System.out.println("Invalid choice. Please enter a valid option");
+                break;
+        }
+    }
+
+    public static void movieCase(Scanner scanner , int choice2, Object o) throws Exception {
+        switch (choice2) {
+            case 0:
+                break;
+            case 1: 
+                int choice3;
+                do {
+                    Movie m = (Movie)o;
+                    m.printFullCast();
+                    displayFullContributorsMenu();
+                    choice3 = scanner.nextInt();
+                    scanner.nextLine();
+                    switch (choice3) {
+                        case 0:
+                            break;
+                        case 1: 
+                            ArrayList<String> names = ((Movie)o).getPeopleName();
+                            ArrayList<String> jobs = ((Movie)o).getPeopleJob();
+                            ArrayList<Integer> originalIds = ((Movie) o).getPeopleId();
+                            ArrayList<Integer> ids2 = new ArrayList<>();
+                            for (Integer id : originalIds) { //negative values for prick()
+                                ids2.add(-id);
+                            }
+                            int choice4;
+                            int choice5 = 1;
+                            do {
+                                for (int i = 0; i < ids2.size(); i++) {
+                                    if(!jobs.get(i).isEmpty()) {
+                                        System.out.printf("%2d. %s (%s)\n", i + 1, names.get(i), jobs.get(i));
+                                    } else {
+                                        System.out.printf("%2d. %s (%s)\n", i + 1, jobs.get(i), "Known for department not available");
+                                    }
+                                }   
+                                Object ob = pick(scanner, ids2);
+                                if(ob instanceof Person) {
+                                    Person p = (Person)ob;
+                                    System.out.println(p);
+                                    do {
+                                        displayPersonMenu();
+                                        choice4 = scanner.nextInt();
+                                        scanner.nextLine();
+                                        personCase(scanner, choice4, ob);
+                                    } while (choice4 != 0);
+                                } else choice5 = 0;
+                            } while(choice5 != 0);
+                            break;
+                        default:
+                            System.out.println("Invalid choice. Please enter a valid option");
+                            break;
+                    }
+                }while(choice3 != 0);
+                break;
+            default:
+                System.out.println("choice2 " + choice2);
+                System.out.println("Invalid choice. Please enter a valid option");
+                break;
+        }
+    } 
 
     private static void loadApiKeys() {
         File tmdbFile = new File("C:\\Users\\Nick\\api_keys\\tmdb_api_key.txt");
@@ -175,7 +301,7 @@ public class App {
         System.out.println("2. Sign Up");
         System.out.println("3. Continue as a Guest");
         System.out.println("4. Exit");
-        System.out.print("Enter your choice: ");
+        System.out.print("Enter your choice ");
     }
 
     private static void displayMainMenu() {
@@ -191,21 +317,22 @@ public class App {
             System.out.println("6. Exit");
         } else {
             System.out.println("4. Login");
+            System.out.println("5. Exit");
         }
-        System.out.print("Enter your choice: ");
+        System.out.print("Enter your choice ");
     }
 
     private static void displayMovieMenu() {
         System.out.println("0. Back");
-        System.out.println("1. See reviews");
-        System.out.println("2. Add review");
-        System.out.println("3. Add to Watchlist");
-        System.out.println("4. Add to Seen");
-        System.out.println("5. Add to Favourites");
-        System.out.println("6. Add to list");
-        System.out.println("7. See full Cast and Crew");
+        System.out.println("1. See full Cast and Crew");
+        System.out.println("2. See reviews");
+        System.out.println("3. Add review");
+        System.out.println("4. Add to Watchlist");
+        System.out.println("5. Add to Seen");
+        System.out.println("6. Add to Favourites");
+        System.out.println("7. Add to list");
         System.out.println("8. Get Bonus content");
-        System.out.println("Enter your choice");
+        System.out.println("Enter your choice ");
     }
 
     private static void displayReviewTypeMenu() {
@@ -215,23 +342,23 @@ public class App {
         System.out.println("2. NO");
     }
 
-    private static void displayFullContributors() {
+    private static void displayFullContributorsMenu() {
         System.out.println("0. Back");
         System.out.println("1. Details for a contributor");
-        System.out.println("Enter your choice");
+        System.out.println("Enter your choice ");
     }
 
     private static void displayPersonMenu() {
         System.out.println("0. Back");
         System.out.println("1. Details for a movie");
-        System.out.println("Enter your choice");
+        System.out.println("Enter your choice ");
     }
 
     private static void userMenu() {
         System.out.println("0. Back");
         System.out.println("1. Choose a list");
         System.out.println("2. Follow"); //or unfollow
-        System.out.println("Enter your choice");
+        System.out.println("Enter your choice ");
     }
 
     private static void displayProfileMenu() {
@@ -249,14 +376,14 @@ public class App {
         System.out.println("10. Your followers");
         System.out.println("11. You follow");
         System.out.println("12. Your country");
-        System.out.print("Enter your choice: ");
+        System.out.print("Enter your choice ");
     }
 
     private static void displayListContentMenu() {
         System.out.println("0. Back");
         System.out.println("1. Modify");
         System.out.println("2. View details"); //not for genres
-        System.out.println("Enter your choice");
+        System.out.println("Enter your choice ");
     }
 
     private static void displayReviewContentMenu() {
@@ -264,13 +391,13 @@ public class App {
         System.out.println("1. Modify");
         System.out.println("2. Remove");
         System.out.println("3. View");
-        System.out.println("Enter your choice");
+        System.out.println("Enter your choice ");
     }
 
     private static void displayCountryMenu() {
         System.out.println("0. Back");
         System.out.println("1. Change country");
-        System.out.println("Enter your choice");
+        System.out.println("Enter your choice ");
     }
 
     private static void displayChatroomMenu() {
@@ -278,7 +405,7 @@ public class App {
         System.out.println("1. Your chatrooms");
         System.out.println("2. Find chatrooms");
         System.out.println("3. Create chatroom"); //not sure what happens with members when creating
-        System.out.println("Enter your choice");
+        System.out.println("Enter your choice ");
     }
 
     private static void displayYourChatroomMenu() {
@@ -289,21 +416,22 @@ public class App {
         System.out.println("4. Rename chatroom");
         System.out.println("5. Delete chatroom"); //if creator
         System.out.println("6. Add friends"); // not sure if it is a function
-        System.out.println("Enter your choice");
+        System.out.println("Enter your choice ");
     }
 
     private static void getAIRecommendation(Scanner scanner) throws Exception {
         System.out.println("\nType your preferences for movie recommendations.");
         String userMessage = scanner.nextLine();
         AiRecommendation2.testChatCompletions(userMessage + " (Only movie titles, no description or other movie details, no apologies for your previous responses or things you can't do as an AI.)", chatgptApiKey);
-        System.out.println("\nEnter your choice");
+        System.out.println("\nEnter your choice ");
         scanner.nextInt();
     }
 
     private static Object pick(Scanner scanner, ArrayList<Integer> ids) throws Exception {
-        System.out.println("Enter your choice \n");
+        System.out.print("Enter your choice or press 0 to go back ");
         int answer = scanner.nextInt();
         scanner.nextLine(); //consume next line character
+        if(answer == 0) return 0;
         if(ids.get(answer - 1) > 0) {
             Movie m = new Movie(ids.get(answer - 1), tmdbApiKey);
             return m;
@@ -383,33 +511,8 @@ public class App {
                     }
                 }
             }
-            
-            int n = idsList.size();
-            if(n >= 2){
-                for (int i = 1; i <= n - 1; i++) {
-                    for (int j = n - 1; j >= i; j--) {
-                        if(popularity.get(j - 1) < popularity.get(j)) {
-                            float temp1 = popularity.get(j - 1);
-                            popularity.set(j - 1, popularity.get(j));
-                            popularity.set(j, temp1);
-                            int temp2 = idsList.get(j - 1);
-                            idsList.set(j - 1, idsList.get(j));
-                            idsList.set(j, temp2);
-                            String temp3 = prints.get(j - 1);
-                            prints.set(j - 1, prints.get(j));
-                            prints.set(j, temp3);
-                        }
-                    }
-                }
-            }
+            idsList = sortResultsOnPopul(idsList, prints, popularity);
 
-            if(!prints.isEmpty()) {
-                for (int i = 0; i < prints.size(); i++) {
-                    String newPrint = String.format("%2d. %s", i + 1, prints.get(i));
-                    prints.set(i, newPrint);
-                    System.out.println(prints.get(i));
-                }
-            }
         } catch (IOException e) {
             System.err.println("Check your internet connection!");
             e.printStackTrace();
@@ -418,6 +521,40 @@ public class App {
             e.printStackTrace();
             System.exit(1);
         }
+        return idsList;
+    }
+
+    private static void printResults(ArrayList<String> prints) {
+        if(!prints.isEmpty()) {
+            System.out.println();
+            for (int i = 0; i < prints.size(); i++) {
+                String newPrint = String.format("%2d. %s", i + 1, prints.get(i));
+                prints.set(i, newPrint);
+                System.out.println(prints.get(i));
+            }
+        }
+    }
+
+    private static ArrayList<Integer> sortResultsOnPopul(ArrayList<Integer> idsList, ArrayList<String> prints, ArrayList<Float> popularity) {
+        int n = idsList.size();
+        if(n >= 2){
+            for (int i = 1; i <= n - 1; i++) {
+                for (int j = n - 1; j >= i; j--) {
+                    if(popularity.get(j - 1) < popularity.get(j)) {
+                        float temp1 = popularity.get(j - 1);
+                        popularity.set(j - 1, popularity.get(j));
+                        popularity.set(j, temp1);
+                        int temp2 = idsList.get(j - 1);
+                        idsList.set(j - 1, idsList.get(j));
+                        idsList.set(j, temp2);
+                        String temp3 = prints.get(j - 1);
+                        prints.set(j - 1, prints.get(j));
+                        prints.set(j, temp3);
+                    }
+                }
+            }
+        }
+        printResults(prints);
         return idsList;
     }
 
