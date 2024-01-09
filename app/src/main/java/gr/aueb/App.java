@@ -96,43 +96,6 @@ public class App {
         }
     }
 
-    /*public static void mainCase2(Scanner scanner) throws Exception {
-        int choice2;
-        int choice3 = 1;
-        String userMessage;
-            System.out.println("\nType your search or press 0 to retun to main menu ");
-            userMessage = scanner.nextLine();
-            userMessage = encodeMovieTitle(userMessage);
-            boolean firstTime = true;
-            ArrayList<Integer> ids = search(userMessage);
-
-            if(!ids.isEmpty()) {
-                do {
-                    if(!firstTime) ids = search(userMessage);
-                    Object o = pick(scanner, ids);
-                        do {
-                            System.out.println(o);
-                            if(o.equals(0)) {
-                                choice2 = 0;
-                                //choice3 = 0;
-                            } else if(o instanceof Movie) {
-                                displayMovieMenu();
-                                // check for input
-                                choice2 = scanner.nextInt();
-                                scanner.nextLine();
-                                movieCase(scanner, choice2, o);
-                            } else {
-                                displayPersonMenu();
-                                choice2 = scanner.nextInt();
-                                scanner.nextLine();
-                                personCase(scanner, choice2, o);
-                            }                       
-                        } while (choice2 != 0);
-                        firstTime = false;
-                } while (choice3 != 0);
-            }
-    }*/
-
     private static boolean mainCase2(Scanner scanner) throws Exception {
         int choice = 0;
         int choice2;
@@ -417,6 +380,12 @@ public class App {
         System.out.println("5. Delete chatroom"); //if creator
         System.out.println("6. Add friends"); // not sure if it is a function
         System.out.println("Enter your choice ");
+    }
+
+    private static void displayChatroomFindMenu() {
+        System.out.println("0. Back");
+        System.out.println("1. Search for a chatroom");
+        System.out.println("2. See existing chatrooms");
     }
 
     private static void getAIRecommendation(Scanner scanner) throws Exception {
