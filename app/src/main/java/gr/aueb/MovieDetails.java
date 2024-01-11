@@ -6,7 +6,7 @@ public class MovieDetails {
     @SerializedName("genres")
     private Genre[] genres;
     @SerializedName("id")
-    private String id;
+    private int id;
     @SerializedName("original_title")
     private String original_title;
     @SerializedName("overview")
@@ -14,7 +14,7 @@ public class MovieDetails {
     @SerializedName("release_date")
     private String release_date;
     @SerializedName("runtime")
-    private String runtime;
+    private int runtime;
     @SerializedName("vote_average")
     private float vote_average;
     @SerializedName("poster_path")
@@ -25,7 +25,7 @@ public class MovieDetails {
     public Genre[] getGenres() {
         return genres;
     }
-    public String getId() {
+    public int getId() {
         return id;
     }
     public String getOriginal_title() {
@@ -37,7 +37,7 @@ public class MovieDetails {
     public String getRelease_date() {
         return release_date;
     }
-    public String getRuntime() {
+    public int getRuntime() {
         return runtime;
     }
     public float getVote_average() {
