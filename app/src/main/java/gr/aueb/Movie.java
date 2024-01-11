@@ -20,7 +20,8 @@ public class Movie {
     private ArrayList<Integer> peopleId;
     private ArrayList<String> peopleName;
     private ArrayList<String> peopleJob;
-    private HashMap<Integer, String[]> people;
+    private HashMap<Integer, Object[]> people;
+    private ArrayList<Float> peoplePopularity;
             
     public Movie(int id, String apiKey) {
         Gson gson = new Gson();
@@ -28,7 +29,7 @@ public class Movie {
         peopleName = new ArrayList<>();
         peopleJob = new ArrayList<>();
         people = new HashMap<>();
-        
+        peoplePopularity = new ArrayList<>();        
         //responce for movie credits
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create("https://api.themoviedb.org/3/movie/" + id + "/credits?language=en-US"))
@@ -86,21 +87,23 @@ public class Movie {
         imdbRating = getImdbRatingFromID(md.getImdb_id());
 
         if(co.getCast() != null) {
-            String temp[]; 
+            Object temp[]; 
             for (Cast c : co.getCast()) {
-                temp = new String[2];
+                temp = new Object[3];
                 temp[0] = c.getName();
-                temp[1] = "Acting";
+                temp[1] = "Actor";
+                temp[2] = c.getPopularity();
                 people.put(c.getId(), temp);
             }
         }
 
         if(co.getCrew() != null) {
-            String temp[]; 
+            Object temp[]; 
             for (Crew c : co.getCrew()) {
-                temp = new String[2];
+                temp = new Object[3];
                 temp[0] = c.getName();
                 temp[1] = c.getJob();
+                temp[2] = c.getPopularity();
                 people.put(c.getId(), temp);
             }
         }
@@ -109,9 +112,10 @@ public class Movie {
             peopleId.add(i);
         }
 
-        for (String[] i : people.values()) {
-            peopleName.add(i[0]);
-            peopleJob.add(i[1]);
+        for (Object[] i : people.values()) {
+            peopleName.add((String)i[0]);
+            peopleJob.add((String)i[1]);
+            peoplePopularity.add((float)i[2]);
         }
     }
     
@@ -202,7 +206,7 @@ public class Movie {
 
         if(this.getImdbRating() != -1) returnString.append("Imdb Rating: " + this.getImdbRating() + "\n \n");
         
-        if(this.md.getRuntime() != null) {
+        if(this.md.getRuntime() != 0) {
             returnString.append("Runtime: " + this.md.getRuntime() + "m" + "\n\n");
         }
 
@@ -305,7 +309,11 @@ public class Movie {
         return peopleJob;
     }
 
-    public HashMap<Integer, String[]> getPeople() {
+    public HashMap<Integer, Object[]> getPeople() {
         return people;
+    }
+
+    public ArrayList<Float> getPeoplePopularity() {
+        return peoplePopularity;
     }
 }
