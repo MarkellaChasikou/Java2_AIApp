@@ -595,5 +595,86 @@ public class User {
     
             }
         }
-        }     
+        }  
+    public List<Chatroom> getJoinedChatrooms() throws Exception {
+        List<Chatroom> joinedChatrooms = new ArrayList<>();
+        DB db = new DB();
+
+        try (Connection con = db.getConnection();
+             PreparedStatement stmt = con.prepareStatement("SELECT Chatroom.* " +
+                                                           "FROM Chatroom " +
+                                                           "JOIN ChatroomUser ON Chatroom.roomId = ChatroomUser.roomId " +
+                                                           "WHERE ChatroomUser.userId = ?")) {
+            stmt.setInt(1, this.id);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    int roomId = rs.getInt("roomId");
+                    String name = rs.getString("name");
+                    int creatorId = rs.getInt("creatorId");
+                    Chatroom chatroom = new Chatroom(roomId, name, creatorId);
+                    joinedChatrooms.add(chatroom);
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+
+        return joinedChatrooms;
+    }
+    //gets also called to check if the user can access the messages of a chatroom in app
+    public List<Chatroom> getNotJoinedChatrooms() throws Exception {
+        List<Chatroom> notJoinedChatrooms = new ArrayList<>();
+        DB db = new DB();
+
+        try (Connection con = db.getConnection();
+            PreparedStatement stmt = con.prepareStatement("SELECT * " +
+                                                        "FROM Chatroom " +
+                                                        "WHERE roomId NOT IN " +
+                                                        "(SELECT roomId FROM ChatroomUser WHERE userId = ?) " +
+                                                        "AND creatorId <> ?")) {
+            stmt.setInt(1, this.id);
+            stmt.setInt(2, this.id);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    int roomId = rs.getInt("roomId");
+                    String name = rs.getString("name");
+                    int creatorId = rs.getInt("creatorId");
+                    Chatroom chatroom = new Chatroom(roomId, name, creatorId);
+                    notJoinedChatrooms.add(chatroom);
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+
+        return notJoinedChatrooms;
+    }
+
+    public List<Chatroom> getCreatedChatrooms() throws Exception {
+        List<Chatroom> createdChatrooms = new ArrayList<>();
+        DB db = new DB();
+
+        try (Connection con = db.getConnection();
+             PreparedStatement stmt = con.prepareStatement("SELECT * FROM Chatroom WHERE creatorId = ?")) {
+            stmt.setInt(1, this.id);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    int roomId = rs.getInt("roomId");
+                    String name = rs.getString("name");
+                    int creatorId = rs.getInt("creatorId");
+                    Chatroom chatroom = new Chatroom(roomId, name, creatorId);
+                    createdChatrooms.add(chatroom);
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+
+        return createdChatrooms;
+    }
+}
+   
 }

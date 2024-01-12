@@ -10,7 +10,7 @@ public class Message {
     private boolean spoiler;
     private String text;
     private int chatroomId;
-    private User user;
+    private String  username;
 
 
     /*public Message(boolean spoiler, String text, int chatroomId, User user) {
@@ -20,12 +20,12 @@ public class Message {
         this.user = user;
     } */     
 
-    public Message(int id, boolean spoiler, String text, int chatroomId, User user) {
+    public Message(int id, boolean spoiler, String text, int chatroomId, String username) {
         this.id = id;
         this.spoiler = spoiler;
         this.text = text;
         this.chatroomId = chatroomId;
-        this.user = user;    
+        this.username = username;    
     }
 
     public int getId() {
