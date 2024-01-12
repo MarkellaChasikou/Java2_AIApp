@@ -15,7 +15,13 @@ public class Crew {
     private String title;
     @SerializedName("release_date")
     private String release_date;
-    
+    @SerializedName("popularity")
+    private float popularity;
+
+    public float getPopularity() {
+        return popularity;
+    }
+
     public String getRelease_date() {
         return release_date;
     }

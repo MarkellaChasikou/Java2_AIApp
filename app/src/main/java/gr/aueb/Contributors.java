@@ -4,13 +4,13 @@ import com.google.gson.annotations.SerializedName;
 
 public class Contributors {
     @SerializedName("id")
-    private String id;
+    private int id;
     @SerializedName("cast")
     private Cast[] cast;
     @SerializedName("crew")
     private Crew[] crew;
    
-    public String getId() {
+    public int getId() {
         return id;
     }
     

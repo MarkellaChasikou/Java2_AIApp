@@ -16,7 +16,8 @@ public class Person {
     private ArrayList<Integer> movieIds;
     private ArrayList<String> movieTitles;
     private ArrayList<String> movieDates;
-    private HashMap<Integer, String[]> movies;
+    private HashMap<Integer, Object[]> movies;
+    private ArrayList<Float> moviePopularity;
 
     public Person(int id, String apikey) {
         Gson gson = new Gson();
@@ -24,6 +25,7 @@ public class Person {
         movieTitles = new ArrayList<>();
         movieDates = new ArrayList<>();
         movies = new HashMap<>();
+        moviePopularity = new ArrayList<>();
 
         //Details
         HttpRequest request = HttpRequest.newBuilder()
@@ -62,21 +64,23 @@ public class Person {
         }
 
         if(pc.getCast() != null) {
-            String temp[]; 
+            Object temp[]; 
             for (Cast c : pc.getCast()) {
-                temp = new String[2];
+                temp = new Object[3];
                 temp[0] = c.getTitle();
                 temp[1] = c.getRelease_date();
+                temp[2] = c.getPopularity();
                 movies.put(c.getId(), temp);
             }
         }
 
         if(pc.getCrew() != null) {
-            String temp[]; 
+            Object temp[]; 
             for (Crew c : pc.getCrew()) {
-                temp = new String[2];
+                temp = new Object[3];
                 temp[0] = c.getTitle();
                 temp[1] = c.getRelease_date();
+                temp[2] = c.getPopularity();
                 movies.put(c.getId(), temp);
             }
         }
@@ -85,9 +89,10 @@ public class Person {
             movieIds.add(i);
         }
 
-        for (String[] i : movies.values()) {
-            movieTitles.add(i[0]);
-            movieDates.add(i[1]);
+        for (Object[] i : movies.values()) {
+            movieTitles.add((String)i[0]);
+            movieDates.add((String)i[1]);
+            moviePopularity.add((float)i[2]);
         }
     } 
 
@@ -104,7 +109,7 @@ public class Person {
         return pc;
     }
 
-    public HashMap<Integer, String[]> getMovies() {
+    public HashMap<Integer, Object[]> getMovies() {
         return movies;
     }
 
@@ -120,4 +125,7 @@ public class Person {
         return movieDates;
     }
 
+    public ArrayList<Float> getMoviePopularity() {
+        return moviePopularity;
+    }
 }
