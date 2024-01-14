@@ -209,8 +209,6 @@ public class Message {
             stmtDeleteUnSeenMessage.setInt(1, messageId);
             stmtDeleteUnSeenMessage.executeUpdate();
 
-            // You can add more delete statements for other tables if needed
-
             System.out.println("Message deleted successfully.");
         } catch (Exception e) {
             throw new Exception("Error deleting message: " + e.getMessage());
