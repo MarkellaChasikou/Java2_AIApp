@@ -342,6 +342,146 @@ public class App {
                     }
                 } while (choice3 != 0);
                 break;
+                case 2:
+                int x=-1;
+                do {
+                if (!guest){
+                    displayReviewContentMenu();
+                     x = scanner.nextInt();
+                        switch(x){
+                            case 0:
+                                break;
+                            case 1:
+                               System.out.println("Type your review:");
+                               String Reviewtext = scanner.nextLine(); // den to diavazei????
+                             float rating ;
+                              while (true) {
+                               System.out.println("Enter your rating 0-10:");
+                                 if (scanner.hasNextFloat()) {
+                                   rating = scanner.nextFloat();
+                                // Έλεγχος αν η βαθμολογία είναι έγκυρη (π.χ., μεταξύ 0 και 10) 
+                                       if (rating >= 0 && rating <= 10) {
+                                        break; // Έξοδος από το loop αν η βαθμολογία είναι έγκυρη
+                                     } else {
+                                   System.out.println("Invalid rating. Please enter a rating between 0 and 10.");
+                                    }
+                                } else {
+                                  System.out.println("Invalid input. Please enter a valid number.");
+                                scanner.nextLine(); // Καθαρισμός του buffer του Scanner
+                                 }
+                               }
+    
+                             
+                            /*  System.out.println("Does your review contain spoilers? ");
+                             System.out.println("1. Yes");
+                             System.out.println("2. No");
+                                                        edw kai afto lathos vgainei emfanizei exceptions */
+                             int spoil = scanner.nextInt();
+                             while (spoil !=1 || spoil !=2) {
+                                System.out.println("Invalid input");
+                                System.out.println("Does your review contain spoilers? ");
+                                System.out.println("1. Yes");
+                                System.out.println("2. No");
+                                spoil = scanner.nextInt();
+                             }
+                             boolean spoiler = false;
+                             if (spoil == 1 ){
+                                spoiler = true;
+                             }
+                                Review.addReview(((User)currentUser).getId(), ((Movie)o).getMd().getId(), Reviewtext, rating, spoiler);
+                            break;
+                            case 2:
+                                  // μεθοδος που επιστρεφει ολα τα reviews που εχει κανει ο χρηστης συγκεκριμενα για αυτην την ταινια
+                                  System.out.println("Choose the review you want to modify:");
+                                  /*for (int i =0 ;i<Arraylist.size; i++;) {       εδω βγαζω σε σειρα τα reviews 
+                          system.print.ln(i + "."+ Arraylist.get(i));  // kati pou legame me lago, des pws tha mporei na kanei modify o xrhsths ena review
+                                  } */
+                                  //  Review r = new Review(// review id , user id ,movie id , review text  , rating , spoiler  )
+                                  int modChoice = scanner.nextInt();
+                                  System.out.println("Type your review:");
+                                  String modReviewtext = scanner.nextLine();
+                                //  r.setReviewText(modReviewText);
+                                System.out.println("Enter your rating 0-10:");
+                               float modRating = scanner.nextFloat();
+                               while (modRating>10 && modRating<0){
+                                System.out.println("Invalid input");
+                                System.out.println("Enter your rating 0-10:");
+                               rating = scanner.nextFloat();
+                             }
+                             // r.setRating(modRating);
+                             System.out.println("Does your review contain spoilers? ");
+                             System.out.println("1. Yes");
+                             System.out.println("2. No");
+                             int modSpoil = scanner.nextInt();
+                             while (modSpoil !=1 || modSpoil !=2) {
+                                System.out.println("Invalid input");
+                                System.out.println("Does your review contain spoilers? ");
+                                System.out.println("1. Yes");
+                                System.out.println("2. No");
+                                spoil = scanner.nextInt();
+                             }
+                             boolean modSpoiler = false;
+                             if (modSpoil == 1 ){
+                                modSpoiler = true;
+                             }
+                             // r.setSpoiler(modSpoiler);
+    
+                            break;
+                            case 3:
+                               // μεθοδος που επιστρεφει ολα τα reviews που εχει κανει ο χρηστης συγκεκριμενα για αυτην την ταινια
+                               System.out.println("Choose the review you want to delete:");
+                          // for (int i =0 ;i<list.size; i++;)
+                          //system.print.ln(i + "."+ list.get(i));
+                          int delChoice = scanner.nextInt();
+                          Review.deleteReview(12345,12345);
+                          break;
+                            case 4:  // k afto edw to afhsa sthn mesh
+                                System.out.println("Do you want spoiler free reviews?");
+                                System.out.println("0. Back");
+                                System.out.println("1. Yes");
+                                System.out.println("2. No");
+                                int x1 = scanner.nextInt();
+                                while (x1 !=1 || x1 !=2 || x1 !=0) {
+                                   System.out.println("Invalid input");
+                                   System.out.println("Do you want spoiler free reviews?");
+                                   System.out.println("0. Back");
+                                   System.out.println("1. Yes");
+                                   System.out.println("2. No");
+                                   spoil = scanner.nextInt();
+                                }
+                               if (x1==1 || x1==2){
+                                    if (x1==1){
+                                    MovieDAO.getSpoilerFreeReviewsForMovie(((Movie)o).getMd().getId());
+                                    }else {
+                                    MovieDAO.getAllReviewsForMovie(((Movie)o).getMd().getId());
+                                    }
+                                }
+                            break;
+                            default:
+                                System.out.println("Invalid choice");
+                                System.out.println("Enter your choice");
+                                x = scanner.nextInt();
+                                break;
+                        }
+                    }
+    
+                }while (x!=0);
+                    break;
+                  
+                
+                
+               
+                
+                case 7: // afto trexei swsta mono an den dinetai to release date( dld pairnei monadiko orisma to title)
+                     printBonusContent(((Movie)o).getMd().getOriginal_title(),((Movie)o).getMd().getRelease_date());
+                     System.out.println("0.Back");
+                     System.out.println("Enter your choice:");
+                     int x2 = scanner.nextInt();
+                     while (x2!=0){
+                    System.out.println("Enter your choice:");
+                    x = scanner.nextInt();
+                     }
+                     break;
             default:
                 System.out.println("choice2 " + choice2);
                 System.out.println("Invalid choice. Please enter a valid option");
@@ -422,13 +562,12 @@ public class App {
     private static void displayMovieMenu() {
         System.out.println("0. Back");
         System.out.println("1. See full Cast and Crew");
-        System.out.println("2. See reviews");
-        System.out.println("3. Add review");
-        System.out.println("4. Add to Watchlist");
-        System.out.println("5. Add to Seen");
-        System.out.println("6. Add to Favourites");
-        System.out.println("7. Add to list");
-        System.out.println("8. Get Bonus content");
+        System.out.println("2. Reviews");
+        System.out.println("3. Add to Watchlist");
+        System.out.println("4. Add to Seen");
+        System.out.println("5. Add to Favourites");
+        System.out.println("6. Add to list");
+        System.out.println("7. Get Bonus content");
         System.out.println("Enter your choice ");
     }
 
@@ -510,9 +649,10 @@ public class App {
      */
     private static void displayReviewContentMenu() {
         System.out.println("0. Back");
-        System.out.println("1. Modify");
-        System.out.println("2. Remove");
-        System.out.println("3. View");
+        System.out.println("1. Add review");
+        System.out.println("2. Modify review");
+        System.out.println("3. Delete review");
+        System.out.println("4. View reviews");
         System.out.println("Enter your choice ");
     }
 
@@ -531,12 +671,14 @@ public class App {
      */
     private static void displayChatroomMenu() {
         System.out.println("0. Back");
-        System.out.println("1. Your chatrooms");
-        System.out.println("2. Find chatrooms");
-        System.out.println("3. Create chatroom"); // not sure what happens with members when creating
+        System.out.println("1. Create a chatroom");
+        System.out.println("2. See Your created chatrooms");
+        System.out.println("3. See joined chatrooms");
+        System.out.println("4. See not joined chatrooms"); //not sure what happens with members when creating
+        System.out.println("5. See all chatrooms");
+        System.out.println("6. Search for a chatroom");
         System.out.println("Enter your choice ");
     }
-
     /**
      * Displays the menu options for managing the content of a user's chatroom.
      */
@@ -648,11 +790,11 @@ public class App {
      * Scenes, and Interviews.
      * 
      * @param movieTitle The title of the movie.
-     * @param year       The release year of the movie, or -1 if not available.
+     * @param year       The release year of the movie, or null if not available.
      */
-    public static void printBonusContent(String movieTitle, int year) {
-        if (year != -1) {
-            BonusContent.searchAndPrintVideo(movieTitle + "  movie " + year, "Fun Facts", youtubeApiKey);
+    public static void printBonusContent(String movieTitle, String year) {
+        if (year != null) {
+            BonusContent.searchAndPrintVideo(movieTitle + "  movie " + year, "Fun Facts", youtubeApiKey); // edw den tha to vgazei swsta logw toy thematos p legame
             BonusContent.searchAndPrintVideo(movieTitle + "  movie " + year, "Behind the Scenes", youtubeApiKey);
             BonusContent.searchAndPrintVideo(movieTitle + "  movie " + year, "Interviews", youtubeApiKey);
         } else {
