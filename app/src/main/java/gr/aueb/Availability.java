@@ -36,6 +36,6 @@ public class Availability {
             result.append(formatAvailability("Stream", c.getFlatrate()));                
             result.append(formatAvailability("Rent", c.getRent()));
             return result.toString();
-        } else return "Not available in " + country;
+        } else return "\nNot available in " + country;
     }
 }

@@ -14,12 +14,13 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 public class App {
-// να φτιαξω τη στοιχιση για αποτελεσματα 100+
     private static User currentUser;
     private static String tmdbApiKey;
     private static String chatgptApiKey;
@@ -98,38 +99,40 @@ public class App {
 
     private static boolean mainCase2(Scanner scanner) throws Exception {
         int choice = 0;
-        int choice2;
         System.out.println("\nType your search or press 0 to retun to main menu ");
         String userMessage = scanner.nextLine();
         userMessage = encodeMovieTitle(userMessage);
         
         if(!userMessage.equals("0")) {
             do {
-                ArrayList<Integer> ids = search(userMessage);
+                ArrayList<Integer> ids = search(userMessage, true);
                 if(!ids.isEmpty()) {
                     Object o = pick(scanner, ids);
                     if(!o.equals(0)){
-                        System.out.println(o);
-                        do {
-                            System.out.println(o);
-                            if(o instanceof Movie) {
-                                displayMovieMenu();
-                                // check for input
-                                choice2 = scanner.nextInt();
-                                scanner.nextLine();
-                                movieCase(scanner, choice2, o);
-                            } else {
-                                displayPersonMenu();
-                                choice2 = scanner.nextInt();
-                                scanner.nextLine();
-                                personCase(scanner, choice2, o);
-                            }                       
-                        } while (choice2 != 0);
+                        mainCase2CheckObjectType(scanner, o);
                     } else break;
                 }       
             } while(choice == 0);
         } else return false;
         return true;
+    }
+
+    public static void mainCase2CheckObjectType(Scanner scanner, Object o) throws Exception {
+        int choice2;
+            do {
+                System.out.println(o);
+                if(o instanceof Movie) {
+                    displayMovieMenu();
+                    choice2 = scanner.nextInt();
+                    scanner.nextLine();
+                    movieCase(scanner, choice2, o);
+                } else {
+                    displayPersonMenu();
+                    choice2 = scanner.nextInt();
+                    scanner.nextLine();
+                    personCase(scanner, choice2, o);
+                }                       
+            } while (choice2 != 0);
     }
 
     public static void personCase(Scanner scanner, int choice2, Object o) throws Exception {
@@ -140,17 +143,20 @@ public class App {
                 ArrayList<Integer> ids2 = ((Person)o).getMovieIds();
                 ArrayList<String> titles = ((Person)o).getMovieTitles();
                 ArrayList<String> dates = ((Person)o).getMovieDates();
+                ArrayList<Float> popularity = ((Person)o).getMoviePopularity();
+                ArrayList<String> prints = new ArrayList<>();
                 int choice3;
                 int choice4 = 1;
                 do {
                     for (int i = 0; i < ids2.size(); i++) {
                         if(!dates.get(i).isEmpty()) {
                             int year = extractYear(dates.get(i));
-                            System.out.printf("%2d. %s (%d)\n", i + 1, titles.get(i), year);
+                            prints.add(String.format("%s (%d)", i + 1, titles.get(i), year));
                         } else {
-                            System.out.printf("%2d. %s (%s)\n", i + 1, titles.get(i), "Release date not available");
+                            prints.add(String.format("%%s (%s)", i + 1, titles.get(i), "Release date not available"));
                         }
-                    }   
+                    }
+                    sortResultsOnPopul(ids2, prints, popularity, true); 
                     Object ob = pick(scanner, ids2);
                     if(ob instanceof Movie) {
                         Movie m = (Movie)ob;
@@ -191,6 +197,8 @@ public class App {
                             ArrayList<String> names = ((Movie)o).getPeopleName();
                             ArrayList<String> jobs = ((Movie)o).getPeopleJob();
                             ArrayList<Integer> originalIds = ((Movie) o).getPeopleId();
+                            ArrayList<Float> popularity = ((Movie) o).getPeoplePopularity();
+                            ArrayList<String> prints = new ArrayList<>();
                             ArrayList<Integer> ids2 = new ArrayList<>();
                             for (Integer id : originalIds) { //negative values for prick()
                                 ids2.add(-id);
@@ -200,11 +208,11 @@ public class App {
                             do {
                                 for (int i = 0; i < ids2.size(); i++) {
                                     if(!jobs.get(i).isEmpty()) {
-                                        System.out.printf("%2d. %s (%s)\n", i + 1, names.get(i), jobs.get(i));
+                                        prints.add(String.format("%s (%s)", names.get(i), jobs.get(i)));
                                     } else {
-                                        System.out.printf("%2d. %s (%s)\n", i + 1, jobs.get(i), "Known for department not available");
+                                        prints.add(String.format("%s (%s)", jobs.get(i), "Known for department not available"));
                                     }
-                                }   
+                                } sortResultsOnPopul(ids2, prints, popularity, true);
                                 Object ob = pick(scanner, ids2);
                                 if(ob instanceof Person) {
                                     Person p = (Person)ob;
@@ -233,7 +241,7 @@ public class App {
 
     private static void loadApiKeys() {
         File tmdbFile = new File("C:\\Users\\Nick\\api_keys\\tmdb_api_key.txt");
-        File chatgptFile = new File("C:\\Users\\Nick\\api_keys\\chat_gpt_key.txt");
+        File chatgptFile = new File("C:\\Users\\Nick\\api_keys\\chat_gpt_key_2.txt");
         File youtubeFile = new File("C:\\Users\\Nick\\api_keys\\youtube_key.txt");
 
         try (BufferedReader br = new BufferedReader(new FileReader(tmdbFile))) {
@@ -389,11 +397,43 @@ public class App {
     }
 
     private static void getAIRecommendation(Scanner scanner) throws Exception {
-        System.out.println("\nType your preferences for movie recommendations.");
+        System.out.println("\nType your preferences for movie recommendations or press 0 to go back");
         String userMessage = scanner.nextLine();
-        AiRecommendation2.testChatCompletions(userMessage + " (Only movie titles, no description or other movie details, no apologies for your previous responses or things you can't do as an AI.)", chatgptApiKey);
-        System.out.println("\nEnter your choice ");
-        scanner.nextInt();
+        if(!userMessage.equals("0")) {
+            boolean flag = false;
+            for(int i = 0; i <= 2; i++) {
+                String result = AiRecommendation2.testChatCompletions(userMessage + "Don't include summaries and firector names. Include release year", chatgptApiKey);
+                ArrayList<String> movieTitles = extractMovieTitles(result);
+                if(movieTitles != null) {
+                    String title = "1";
+                    do {
+                        System.out.println(result);
+                        flag = true;
+                        title = pickRecommendation(scanner, movieTitles);
+                        title = encodeMovieTitle(title);
+                        if(title != "0") {
+                            ArrayList<Integer> ids = search(title, false);
+                            Movie m = new Movie(ids.get(0), tmdbApiKey);
+                            mainCase2CheckObjectType(scanner, m);
+                        }
+                    } while (!title.equals("0"));
+                    break;
+                }
+            }
+            if(flag == false) {
+            System.out.println("Something went wrong. Try to be more specific and limit your message to movie recommendations.");
+            }
+        }  
+    }
+
+    private static String pickRecommendation(Scanner scanner, ArrayList<String> titles) throws Exception {
+        System.out.print("Enter your choice or press 0 to go back ");
+        int answer = scanner.nextInt();
+        scanner.nextLine(); //consume next line character
+        if(answer == 0) return "0";
+        else {
+            return titles.get(answer - 1);
+        }
     }
 
     private static Object pick(Scanner scanner, ArrayList<Integer> ids) throws Exception {
@@ -431,7 +471,7 @@ public class App {
         }
     }
 
-    private static ArrayList<Integer> search(String userMessage) {
+    private static ArrayList<Integer> search(String userMessage, boolean flag) {
         Gson gson = new Gson();
         ArrayList<Integer> idsList = new ArrayList<>();
         ArrayList<String> prints = new ArrayList<>();
@@ -480,7 +520,7 @@ public class App {
                     }
                 }
             }
-            idsList = sortResultsOnPopul(idsList, prints, popularity);
+            idsList = sortResultsOnPopul(idsList, prints, popularity, flag);
 
         } catch (IOException e) {
             System.err.println("Check your internet connection!");
@@ -497,14 +537,14 @@ public class App {
         if(!prints.isEmpty()) {
             System.out.println();
             for (int i = 0; i < prints.size(); i++) {
-                String newPrint = String.format("%2d. %s", i + 1, prints.get(i));
+                String newPrint = String.format("%3d. %s", i + 1, prints.get(i));
                 prints.set(i, newPrint);
                 System.out.println(prints.get(i));
             }
         }
     }
 
-    private static ArrayList<Integer> sortResultsOnPopul(ArrayList<Integer> idsList, ArrayList<String> prints, ArrayList<Float> popularity) {
+    private static ArrayList<Integer> sortResultsOnPopul(ArrayList<Integer> idsList, ArrayList<String> prints, ArrayList<Float> popularity, boolean flag) {
         int n = idsList.size();
         if(n >= 2){
             for (int i = 1; i <= n - 1; i++) {
@@ -523,7 +563,7 @@ public class App {
                 }
             }
         }
-        printResults(prints);
+        if(flag == true) printResults(prints);
         return idsList;
     }
 
@@ -532,4 +572,14 @@ public class App {
         int year = date.getYear();
         return year;
     } 
+
+    public static ArrayList<String> extractMovieTitles(String response) {
+        ArrayList<String> movieTitles = new ArrayList<>();
+        Pattern pattern = Pattern.compile("\\d+\\.\\s+\"?([^\",(]+)\"?(?:\\s+\\(\\d{4}\\))?,?.*");
+        Matcher matcher = pattern.matcher(response);
+        while (matcher.find()) {
+            movieTitles.add(matcher.group(1).trim());
+        }
+        return movieTitles;
+    }
 }
