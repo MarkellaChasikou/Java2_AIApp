@@ -118,8 +118,8 @@ public class Message {
     }
 
 
-    public User getUser() {
-        return user;
+    public String getUsername() {
+        return username;
     }
 
 
@@ -133,7 +133,7 @@ public class Message {
              PreparedStatement stmtRoomMembers = con.prepareStatement("SELECT userId FROM chatroomuser WHERE roomId=?")) {
     
             stmt1.setInt(1, chatroomId);
-            stmt1.setInt(2, user.getId());
+            stmt1.setInt(2, username);
             stmt1.setBoolean(3, spoiler);
             stmt1.setString(4, text);
     

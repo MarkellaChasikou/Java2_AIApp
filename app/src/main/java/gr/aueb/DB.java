@@ -3,7 +3,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class DB {
+public class DB implements AutoCloseable{
     //Database connection settings, change dbName, dbusername, dbpassword
 	private final String dbServer = "localhost";
 	private final String dbServerPort = "3306";

@@ -65,8 +65,10 @@ CREATE TABLE Message (
     userId INT,
     spoiler BIT NOT NULL,
     text VARCHAR(255) NOT NULL,
+    username varchar(25) NOT NULL,
     FOREIGN KEY (roomId) REFERENCES Chatroom(roomId) ON DELETE CASCADE,
-    FOREIGN KEY (userId) REFERENCES AppUser(userId) ON DELETE CASCADE
+    FOREIGN KEY (userId) REFERENCES AppUser(userId) ON DELETE CASCADE,
+    FOREIGN KEY (username) REFERENCES AppUser(username) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE UnSeenMessage (
