@@ -35,8 +35,8 @@ import exercise2_2023_2024_8210070.User;
  * This class handles user interactions, menu displays, and orchestrates various
  * functionalities.
  * 
- * @version 1.8
- * @author Νίκος Ραγκούσης 14 January 2024
+ * @version 1.8 14 January 2024
+ * @author Νίκος Ραγκούσης 
  */
 public class App {
     /** The currently logged-in user */
