@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Review {
     private final int reviewId;
@@ -147,6 +149,33 @@ public class Review {
                 System.out.println("Review not found or you do not have permission to delete it.");
             }
         }
+    }
+        public static List<Review> getReviewsByUserAndMovie(int userId, int movieId) throws Exception {
+        List<Review> reviews = new ArrayList<>();
+
+        try (
+            DB db = new DB();
+            Connection con = db.getConnection();
+            PreparedStatement stmt = con.prepareStatement(
+                    "SELECT * FROM Review WHERE userId = ? AND movieId = ?");
+        ) {
+            stmt.setInt(1, userId);
+            stmt.setInt(2, movieId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    int reviewId = rs.getInt("reviewId");
+                    String reviewText = rs.getString("review_text");
+                    float rating = rs.getFloat("rating");
+                    boolean spoiler = rs.getBoolean("spoiler");
+
+                    Review review = new Review(reviewId, userId, movieId, reviewText, rating, spoiler);
+                    reviews.add(review);
+                }
+            }
+        }
+
+        return reviews;
     }
 
     // toString method
