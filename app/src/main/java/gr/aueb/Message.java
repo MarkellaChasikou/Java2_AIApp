@@ -7,11 +7,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class Message {
-    private int messageId;
-    private int userId;
+    private final int messageId;
+    private final int userId;
     private boolean spoiler;
     private String text;
-    private int chatroomId;
+    private final int chatroomId;
     private String  username;
 
 

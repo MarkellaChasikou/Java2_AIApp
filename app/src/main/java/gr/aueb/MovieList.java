@@ -7,41 +7,19 @@ import java.util.List;
 
 public class MovieList {
     private String listType; // Τύπος λίστας (public ή private)
-    private final String creatorId; // ID του δημιουργού της λίστας
-    private List<String> movies; // Λίστα των ταινιών
+    private final String creatorId;
+    private int listName;
+    private final int listId; // ID του δημιουργού της λίστας
 
-    public MovieList(String listType, String creatorId) {
+
+    public MovieList(String listType, String creatorId, int listName, int listId) {
         this.listType = listType;
         this.creatorId = creatorId;
-        this.movies = new ArrayList<>();
+        this.listName = listName;
+        this.listId = listId;
     }
 
-    // Προσθήκη ταινίας στη λίστα
-    public void addMovie(String movieName) {
-        if (!movies.stream().anyMatch(movieName::equalsIgnoreCase)) {
-            movies.add(movieName);
-            System.out.println(movieName + " added to the list.");
-        } else {
-            System.out.println("Movie '" + movieName + "' is already in the list.");
-        }
-    }
-
-    // Αφαίρεση ταινίας από τη λίστα
-    public void removeMovie(String movieName) {
-           
-        if (movies.contains(movieName)) {
-            movies.remove(movieName);
-            System.out.println(movieName + " removed from the list.");
-        } else {
-            System.out.println(movieName + " is not in the list.");
-        } 
-    }
-
-    // Εμφάνιση των ταινιών στη λίστα
-    public void displayMovies() {
-        System.out.println("Movies in the list: " + movies);
-    }
-        //Create List Method
+    //Create List Method
     public void createList(String listType, String listName) throws Exception {
         DB db = new DB();
         Connection con = null;
@@ -65,34 +43,6 @@ public class MovieList {
             stmt.executeUpdate();
             System.out.println("List: " + listName + " created successfully");
             stmt.close();
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        } finally {
-            try {
-                db.close();
-            } catch (Exception e) {
-
-            }
-        }
-    }
-//Get List Method
-    public List<String> getLists() throws Exception {
-        List<String> lists = new ArrayList<String>();
-        DB db = new DB();
-        Connection con = null;
-        String query = "SELECT DISTINCT name FROM List WHERE userId=?;";
-        try {
-            con = db.getConnection();
-            PreparedStatement stmt = con.prepareStatement(query);
-            stmt.setInt(1, id);
-            ResultSet rs = stmt.executeQuery();
-
-            while(rs.next()) {
-                lists.add(rs.getString("name"));
-            }
-            rs.close();
-            stmt.close();
-            return lists;
         } catch (Exception e) {
             throw new Exception(e.getMessage());
         } finally {

@@ -2,7 +2,7 @@ use bugsbunny;
 
 CREATE TABLE Chatroom (
     roomId INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(25) NOT NULL,
+    name VARCHAR(25) UNIQUE NOT NULL,
     creatorId INT,
     FOREIGN KEY (creatorId) REFERENCES AppUser(userId)
 );

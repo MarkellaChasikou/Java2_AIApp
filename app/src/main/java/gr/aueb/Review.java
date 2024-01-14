@@ -6,9 +6,9 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 
 public class Review {
-    private int reviewId;
-    private int userId;
-    private int movieId;
+    private final int reviewId;
+    private final int userId;
+    private final int movieId;
     private String reviewText;
     private float rating;
     private boolean spoiler;

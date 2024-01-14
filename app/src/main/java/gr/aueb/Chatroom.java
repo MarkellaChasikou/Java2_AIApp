@@ -9,9 +9,9 @@ import java.util.List;
 
 
 public class Chatroom {
-    private int roomId;
+    private final int roomId;
     private String name;
-    private int createorId;
+    private final int createorId;
     //private User user;
     //private Message message;
     //private List<Integer> users = new ArrayList<Integer>();
@@ -51,7 +51,7 @@ public class Chatroom {
         return createorId;
     }
 
-    public void setName(String name, int userId) {
+    public void setName(String name, int userId) throws Exception {
     
     if (!isChatroomCreator(userId)) {
         // If the user is not the creator, do not allow the update
@@ -90,17 +90,45 @@ private boolean isChatroomCreator(int userId) {
     return false;
 }
 
-    private void updateNameInDatabase() {
+    private void updateNameInDatabase() throws Exception {
+        if (isNameUnique(name)) {
+            DB db = new DB();
+            try (Connection con = db.getConnection();
+                PreparedStatement stmt = con.prepareStatement("UPDATE Chatroom SET name = ? WHERE roomId = ?")) {
+
+                stmt.setString(1, name);
+                stmt.setInt(2, roomId);
+                stmt.executeUpdate();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new Exception("Failed to update name in the database.");
+            } finally {
+                try {
+                    db.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } else {
+            throw new Exception("Chatroom with the same name already exists. Choose a different name.");
+        }
+    }
+
+    private boolean isNameUnique(String newName) {
         DB db = new DB();
         try (Connection con = db.getConnection();
-             PreparedStatement stmt = con.prepareStatement("UPDATE Chatroom SET name = ? WHERE roomId = ?")) {
-    
-            stmt.setString(1, name);
-            stmt.setInt(2, roomId);
-            stmt.executeUpdate();
-    
+            PreparedStatement stmt = con.prepareStatement("SELECT COUNT(*) FROM Chatroom WHERE name = ?")) {
+
+            stmt.setString(1, newName);
+            try (ResultSet rs = stmt.executeQuery()) {
+                rs.next();
+                return rs.getInt(1) == 0; // If count is 0, the name is unique
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
+            return false; // Handle the exception or log it accordingly
         } finally {
             try {
                 db.close();
@@ -129,44 +157,39 @@ private boolean isChatroomCreator(int userId) {
    //Create chatroom method 
    //Gets called immediately after creating a chatroom from constructor
    public Chatroom createChatroom() throws Exception {
-    DB db = new DB();
-    Connection con = null;
-    int roomId;
-    String sql1 = "INSERT INTO Chatroom(name, creatorId) VALUES(?, ?);";
-    String sql2 = "INSERT INTO ChatroomUser VALUES(?,?)";
-    try {
-        con = db.getConnection();
-        try (PreparedStatement stmt1 = con.prepareStatement(sql1, Statement.RETURN_GENERATED_KEYS)) {
-            stmt1.setString(1, name);
-            stmt1.setInt(2, createorId);
-            stmt1.executeUpdate();
-            try (ResultSet generatedId = stmt1.getGeneratedKeys()) {
-                if (generatedId.next()) {
-                    roomId = generatedId.getInt(1);
-                } else {
-                    throw new Exception("Failed to retrieve generated roomId.");
+    if (isNameUnique(name)) {
+        try (DB db = new DB(); Connection con = db.getConnection()) {
+            int roomId;
+            String sql1 = "INSERT INTO Chatroom(name, creatorId) VALUES(?, ?);";
+            String sql2 = "INSERT INTO ChatroomUser VALUES(?,?)";
+
+            try (PreparedStatement stmt1 = con.prepareStatement(sql1, Statement.RETURN_GENERATED_KEYS)) {
+                stmt1.setString(1, name);
+                stmt1.setInt(2, createorId);
+                stmt1.executeUpdate();
+
+                try (ResultSet generatedId = stmt1.getGeneratedKeys()) {
+                    if (generatedId.next()) {
+                        roomId = generatedId.getInt(1);
+                    } else {
+                        throw new Exception("Failed to retrieve generated roomId.");
+                    }
                 }
             }
-        }
-        try (PreparedStatement stmt2 = con.prepareStatement(sql2)) {
-            stmt2.setInt(1, roomId);
-            stmt2.setInt(2, createorId);
-            stmt2.executeUpdate();
-            System.out.println("Chatroom " + name + " created successfully");
-        }
 
-        return new Chatroom(roomId, name, createorId);
-    } catch (Exception e) {
-        throw new Exception(e.getMessage());
-    } finally {
-        try {
-            if (con != null) {
-                con.close();
+            try (PreparedStatement stmt2 = con.prepareStatement(sql2)) {
+                stmt2.setInt(1, roomId);
+                stmt2.setInt(2, createorId);
+                stmt2.executeUpdate();
+                System.out.println("Chatroom " + name + " created successfully");
             }
-            db.close();
+
+            return new Chatroom(roomId, name, createorId);
         } catch (Exception e) {
-            e.printStackTrace(); 
+            throw new Exception(e.getMessage());
         }
+    } else {
+        throw new Exception("Chatroom with the same name already exists. Choose a different name.");
     }
     }
 
@@ -314,6 +337,30 @@ private boolean isChatroomCreator(int userId) {
         }
 
         return messages;
+    }
+        // Search chatroom by name method
+    public static Chatroom getChatroomByName(String chatroomName) throws Exception {
+        Chatroom chatroom = null;
+
+        try (DB db = new DB(); Connection con = db.getConnection()) {
+            String sql = "SELECT * FROM Chatroom WHERE name = ?";
+
+            try (PreparedStatement stmt = con.prepareStatement(sql)) {
+                stmt.setString(1, chatroomName);
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        int roomId = rs.getInt("roomId");
+                        int creatorId = rs.getInt("creatorId");
+                        chatroom = new Chatroom(roomId, chatroomName, creatorId);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+
+        return chatroom;
     }
 
     

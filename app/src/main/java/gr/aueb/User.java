@@ -5,7 +5,7 @@ import java.util.List;
 import java.sql.*;
 
 public class User {
-    private int id;
+    private final int id;
     private String username;
     private String password;
     private String country;
@@ -286,62 +286,37 @@ public class User {
     
         return followers;
     }
-    
-    //Leave chatroom method
-    public static void leaveChatroom(int chatroomId, User user) throws Exception {
-        DB db = new DB();
-        Connection con = null;
-        String sql = "DELETE FROM ChatroomUser WHERE roomId=? AND userId=?;";
-        try {
-            con = db.getConnection();
-            PreparedStatement stmt = con.prepareStatement(sql);
-            stmt.setInt(1, chatroomId);
-            stmt.setInt(2,user.getId());
-            stmt.executeUpdate();
-            stmt.close();
+    // Leave chatroom method
+    public void leaveChatroom(int chatroomId) throws Exception {
+        try (DB db = new DB(); Connection con = db.getConnection()) {
+            String sql = "DELETE FROM ChatroomUser WHERE roomId=? AND userId=?;";
+
+            try (PreparedStatement stmt = con.prepareStatement(sql)) {
+                stmt.setInt(1, chatroomId);
+                stmt.setInt(2, this.id); // Assuming id is the user's ID
+                stmt.executeUpdate();
+            }
         } catch (Exception e) {
-            throw new Exception(e.getMessage());    
-        } finally {
-            try {
-                db.close();
-            } catch (Exception e) {
-    
-            }
+            throw new Exception(e.getMessage());
         }
-        }
-    //Join chatroom method
-    public static Chatroom joinChatroom(int chatroomId, User user) throws Exception {
-        List<Integer> members = new ArrayList<>();
-        DB db = new DB();
-        Connection con = null;
-        String sql = "INSERT INTO ChatroomUser VALUES(?,?);";
-        String query = "SELECT * FROM Chatroomuser join chatroom WHERE Chatroomuser.roomId=?";
-        try {
-            con = db.getConnection();
-            PreparedStatement stmt1 = con.prepareStatement(sql);
-            stmt1.setInt(1, chatroomId);
-            stmt1.setInt(2,user.getId());
-            stmt1.executeUpdate();
-            System.out.println("You can know sent messages in chatroom ");
-            stmt1.close();
-            PreparedStatement stmt2 = con.prepareStatement(query);
-            stmt2.setInt(1, chatroomId);
-            ResultSet rs = stmt2.executeQuery();
-            while (rs.next()) {
-                members.add(rs.getInt("userid"));
+    }
+
+    // Join chatroom method
+    public void joinChatroom(int chatroomId) throws Exception {
+        try (DB db = new DB(); Connection con = db.getConnection()) {
+            String insertSql = "INSERT INTO ChatroomUser VALUES(?,?);";
+
+            try (PreparedStatement stmt = con.prepareStatement(insertSql)) {
+                stmt.setInt(1, chatroomId);
+                stmt.setInt(2, this.id); // Assuming id is the user's ID
+                stmt.executeUpdate();
+                System.out.println("You can now send messages in the chatroom.");
             }
-    
-        return new Chatroom(chatroomId, members);
         } catch (Exception e) {
-            throw new Exception(e.getMessage());    
-        } finally {
-            try {
-                db.close();
-            } catch (Exception e) {
-    
-            }
+            throw new Exception(e.getMessage());
         }
-        }  
+    }
+
     public List<Chatroom> getJoinedChatrooms() throws Exception {
         List<Chatroom> joinedChatrooms = new ArrayList<>();
         DB db = new DB();
@@ -421,4 +396,33 @@ public class User {
 
         return createdChatrooms;
     }
+        //Get List Method
+    public List<String> getLists() throws Exception {
+        List<String> lists = new ArrayList<String>();
+        DB db = new DB();
+        Connection con = null;
+        String query = "SELECT DISTINCT name FROM List WHERE userId=?;";
+        try {
+            con = db.getConnection();
+            PreparedStatement stmt = con.prepareStatement(query);
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+
+            while(rs.next()) {
+                lists.add(rs.getString("name"));
+            }
+            rs.close();
+            stmt.close();
+            return lists;
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        } finally {
+            try {
+                db.close();
+            } catch (Exception e) {
+
+            }
+        }
+    }
+
 }
