@@ -13,8 +13,8 @@ public class Chatroom {
     private String name;
     private int createorId;
     //private User user;
-    private Message message;
-    private List<Integer> users = new ArrayList<Integer>();
+    //private Message message;
+    //private List<Integer> users = new ArrayList<Integer>();
 
     //Constructors
     /*public Chatroom(String name, User user) {
@@ -273,7 +273,7 @@ private boolean isChatroomCreator(int userId) {
 
         return messages;
     }
-        
+
     // Get unseen Messages method
     public List<Message> getUnseenMessages(int userId) throws Exception {
         List<Message> messages = new ArrayList<>();
