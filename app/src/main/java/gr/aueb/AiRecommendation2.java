@@ -1,13 +1,13 @@
 package gr.aueb;
 
-import com.cloudurable.jai.OpenAIClient;
-import com.cloudurable.jai.model.text.completion.chat.ChatRequest;
-import com.cloudurable.jai.model.text.completion.chat.ChatResponse;
-import com.cloudurable.jai.model.text.completion.chat.Message;
-import com.cloudurable.jai.model.text.completion.chat.Role;
-import com.cloudurable.jai.model.text.completion.chat.function.*;
-import com.cloudurable.jai.util.JsonSerializer;
-import io.nats.jparse.node.ObjectNode;
+//import com.cloudurable.jai.OpenAIClient;
+//import com.cloudurable.jai.model.text.completion.chat.ChatRequest;
+//import com.cloudurable.jai.model.text.completion.chat.ChatResponse;
+//import com.cloudurable.jai.model.text.completion.chat.Message;
+//import com.cloudurable.jai.model.text.completion.chat.Role;
+//import com.cloudurable.jai.model.text.completion.chat.function.*;
+//import com.cloudurable.jai.util.JsonSerializer;
+//import io.nats.jparse.node.ObjectNode;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -27,7 +27,7 @@ import java.net.URISyntaxException;
 
 public class AiRecommendation2 {
 
-    public static void testChatCompletions(String userMessage, String apiKey) {
+    public static String testChatCompletions(String userMessage, String apiKey) throws URISyntaxException {
         String url = "https://api.openai.com/v1/chat/completions";
         String model = "gpt-3.5-turbo";
         int maxRetries = 3;
@@ -35,13 +35,13 @@ public class AiRecommendation2 {
         for (int attempt = 1; attempt <= maxRetries; attempt++) {
             try {
                 // Create the HTTP POST request
-                URL obj;
-                try {
-                    obj = new URI(url).toURL(); // Handle URISyntaxException
-                } catch (URISyntaxException e) {
-                    e.printStackTrace();
-                    return; 
-                }
+                URL obj = new URI(url).toURL();
+                //try {
+                    //obj = new URI(url).toURL(); // Handle URISyntaxException
+                //} catch (URISyntaxException e) {
+                    //e.printStackTrace();
+                    //return; 
+                //}
 
                 HttpURLConnection con = (HttpURLConnection) obj.openConnection();
                 con.setRequestMethod("POST");
@@ -53,7 +53,7 @@ public class AiRecommendation2 {
                         + "\"model\": \"" + model + "\","
                         + "\"messages\": ["
                         + "{\"role\": \"user\", \"content\": \"" + userMessage + "\"},"
-                        + "{\"role\": \"assistant\", \"content\": \"Here are 10 movie examples for you:\\n1. Movie 1\\n2. Movie 2\\n3. Movie 3\\n4. Movie 4\\n5. Movie 5\\n6. Movie 6\\n7. Movie 7\\n8. Movie 8\\n9. Movie 9\\n10. Movie 10\"}"
+                        + "{\"role\": \"assistant\", \"content\": \"Here are 10 movie examples for you:\\n1. Movie 1 title\\n2. Movie 2 title\\n3. Movie 3 title\\n4. Movie 4 title\\n5. Movie 5 title\\n6. Movie 6 title\\n7. Movie 7 title\\n8. Movie 8 title\\n9. Movie 9 title\\n10. Movie 10 title\"}"
                         + "]"
                         + "}";
 
@@ -76,9 +76,9 @@ public class AiRecommendation2 {
                     in.close();
                     
                     // Print the response
-                    AiRecommendation2.aiMessage(response);
-                    break; // Successful response, exit the retry loop
-                } else if (responseCode == 429) {
+                    return AiRecommendation2.aiMessage(response);
+                    // Successful response, exit the retry loop
+                /* } else if (responseCode == 429) {
                     // Retry after the specified duration
                     int retryAfter = con.getHeaderFieldInt("Retry-After", -1);
                     if (retryAfter > 0) {
@@ -88,19 +88,20 @@ public class AiRecommendation2 {
                         System.out.println("Too Many Requests. Retrying after a short delay.");
                         Thread.sleep(5000); // Retry after a short delay if Retry-After is not provided
                     }
+                    */
                 } else {
                     // Handle other response codes if needed
-                    System.out.println("Unexpected response code: " + responseCode);
-                    break; 
+                    return("Unexpected response code: " + responseCode);
                 }
-            } catch (IOException | InterruptedException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
+                return "";
             }
-        }
+        } return "";
     }
      
      
-    public static void aiMessage(StringBuilder response) {
+    public static String aiMessage(StringBuilder response) {
         Gson gson = new Gson();
         JsonObject jo = gson.fromJson(response.toString(), JsonObject.class);
 
@@ -109,9 +110,9 @@ public class AiRecommendation2 {
                 .getAsJsonObject("message")
                 .get("content").getAsString();
 
-        System.out.println("\n\n" + content);
+        return "\n\n" + content;
     }
-    public static void chatGPT(String userMessage, String apiKey) {
+    /*public static void chatGPT(String userMessage, String apiKey) {
                 
         final var message = Message.builder().role(Role.USER)
                 .content(userMessage + "I want 10 movies suggestions and their tmdb ids of them").build();
@@ -120,5 +121,5 @@ public class AiRecommendation2 {
                 .model("gpt-3.5-turbo-0613")
                 .addMessage(message)  
                 .functionalCall(ChatRequest.AUTO);
-    }
+    }*/
 }
