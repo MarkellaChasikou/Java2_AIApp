@@ -213,5 +213,16 @@ public class Message {
         } catch (Exception e) {
             throw new Exception("Error deleting message: " + e.getMessage());
         }
-    }        
+    }
+    @Override
+    public String toString() {
+        return "Message{" +
+                "messageId=" + messageId +
+                ", userId=" + userId +
+                ", spoiler=" + spoiler +
+                ", text='" + text + '\'' +
+                ", chatroomId=" + chatroomId +
+                ", username='" + username + '\'' +
+                '}';
+    }       
 }

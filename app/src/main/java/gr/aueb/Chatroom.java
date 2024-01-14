@@ -363,11 +363,12 @@ private boolean isChatroomCreator(int userId) {
         return chatroom;
     }
 
-    
+    @Override
     public String toString() {
         return "Chatroom{" +
-                "roomId: " + roomId +
-                ", name: '" + name + '\'' +
+                "roomId=" + roomId +
+                ", name='" + name + '\'' +
+                ", createorId=" + createorId +
                 '}';
     }
 }

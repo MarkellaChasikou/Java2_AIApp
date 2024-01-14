@@ -232,4 +232,13 @@ public class MovieList {
             }
         }
     }
+    @Override
+    public String toString() {
+        return "MovieList{" +
+                "listType='" + listType + '\'' +
+                ", creatorId=" + creatorId +
+                ", listName='" + listName + '\'' +
+                ", listId=" + listId +
+                '}';
+    }    
 }
