@@ -3,10 +3,12 @@ package gr.aueb;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 public class Message {
-    private int id;
+    private int messageId;
+    private int userId;
     private boolean spoiler;
     private String text;
     private int chatroomId;
@@ -20,16 +22,20 @@ public class Message {
         this.user = user;
     } */     
 
-    public Message(int id, boolean spoiler, String text, int chatroomId, String username) {
-        this.id = id;
+    public Message(int messageId, int userId, boolean spoiler, String text, int chatroomId, String username) {
+        this.messageId = messageId;
+        this.userId = userId;
         this.spoiler = spoiler;
         this.text = text;
         this.chatroomId = chatroomId;
         this.username = username;    
     }
 
-    public int getId() {
-        return id;
+    public int getMessageId() {
+        return messageId;
+    }
+    public int getUserId() {
+        return userId;
     }
 
     public boolean getSpoiler() {
@@ -49,7 +55,7 @@ public class Message {
             con = db.getConnection();
             stmt = con.prepareStatement("UPDATE message SET spoiler=? WHERE id=?");
             stmt.setBoolean(1, spoiler);
-            stmt.setInt(2, id); 
+            stmt.setInt(2, messageId); 
             stmt.executeUpdate();
             System.out.println("Spoiler updated in the database");
         } catch (Exception e) {
@@ -90,7 +96,7 @@ public class Message {
             con = db.getConnection();
             stmt = con.prepareStatement("UPDATE message SET text=? WHERE id=?");
             stmt.setString(1, text);
-            stmt.setInt(2, id);
+            stmt.setInt(2, messageId);
             stmt.executeUpdate();
             System.out.println("Text updated in the database");
         } catch (Exception e) {
@@ -124,103 +130,90 @@ public class Message {
 
 
     //Add message Method
-    //Gets called always when constructor is used
-    public Message addMessage() throws Exception {
-        DB db = new DB();
-        try (Connection con = db.getConnection();
-             PreparedStatement stmt1 = con.prepareStatement("INSERT INTO message(roomId, userId, spoiler, text) VALUES(?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
-             PreparedStatement stmt2 = con.prepareStatement("INSERT INTO unseenmessage(userId, roomId, unSeenMessageId) VALUES(?,?,?)");
-             PreparedStatement stmtRoomMembers = con.prepareStatement("SELECT userId FROM chatroomuser WHERE roomId=?")) {
-    
-            stmt1.setInt(1, chatroomId);
-            stmt1.setInt(2, username);
-            stmt1.setBoolean(3, spoiler);
-            stmt1.setString(4, text);
-    
-            int affectedRows = stmt1.executeUpdate();
-    
-            if (affectedRows > 0) {
-                try (ResultSet generatedKeys = stmt1.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        int messageId = generatedKeys.getInt(1);
-    
-                        stmtRoomMembers.setInt(1, chatroomId);
-                        try (ResultSet rsRoomMembers = stmtRoomMembers.executeQuery()) {
-                            int excludeUserId = user.getId();
-                            while (rsRoomMembers.next()) {
-                                int roomMemberId = rsRoomMembers.getInt("userId");
-                                if (roomMemberId != excludeUserId) {
-                                    stmt2.setInt(1, roomMemberId);
-                                    stmt2.setInt(2, chatroomId);
-                                    stmt2.setInt(3, messageId);
-                                    stmt2.executeUpdate();
-                                }
-                            }
-                        }
-    
-                        // Retrieve the message details from the database using the generated message ID
-                        String retrieveMessageQuery = "SELECT * FROM message WHERE id=?";
-                        try (PreparedStatement stmtRetrieveMessage = con.prepareStatement(retrieveMessageQuery)) {
-                            stmtRetrieveMessage.setInt(1, messageId);
-                            try (ResultSet rsMessage = stmtRetrieveMessage.executeQuery()) {
-                                if (rsMessage.next()) {
-                                    int id = rsMessage.getInt("id");
-                                    boolean retrievedSpoiler = rsMessage.getBoolean("spoiler");
-                                    String messageText = rsMessage.getString("text");
-                                    int retrievedChatroomId = rsMessage.getInt("roomId");
-    
-                                    // Create and return the Message object
-                                    return new Message(id, retrievedSpoiler, messageText, retrievedChatroomId, user);
-                                }
-                            }
-                        }
-                    }
+    //Gets called instead of constructor
+    public static Message addMessage(int userId, boolean spoiler, String text, int chatroomId, String username) throws Exception {
+        try (
+            DB db = new DB();
+            Connection con = db.getConnection();
+            PreparedStatement stmt = con.prepareStatement("INSERT INTO Message (userId, spoiler, text, roomId, username) VALUES (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+        ) {
+            stmt.setInt(1, userId);
+            stmt.setBoolean(2, spoiler);
+            stmt.setString(3, text);
+            stmt.setInt(4, chatroomId);
+            stmt.setString(5, username);
+
+            int affectedRows = stmt.executeUpdate();
+
+            if (affectedRows == 0) {
+                throw new SQLException("Creating message failed, no rows affected.");
+            }
+
+            // Get the generated messageId
+            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    int messageId = generatedKeys.getInt(1);
+
+                    // Insert into UnSeenMessage for all other members of the chatroom
+                    insertIntoUnSeenMessage(chatroomId, userId, messageId);
+
+                    // Return a new Message object with the generated messageId and other fields
+                    return new Message(messageId, userId, spoiler, text, chatroomId, username);
+                } else {
+                    throw new SQLException("Creating message failed, no ID obtained.");
                 }
             }
         } catch (Exception e) {
             throw new Exception(e.getMessage());
-        } finally {
-            try {
-                db.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
-    
-        // Return null in case of an error or no message is retrieved
-        return null;
+    }
+
+    // Helper method to insert into UnSeenMessage for all other members of the chatroom
+    private static void insertIntoUnSeenMessage(int chatroomId, int senderUserId, int messageId) throws Exception {
+        try (
+            DB db = new DB();
+            Connection con = db.getConnection();
+            PreparedStatement stmt = con.prepareStatement("INSERT INTO UnSeenMessage (userId, roomId, UnSeenMessageId) SELECT userId, ?, ? FROM ChatroomUser WHERE roomId = ? AND userId <> ?");
+        ) {
+            stmt.setInt(1, chatroomId);
+            stmt.setInt(2, messageId);
+            stmt.setInt(3, chatroomId);
+            stmt.setInt(4, senderUserId);
+
+            stmt.executeUpdate();
+        } catch (Exception e) {
+            throw new Exception("Error inserting into UnSeenMessage: " + e.getMessage());
+        }
     }
             
     //Delete message Method
-    public static void deleteMessage(int messageId) throws Exception {
-        DB db = null;
-        Connection con = null;
-        PreparedStatement stmt = null;
-    
-        try {
-            db = new DB();
-            con = db.getConnection();
-            stmt = con.prepareStatement("DELETE FROM message WHERE id=?");
-            stmt.setInt(1, messageId);
-            stmt.executeUpdate();
-            System.out.println("Message deleted");
-        } catch (Exception e) {
-            throw new Exception(e.getMessage());
-        } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (con != null) {
-                    con.close();
-                }
-                if (db != null) {
-                    db.close();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+    public static void deleteMessage(Message message, int userId) throws Exception {
+        if (message.getUserId() != userId) {
+            throw new Exception("User does not have permission to delete this message.");
         }
-    }
-        
+
+        int messageId = message.getMessageId();
+        int chatroomId = message.getChatroomId();
+
+        try (
+            DB db = new DB();
+            Connection con = db.getConnection();
+            PreparedStatement stmtDeleteMessage = con.prepareStatement("DELETE FROM Message WHERE id = ?");
+            PreparedStatement stmtDeleteUnSeenMessage = con.prepareStatement("DELETE FROM UnSeenMessage WHERE UnSeenMessageId = ?");
+        ) {
+            // Delete from Message table
+            stmtDeleteMessage.setInt(1, messageId);
+            stmtDeleteMessage.executeUpdate();
+
+            // Delete from UnSeenMessage table
+            stmtDeleteUnSeenMessage.setInt(1, messageId);
+            stmtDeleteUnSeenMessage.executeUpdate();
+
+            // You can add more delete statements for other tables if needed
+
+            System.out.println("Message deleted successfully.");
+        } catch (Exception e) {
+            throw new Exception("Error deleting message: " + e.getMessage());
+        }
+    }        
 }

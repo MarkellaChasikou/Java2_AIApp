@@ -242,28 +242,28 @@ private boolean isChatroomCreator(int userId) {
     }
     
     
-
     //Get messages method
-    public static List<Message> getMessages(int chatroomId) throws Exception {
+    public List<Message> getMessages() throws Exception {
         List<Message> messages = new ArrayList<>();
 
         try (
             Connection con = new DB().getConnection();
             PreparedStatement stmt = con.prepareStatement(
-                    "SELECT message.id, message.text, message.spoiler, appuser.username " +
-                            "FROM message " +
-                            "JOIN appuser ON message.userId = appuser.userId " +
-                            "WHERE message.roomId=?");
+                    "SELECT id, userId, text, spoiler, username " +
+                            "FROM Message " +
+                            "JOIN AppUser ON Message.userId = AppUser.userId " +
+                            "WHERE roomId=?");
         ) {
-            stmt.setInt(1, chatroomId);
+            stmt.setInt(1, roomId);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     int messageId = rs.getInt("id");
+                    int userId = rs.getInt("userId");
                     String messageText = rs.getString("text");
                     boolean spoiler = rs.getBoolean("spoiler");
                     String senderUsername = rs.getString("username");
-                    Message message = new Message(messageId, spoiler, messageText, chatroomId, senderUsername);
+                    Message message = new Message(messageId, userId, spoiler, messageText, roomId, senderUsername);
                     messages.add(message);
                 }
             }
@@ -273,49 +273,44 @@ private boolean isChatroomCreator(int userId) {
 
         return messages;
     }
-
+        
     // Get unseen Messages method
-    public static List<Message> getUnseenMessage(int chatroomId, User user) throws Exception {
+    public List<Message> getUnseenMessages(int userId) throws Exception {
         List<Message> messages = new ArrayList<>();
-        DB db = new DB();
 
-        try (Connection con = db.getConnection();
+        try (DB db = new DB();
+            Connection con = db.getConnection();
             PreparedStatement stmt1 = con.prepareStatement(
-                    "SELECT message.id, message.text, message.spoiler, appuser.username " +
-                            "FROM message " +
-                            "JOIN unseenmessage ON unseenmessage.unSeenMessageId = message.id " +
-                            "JOIN appuser ON message.userId = appuser.userId " +
-                            "WHERE unseenmessage.userId=? AND unseenmessage.roomId =?");
+                    "SELECT Message.id, Message.userId, Message.text, Message.spoiler, AppUser.username " +
+                            "FROM Message " +
+                            "JOIN UnseenMessage ON UnseenMessage.UnSeenMessageId = Message.id " +
+                            "JOIN AppUser ON Message.userId = AppUser.userId " +
+                            "WHERE UnseenMessage.userId=? AND UnseenMessage.roomId =?");
             PreparedStatement stmt2 = con.prepareStatement(
-                    "DELETE FROM unseenmessage WHERE unseenmessage.userId=? AND unseenmessage.roomId =?");
+                    "DELETE FROM UnseenMessage WHERE UnseenMessage.userId=? AND UnseenMessage.roomId =?");
         ) {
-            stmt1.setInt(1, user.getId());
-            stmt1.setInt(2, chatroomId);
+            stmt1.setInt(1, userId);
+            stmt1.setInt(2, roomId);
 
             try (ResultSet rs = stmt1.executeQuery()) {
                 while (rs.next()) {
                     int messageId = rs.getInt("id");
+                    int senderUserId = rs.getInt("userId");
                     String messageText = rs.getString("text");
                     boolean spoiler = rs.getBoolean("spoiler");
                     String senderUsername = rs.getString("username");
-                    Message message = new Message(messageId, spoiler, messageText, chatroomId, senderUsername);
+                    Message message = new Message(messageId, senderUserId, spoiler, messageText, roomId, senderUsername);
                     messages.add(message);
                 }
             }
 
             if (!messages.isEmpty()) {
-                stmt2.setInt(1, user.getId());
-                stmt2.setInt(2, chatroomId);
+                stmt2.setInt(1, userId);
+                stmt2.setInt(2, roomId);
                 stmt2.executeUpdate();
             }
         } catch (Exception e) {
             throw new Exception(e.getMessage());
-        } finally {
-            try {
-                db.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
 
         return messages;
