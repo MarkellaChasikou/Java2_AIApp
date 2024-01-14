@@ -9,7 +9,7 @@ public class DB implements AutoCloseable{
 	private final String dbServerPort = "3306";
 	private final String dbName = "bugsbunny";
 	private final String dbusername = "root";
-	private final String dbpassword = "BugsBunny20232024";
+	private final String dbpassword = "120032003BbMp4";
 	private Connection con = null;
 	
 	//Establishes a connection with the database, initializes and returns
