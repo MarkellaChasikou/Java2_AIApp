@@ -14,15 +14,24 @@ public class BonusContent {
 
 
     public static void searchAndPrintVideo(String searchQuery, String category, String apiKey ) {
+        if (apiKey == null) {
+            throw new IllegalArgumentException("ApiKey cannot be null or empty.");
+        }
+        if (searchQuery == null) {
+            throw new IllegalArgumentException("Search Query cannot be null or empty.");
+        }
+        if (category == null) {
+            throw new IllegalArgumentException("category cannot be null or empty.");
+        }
         try {
 
             String searchUrl = "https://www.googleapis.com/youtube/v3/search?part=snippet&q=" +
-            
-                    URLEncoder.encode( searchQuery + " " + category, StandardCharsets.UTF_8)   +
-                    "&type=video&key=" + apiKey;
+                URLEncoder.encode(searchQuery + " " + category, "UTF-8") +
+                "&type=video&key=" + apiKey;
 
-            InputStream input = new URL(searchUrl).openStream();
-            JsonArray items = JsonParser.parseReader(new InputStreamReader(input, "UTF-8")).getAsJsonObject().getAsJsonArray("items");
+        InputStream input = new URL(searchUrl).openStream();
+        JsonArray items = JsonParser.parseReader(new InputStreamReader(input, "UTF-8")).getAsJsonObject().getAsJsonArray("items");
+
 
 
             if (items.size() > 0) {
