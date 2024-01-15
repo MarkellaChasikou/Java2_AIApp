@@ -185,59 +185,59 @@ public class User {
         }
     }*/
 
-    //Follow user
-    public void followUser(String follow_user) {
-        try (DB db = new DB();
-             Connection con = db.getConnection();
-             PreparedStatement stmt1 = con.prepareStatement("SELECT * FROM AppUser WHERE username=?");
-             ResultSet rs = stmt1.executeQuery()) {
-    
-            stmt1.setString(1, follow_user);
-    
-            if (!rs.next()) {
-                throw new Exception("There is no user with username: " + follow_user);
-            }
-    
-            int follow_id = rs.getInt("userId");
-    
-            try (PreparedStatement stmt2 = con.prepareStatement("INSERT INTO Followers (followedId, followerId) VALUES(?, ?)")) {
-                stmt2.setInt(1, follow_id);
-                stmt2.setInt(2, id);
-                stmt2.executeUpdate();
-                System.out.println("You follow " + follow_user);
-            }
-    
-        } catch (Exception e) {
-            e.printStackTrace();
+// Follow user
+public void followUser(String follow_user) throws Exception {
+    try (DB db = new DB();
+         Connection con = db.getConnection();
+         PreparedStatement stmt1 = con.prepareStatement("SELECT * FROM AppUser WHERE username=?")) {
+
+        stmt1.setString(1, follow_user);
+        ResultSet rs = stmt1.executeQuery();
+
+        if (!rs.next()) {
+            throw new Exception("There is no user with username: " + follow_user);
         }
-    }
-    
-    //Unfollow user
-    public void unfollowUser(String unfollow_user) {
-        try (DB db = new DB();
-             Connection con = db.getConnection();
-             PreparedStatement stmt1 = con.prepareStatement("SELECT * FROM AppUser WHERE username=?");
-             ResultSet rs = stmt1.executeQuery()) {
-    
-            stmt1.setString(1, unfollow_user);
-    
-            if (!rs.next()) {
-                throw new Exception("There is no user with username: " + unfollow_user);
-            }
-    
-            int unfollow_id = rs.getInt("userId");
-    
-            try (PreparedStatement stmt2 = con.prepareStatement("DELETE FROM Followers WHERE followedId = ? AND followerId = ?")) {
-                stmt2.setInt(1, unfollow_id);
-                stmt2.setInt(2, id);
-                stmt2.executeUpdate();
-                System.out.println("You have just unfollow " + unfollow_user);
-            }
-    
-        } catch (Exception e) {
-            e.printStackTrace();
+
+        int follow_id = rs.getInt("userId");
+
+        try (PreparedStatement stmt2 = con.prepareStatement("INSERT INTO Followers (followedId, followerId) VALUES(?, ?)")) {
+            stmt2.setInt(1, follow_id);
+            stmt2.setInt(2, id);
+            stmt2.executeUpdate();
+            System.out.println("You follow " + follow_user);
         }
+
+    } catch (SQLException e) {
+        e.printStackTrace(); 
     }
+}
+
+// Unfollow user
+public void unfollowUser(String unfollow_user) throws Exception {
+    try (DB db = new DB();
+         Connection con = db.getConnection();
+         PreparedStatement stmt1 = con.prepareStatement("SELECT * FROM AppUser WHERE username=?")) {
+
+        stmt1.setString(1, unfollow_user);
+        ResultSet rs = stmt1.executeQuery();
+
+        if (!rs.next()) {
+            throw new Exception("There is no user with username: " + unfollow_user);
+        }
+
+        int unfollow_id = rs.getInt("userId");
+
+        try (PreparedStatement stmt2 = con.prepareStatement("DELETE FROM Followers WHERE followedId = ? AND followerId = ?")) {
+            stmt2.setInt(1, unfollow_id);
+            stmt2.setInt(2, id);
+            stmt2.executeUpdate();
+            System.out.println("You have just unfollow " + unfollow_user);
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace(); 
+    }
+}
 
     //Get Followings Method
     public List<String> getFollowing() throws Exception {
