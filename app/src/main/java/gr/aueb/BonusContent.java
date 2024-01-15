@@ -41,17 +41,25 @@ public class BonusContent {
      *                    "Behind the Scenes", "Interviews").
      * @param apiKey      The API key required for accessing the YouTube Data API.
      */
-    public static void searchAndPrintVideo(String searchQuery, String category, String apiKey) {
+    public static void searchAndPrintVideo(String searchQuery, String category, String apiKey ) {
+        if (apiKey == null) {
+            throw new IllegalArgumentException("ApiKey cannot be null or empty.");
+        }
+        if (searchQuery == null) {
+            throw new IllegalArgumentException("Search Query cannot be null or empty.");
+        }
+        if (category == null) {
+            throw new IllegalArgumentException("category cannot be null or empty.");
+        }
         try {
 
             String searchUrl = "https://www.googleapis.com/youtube/v3/search?part=snippet&q=" +
-            
-                    URLEncoder.encode( searchQuery + " " + category, StandardCharsets.UTF_8)   +
-                    "&type=video&key=" + apiKey;
+                URLEncoder.encode(searchQuery + " " + category, "UTF-8") +
+                "&type=video&key=" + apiKey;
 
-            InputStream input = new URL(searchUrl).openStream();
-            JsonArray items = JsonParser.parseReader(new InputStreamReader(input)).getAsJsonObject()
-                    .getAsJsonArray("items");
+        InputStream input = new URL(searchUrl).openStream();
+        JsonArray items = JsonParser.parseReader(new InputStreamReader(input, "UTF-8")).getAsJsonObject().getAsJsonArray("items");
+
 
             if (items.size() > 0) {
                 System.out.println("Videos for the category '" + category + "':");
