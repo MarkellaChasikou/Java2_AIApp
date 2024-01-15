@@ -38,16 +38,14 @@ public class Message {
     /** The username of the user who sent the message. */
     private String username;
 
-    /**
-     * Constructs a Message object with specified attributes.
-     * 
-     * @param messageId  The unique identifier for the message.
-     * @param userId     The user ID associated with the message.
-     * @param spoiler    The spoiler status of the message.
-     * @param text       The text content of the message.
-     * @param chatroomId The chatroom ID associated with the message.
-     * @param username   The username of the user who sent the message.
-     */
+    /*public Message(boolean spoiler, String text, int chatroomId, User user) {
+        this.spoiler = spoiler;
+        this.text = text;
+        this.chatroomId = chatroomId;
+        this.user = user;
+    } */     
+    
+    /** Constructs a Message object with specified attributes. */
     public Message(int messageId, int userId, boolean spoiler, String text, int chatroomId, String username) {
         this.messageId = messageId;
         this.userId = userId;
