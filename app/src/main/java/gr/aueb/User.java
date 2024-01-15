@@ -397,8 +397,8 @@ public void unfollowUser(String unfollow_user) throws Exception {
         return createdChatrooms;
     }
         //Get List Method
-    public List<String> getLists() throws Exception {
-        List<String> lists = new ArrayList<String>();
+    public ArrayList<String> getLists() throws Exception {
+        ArrayList<String> lists = new ArrayList<String>();
         DB db = new DB();
         Connection con = null;
         String query = "SELECT DISTINCT name FROM List WHERE userId=?;";
@@ -439,8 +439,8 @@ public void unfollowUser(String unfollow_user) throws Exception {
             return false; 
         }
     }
-    public static List<User> getUsersWithPartialUsername(String partialUsername) {
-        List<User> users = new ArrayList<>();
+    public static ArrayList<User> getUsersWithPartialUsername(String partialUsername) {
+        ArrayList<User> users = new ArrayList<>();
     
         try (DB db = new DB();
              Connection con = db.getConnection();
