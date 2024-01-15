@@ -424,6 +424,50 @@ public void unfollowUser(String unfollow_user) throws Exception {
             }
         }
     }
+    public static boolean doesUsernameExist(String username) throws Exception {
+        try (DB db = new DB();
+             Connection con = db.getConnection();
+             PreparedStatement stmt = con.prepareStatement("SELECT username FROM AppUser WHERE username = ?")) {
+    
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+    
+            return rs.next(); // If rs.next() is true, the username already exists; otherwise, it doesn't.
+    
+        } catch (SQLException e) {
+            e.printStackTrace(); 
+            return false; 
+        }
+    }
+    public static List<User> getUsersWithPartialUsername(String partialUsername) {
+        List<User> users = new ArrayList<>();
+    
+        try (DB db = new DB();
+             Connection con = db.getConnection();
+             PreparedStatement stmt = con.prepareStatement("SELECT * FROM AppUser WHERE username LIKE ?")) {
+    
+            stmt.setString(1, "%" + partialUsername + "%");
+            ResultSet rs = stmt.executeQuery();
+    
+            while (rs.next()) {
+                int userId = rs.getInt("userId");
+                String username = rs.getString("username");
+                String password = rs.getString("pass_word");
+                String country = rs.getString("country");
+                User user = new User(userId, username, password, country);
+                users.add(user);
+            }
+    
+        } catch (SQLException e) {
+            e.printStackTrace(); 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    
+        return users;
+    }
+    
+    
     @Override
     public String toString() {
         return "User{" +
