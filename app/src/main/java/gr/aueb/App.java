@@ -122,6 +122,7 @@ public class App {
         TreeMap<String, String> countries = Country.allCountriesNames(tmdbApiKey);
         int i = 0;
         String[] keys = new String[countries.size()];
+        System.out.println();
         for (String s : countries.keySet()) {
             i++;
             System.out.printf("%3d. %s (%s)\n", i, s, countries.get(s));
@@ -267,32 +268,32 @@ public class App {
             do {
                 System.out.println("\nType your search or press 0 to return to the main menu ");
                 userMessage = scanner.nextLine();
-    
+                /* 
                 if (!userMessage.equals("0")) {
                     do {
-                        //ArrayList<User> users = method;
-                        //if (!users.isEmpty()) {
-                            //User u = method2
-                            //if (!u.equals(0)) {
-                                //do {
-                                    //System.out.println(u.getUsername() + "\n\n");
-                                    //displayUserMenu();
-                                    //int choice = scanner.nextInt();
-                                    //scanner.nextLine();
-                                    //if(choice != 0) {
-                                        //friendCaseMethod
-                                    //}
-                                //} while(choice != 0);
-                            //} else
-                                //break;
-                        //} else sysout "No users found"
+                        ArrayList<User> users = User.getUsersWithPartialUsername(userMessage);
+                        if (!users.isEmpty()) {
+                            User u = method2
+                            if (!u.equals(0)) {
+                                do {
+                                    System.out.println(u.getUsername() + "\n\n");
+                                    displayUserMenu();
+                                    int choice = scanner.nextInt();
+                                    scanner.nextLine();
+                                    if(choice != 0) {
+                                        friendCaseMethod
+                                    }
+                                } while(choice != 0);
+                            } else
+                                break;
+                        } else sysout "No users found"
                     } while (true);
-                }
+                }*/
             } while (!userMessage.equals("0"));
         }
     }
 
-    public static void mainCase4(Scanner scanner) {
+    public static void mainCase4(Scanner scanner) throws Exception {
         if(guest) {
             System.out.println("Exiting the application.");
             System.exit(0);
@@ -307,20 +308,67 @@ public class App {
         } 
     }
 
-    public static void caseProfile(Scanner scanner, int choice) {
+    public static void caseProfile(Scanner scanner, int choice) throws Exception {
         switch (choice) {
             case 0:
                 break;
             case 1:
                 currentUser = null;
                 skipStartMenu = false;
-            case 2: 
+                break;
+            case 5: 
+                do {
+                    System.out.println("\nYour lists: ");
+                    String list = chooseList(scanner);
+                    if(!list.equals("0")) {
+                        ArrayList<String> movies = MovieList.getMoviesFromList(list);
+                        do {
+                            for (int i = 0; i < movies.size(); i++) {
+                                System.out.printf("%3d. %s", i + 1, movies.get(i));
+                            }
+                            //method for movie ids
+                            //Movie m = (Movie)pick(scanner, ids);
+                            //if(!m.equals(0)) mainCase2CheckObjectType(scanner, m);
+                            //else break;
+                        } while (true);
+                    } else break;
+                } while(true);
+                break;
+            case 9: 
+                int choice2;
+                do {
+                    TreeMap<String, String> countries = Country.allCountriesNames(tmdbApiKey);
+                    System.out.println("Your country: " + countries.get(currentUser.getCountry()) + "\n");
+                    displayCountryMenu();
+                    choice2 = scanner.nextInt();
+                    scanner.nextLine();
+                    if(choice2 == 1) {
+                        String newCountry = chooseCountry(scanner);
+                        if(!newCountry.equals("0")) {
+                            currentUser.setCountry(newCountry, currentUser.getPassword());
+                        }
+                    } else break;
+                } while(true);
+                break;
             default:
                 break;
         }
     }
 
-
+    private static String chooseList(Scanner scanner) throws Exception {
+        ArrayList<String> movieLists = currentUser.getLists();
+        for (int i = 0; i < movieLists.size(); i++) {
+             System.out.printf("%3d. %s", i + 1, movieLists.get(i));
+        }
+        System.out.println("\nEnter your choice or press 0 to go back ");
+        int choice = scanner.nextInt();
+        scanner.nextLine();
+        if(choice == 0) {
+            return "0";
+        } else {
+            return movieLists.get(choice - 1);
+        }
+    }
 
     /**
      * Handles the user options related to a Person.
@@ -725,7 +773,7 @@ public class App {
         System.out.println("3. Seen");
         System.out.println("4. Favourites");
         System.out.println("5. Your lists");
-        System.out.println("6 your reviews");
+        System.out.println("6. Your reviews");
         System.out.println("7. Your followers");
         System.out.println("8. You follow");
         System.out.println("9. Your country");
