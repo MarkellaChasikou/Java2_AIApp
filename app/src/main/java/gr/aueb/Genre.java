@@ -11,10 +11,10 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.HashMap;
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -62,17 +62,15 @@ public class Genre {
                 .build();
 
         try {
-            HttpResponse<String> response = HttpClient.newHttpClient().send(request,
-                    HttpResponse.BodyHandlers.ofString());
-            JsonElement element = JsonParser.parseString(response.body());
-            JsonObject jsonObject = element.getAsJsonObject();
-            JsonArray resultsArray = jsonObject.getAsJsonArray("results");
-
-            for (JsonElement g : resultsArray) {
-                JsonObject countryObject = g.getAsJsonObject();
-                int id = countryObject.get("id").getAsInt();
-                String name = countryObject.get("name").getAsString();
-
+            HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+            Gson gson = new Gson();
+            JsonObject jsonObject = gson.fromJson(response.body(), JsonObject.class);
+            JsonArray genresArray = jsonObject.getAsJsonArray("genres");
+            
+            for (JsonElement genreElement : genresArray) {
+                JsonObject genreObject = genreElement.getAsJsonObject();
+                int id = genreObject.get("id").getAsInt();
+                String name = genreObject.get("name").getAsString();
                 genres.put(id, name);
             }
 

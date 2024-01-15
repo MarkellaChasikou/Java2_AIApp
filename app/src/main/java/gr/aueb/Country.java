@@ -6,7 +6,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.TreeMap;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -26,8 +26,8 @@ public class Country {
     private ArrayList<Provider> rent;
 
 
-    public static HashMap<String, String> allCountriesNames(String apiKey)  {
-        HashMap<String, String> countries = new HashMap<>();
+    public static TreeMap<String, String> allCountriesNames(String apiKey)  {
+        TreeMap<String, String> countries = new TreeMap<>();
         
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create("https://api.themoviedb.org/3/watch/providers/regions?language=en-US"))
@@ -35,9 +35,8 @@ public class Country {
             .header("Authorization", "Bearer " + apiKey)
             .method("GET", HttpRequest.BodyPublishers.noBody())
             .build();
-        HttpResponse<String> response;
         try {
-            response = HttpClient.newHttpClient()
+            HttpResponse<String> response = HttpClient.newHttpClient()
                 .send(request, HttpResponse.BodyHandlers.ofString());
             JsonElement element = JsonParser.parseString(response.body());
             JsonObject jsonObject = element.getAsJsonObject();
