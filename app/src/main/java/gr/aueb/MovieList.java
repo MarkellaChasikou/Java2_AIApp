@@ -1,18 +1,20 @@
 package gr.aueb;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MovieList {
     private String listType; // Τύπος λίστας (public ή private)
     private final int creatorId;
     private String listName;
     private final int listId; // ID του δημιουργού της λίστας
-
 
     public MovieList(String listType, int creatorId, String listName, int listId) {
         this.listType = listType;
@@ -21,12 +23,61 @@ public class MovieList {
         this.listId = listId;
     }
 
+    public void setListType(String listType, int userId) throws Exception {
+        if (userId == creatorId) {
+            this.listType = listType;
+            updateListTypeInDatabase();
+        } else {
+            throw new Exception("User does not have permission to change the list type.");
+        }
+    }
+
+    public void setListName(String listName, int userId) throws Exception {
+        if (userId == creatorId) {
+            this.listName = listName;
+            updateListNameInDatabase();
+        } else {
+            throw new Exception("User does not have permission to change the list name.");
+        }
+    }
+
+    // Database update methods
+    private void updateListTypeInDatabase() throws Exception {
+        try (DB db = new DB();
+                Connection con = db.getConnection();
+                PreparedStatement stmt = con.prepareStatement("UPDATE List SET listType = ? WHERE list_id = ?")) {
+
+            stmt.setString(1, listType);
+            stmt.setInt(2, listId);
+            stmt.executeUpdate();
+
+            System.out.println("List type updated in the database");
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+    }
+
+    private void updateListNameInDatabase() throws Exception {
+        try (DB db = new DB();
+                Connection con = db.getConnection();
+                PreparedStatement stmt = con.prepareStatement("UPDATE List SET name = ? WHERE list_id = ?")) {
+
+            stmt.setString(1, listName);
+            stmt.setInt(2, listId);
+            stmt.executeUpdate();
+
+            System.out.println("List name updated in the database");
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+    }
+
     // Create List Method
     public static MovieList createList(String listType, String listName, int creatorId) throws Exception {
         int listId;
 
         try (DB db = new DB();
-             Connection con = db.getConnection()) {
+                Connection con = db.getConnection()) {
 
             String query = "SELECT * FROM List WHERE name=? AND userId=?;";
             String insertSql = "INSERT INTO List(listType, name, userId) VALUES (?,?,?)";
@@ -69,8 +120,9 @@ public class MovieList {
     }
 
     // Add to List Method
-    public void addToList(String listName, String movieName, String movieId, int userId) throws Exception {
+    public void addToList(String movieName, String movieId, int userId) throws Exception {
         int listId;
+
         try (DB db = new DB(); Connection con = db.getConnection()) {
             String query = "SELECT list_id FROM List WHERE name=? AND userId=?;";
             String sql = "INSERT INTO MoviesList (list_id, movieName, movieId) VALUES (?,?,?);";
@@ -101,13 +153,15 @@ public class MovieList {
     }
 
     // Get Movies From List Method
-    public List<String> getMoviesFromList(String listName) throws Exception {
+    public Map<String, String> getMoviesFromList(String listName) throws Exception {
         int listId;
-        List<String> movies = new ArrayList<>();
+        Map<String, String> movies = new HashMap<>();
+
         try (DB db = new DB(); Connection con = db.getConnection()) {
             String query1 = "SELECT list_id FROM List WHERE name=?;";
-            String query2 = "SELECT movieName FROM MoviesList WHERE list_id=?;";
+            String query2 = "SELECT movieName, movieId FROM MoviesList WHERE list_id=?;";
 
+            // Get the list ID
             try (PreparedStatement stmt1 = con.prepareStatement(query1)) {
                 stmt1.setString(1, listName);
                 try (ResultSet rs1 = stmt1.executeQuery()) {
@@ -118,11 +172,14 @@ public class MovieList {
                 }
             }
 
+            // Get movies from the list
             try (PreparedStatement stmt2 = con.prepareStatement(query2)) {
                 stmt2.setInt(1, listId);
                 try (ResultSet rs2 = stmt2.executeQuery()) {
                     while (rs2.next()) {
-                        movies.add(rs2.getString("movieName"));
+                        String movieName = rs2.getString("movieName");
+                        String movieId = rs2.getString("movieId");
+                        movies.put(movieName, movieId);
                     }
                 }
             }
@@ -134,18 +191,18 @@ public class MovieList {
     }
 
     // Delete List Method
-    public void deleteList(String listName, int userId) throws Exception {
+    public void deleteList(int userId) throws Exception {
         try (DB db = new DB(); Connection con = db.getConnection()) {
-            String sql = "DELETE FROM list WHERE userId=? AND name=?;";
+            String sql = "DELETE FROM list WHERE userId=? AND list_id=?;";
             try (PreparedStatement stmt = con.prepareStatement(sql)) {
                 stmt.setInt(1, userId);
-                stmt.setString(2, listName);
+                stmt.setInt(2, listId);
                 int rowsAffected = stmt.executeUpdate();
 
                 if (rowsAffected > 0) {
-                    System.out.println("List: " + listName + " deleted successfully");
+                    System.out.println("List deleted successfully");
                 } else {
-                    throw new Exception("List " + listName + " not found or user is not the creator.");
+                    throw new Exception("List not found or user is not the creator.");
                 }
             }
         } catch (Exception e) {
@@ -154,21 +211,18 @@ public class MovieList {
     }
 
     // Remove movie from List Method
-    public void removeMovie(String movieName, String listName, int userId) throws Exception {
-        int listId;
+    public void removeMovie(String movieName, int userId) throws Exception {
         try (DB db = new DB(); Connection con = db.getConnection()) {
-            String query = "SELECT list_id FROM List WHERE name=? AND userId=?;";
+            String query = "SELECT userId FROM List WHERE list_id=?;";
             String sql = "DELETE FROM MoviesList WHERE list_id=? AND movieName=?;";
 
             // Check if the user is the creator of the list
             try (PreparedStatement checkStmt = con.prepareStatement(query)) {
-                checkStmt.setString(1, listName);
-                checkStmt.setInt(2, userId);
+                checkStmt.setInt(1, listId);
                 try (ResultSet rs = checkStmt.executeQuery()) {
-                    if (!rs.next()) {
+                    if (!rs.next() || rs.getInt("userId") != userId) {
                         throw new Exception("User is not the creator of the list or the list does not exist.");
                     }
-                    listId = rs.getInt("list_id");
                 }
             }
 
@@ -179,20 +233,21 @@ public class MovieList {
                 int rowsAffected = stmt.executeUpdate();
 
                 if (rowsAffected > 0) {
-                    System.out.println("Movie " + movieName + " deleted successfully");
+                    System.out.println("Movie deleted successfully");
                 } else {
-                    throw new Exception("Movie " + movieName + " not found in the list.");
+                    throw new Exception("Movie not found in the list.");
                 }
             }
         } catch (Exception e) {
             throw new Exception(e.getMessage());
         }
     }
-        // Retrieve Movie Lists Method
+
+    // Retrieve Movie Lists Method
     public static List<MovieList> getMovieLists(int userId) throws Exception {
         List<MovieList> movieLists = new ArrayList<>();
         try (DB db = new DB();
-             Connection con = db.getConnection()) {
+                Connection con = db.getConnection()) {
 
             String sql = "SELECT * FROM List WHERE listType IN ('public', 'protected') AND userId=?";
             try (PreparedStatement stmt = con.prepareStatement(sql)) {
@@ -232,6 +287,7 @@ public class MovieList {
             }
         }
     }
+
     @Override
     public String toString() {
         return "MovieList{" +
@@ -240,5 +296,5 @@ public class MovieList {
                 ", listName='" + listName + '\'' +
                 ", listId=" + listId +
                 '}';
-    }    
+    }
 }
