@@ -548,6 +548,36 @@ public class User {
         }
     }
 
+    // Method to get all user reviews ordered by movie ID
+    public List<Review> getAllUserReviewsOrderedByMovieId() throws Exception {
+        List<Review> userReviews = new ArrayList<>();
+
+        try (DB db = new DB(); Connection con = db.getConnection()) {
+            String sql = "SELECT reviewId, movieId, reviewText, rating, spoiler FROM Review WHERE userId=? ORDER BY movieId;";
+
+            try (PreparedStatement stmt = con.prepareStatement(sql)) {
+                stmt.setInt(1, id);
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        int reviewId = rs.getInt("reviewId");
+                        int movieId = rs.getInt("movieId");
+                        String reviewText = rs.getString("reviewText");
+                        float rating = rs.getFloat("rating");
+                        boolean spoiler = rs.getBoolean("spoiler");
+
+                        Review review = new Review(reviewId, id, movieId, reviewText, rating, spoiler);
+                        userReviews.add(review);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+
+        return userReviews;
+    }
+
     @Override
     public String toString() {
         return "User{" +
