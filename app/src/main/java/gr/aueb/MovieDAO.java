@@ -34,8 +34,8 @@ public class MovieDAO {
      * @return A list of reviews for the specified movie.
      * @throws Exception If an error occurs during database interaction.
      */
-    public static List<Review> getAllReviewsForMovie(int movieId) throws Exception {
-        List<Review> reviews = new ArrayList<>();
+    public static ArrayList<Review> getAllReviewsForMovie(int movieId) throws Exception {
+        ArrayList<Review> reviews = new ArrayList<>();
 
         try (DB db = new DB();
                 Connection con = db.getConnection();
@@ -68,8 +68,8 @@ public class MovieDAO {
      * @return A list of spoiler-free reviews for the specified movie.
      * @throws Exception If an error occurs during database interaction.
      */
-    public static List<Review> getSpoilerFreeReviewsForMovie(int movieId) throws Exception {
-        List<Review> spoilerFreeReviews = new ArrayList<>();
+    public static ArrayList<Review> getSpoilerFreeReviewsForMovie(int movieId) throws Exception {
+        ArrayList<Review> spoilerFreeReviews = new ArrayList<>();
 
         try (DB db = new DB();
                 Connection con = db.getConnection();

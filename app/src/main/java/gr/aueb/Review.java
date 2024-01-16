@@ -167,8 +167,8 @@ public class Review {
         }
     }
 
-    public static List<Review> getReviewsByUserAndMovie(int userId, int movieId) throws Exception {
-        List<Review> reviews = new ArrayList<>();
+    public static ArrayList<Review> getReviewsByUserAndMovie(int userId, int movieId) throws Exception {
+        ArrayList<Review> reviews = new ArrayList<>();
 
         try (
                 DB db = new DB();
