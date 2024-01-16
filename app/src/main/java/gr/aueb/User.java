@@ -453,31 +453,32 @@ public class User {
     }
 
     // Get List Method
-    public ArrayList<String> getLists() throws Exception {
-        ArrayList<String> lists = new ArrayList<String>();
-        DB db = new DB();
-        Connection con = null;
-        String query = "SELECT DISTINCT name FROM List WHERE userId=?;";
-        try {
-            con = db.getConnection();
-            PreparedStatement stmt = con.prepareStatement(query);
-            stmt.setInt(1, id);
-            ResultSet rs = stmt.executeQuery();
+    public ArrayList<MovieList> getLists() throws Exception {
+        ArrayList<MovieList> movieLists = new ArrayList<>();
 
-            while (rs.next()) {
-                lists.add(rs.getString("name"));
+        try (DB db = new DB(); Connection con = db.getConnection()) {
+            String query = "SELECT * FROM List WHERE userId=?;";
+
+            try (PreparedStatement stmt = con.prepareStatement(query)) {
+                stmt.setInt(1, id);
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        String listType = rs.getString("listType");
+                        String listName = rs.getString("name");
+                        int listId = rs.getInt("list_id");
+                        int creatorId = rs.getInt("userId");
+
+                        // Create and add MovieList object
+                        MovieList movieList = new MovieList(listType, creatorId, listName, listId);
+                        movieLists.add(movieList);
+                    }
+                }
             }
-            rs.close();
-            stmt.close();
-            return lists;
+
+            return movieLists;
         } catch (Exception e) {
             throw new Exception(e.getMessage());
-        } finally {
-            try {
-                db.close();
-            } catch (Exception e) {
-
-            }
         }
     }
 

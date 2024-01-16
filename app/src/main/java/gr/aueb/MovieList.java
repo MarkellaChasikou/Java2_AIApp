@@ -22,19 +22,22 @@ public class MovieList {
         this.listName = listName;
         this.listId = listId;
     }
+
     public String getListType() {
         return listType;
     }
+
     public int getCreatorId() {
         return creatorId;
     }
+
     public String getListName() {
         return listName;
     }
+
     public int getListId() {
         return listId;
     }
-
 
     public void setListType(String listType, int userId) throws Exception {
         if (userId == creatorId) {
@@ -299,6 +302,29 @@ public class MovieList {
                 return followerRs.next();
             }
         }
+    }
+
+    // Check if the movie with the given name or ID exists in the list
+    public boolean containsMovie(String movieName, String movieId) throws Exception {
+        try (DB db = new DB(); Connection con = db.getConnection()) {
+            String sql = "SELECT COUNT(*) AS count FROM MoviesList WHERE list_id=? AND (movieName=? OR movieId=?);";
+
+            try (PreparedStatement stmt = con.prepareStatement(sql)) {
+                stmt.setInt(1, listId);
+                stmt.setString(2, movieName);
+                stmt.setString(3, movieId);
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        int count = rs.getInt("count");
+                        return count > 0;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        return false;
     }
 
     @Override
