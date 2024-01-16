@@ -191,7 +191,7 @@ public class ReviewTest {
 
        // Aυτό θα ελέγξει αν υπάρχει κάποια κριτική με το ίδιο reviewId στη λίστα retrievedReviews.
         assertTrue(retrievedReviews.stream().anyMatch(r -> r.getReviewId() == review.getReviewId()));
-    }c
+    }
 
  @Test
     public void getReviewsByUserAndMovieNoMatchTest() throws Exception {
