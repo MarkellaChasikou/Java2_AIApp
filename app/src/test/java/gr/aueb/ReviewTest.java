@@ -24,13 +24,21 @@ public class ReviewTest {
     private static Review review;
     private static Connection connection;
     private static Review reviewDelete;
-    File tmdbFile = new File("c:/Users/Βασιλης/OneDrive/Υπολογιστής/apiKeys/tmdb_api_key.txt");
+    static File tmdbFile = new File("c:/Users/Βασιλης/OneDrive/Υπολογιστής/apiKeys/tmdb_api_key.txt");
+
+   
     @BeforeAll
     public static void CreateInserts() throws Exception {
         DB db = new DB(); 
         connection = db.getConnection();
         // αυτη εδω η review για να την κανω delete 
         reviewDelete = new Review(1, 5, 1, "Sample review text", 8, false);
+        try (BufferedReader br = new BufferedReader(new FileReader(tmdbFile))) {
+            tmdbApiKey = br.readLine();
+        } catch (Exception e) {
+            System.err.println("Error reading YouTube API key file.");
+            System.exit(1);
+        }
         movie = new Movie(389,tmdbApiKey );
     }
    
@@ -68,7 +76,7 @@ public class ReviewTest {
             try {
             // Έλεγχος αν η εγγραφή έγινε σωστά
             assertNotNull(review);
-            assertEquals(389 ,review.getMovieId() );
+            assertEquals(movie.getMd().getId() ,review.getMovieId() );
            assertEquals(9, review.getRating());
             assertEquals(false, review.isSpoiler());
         } catch (Exception e) {
@@ -187,7 +195,7 @@ public class ReviewTest {
  @Test
     public void getReviewsByUserAndMovieTest() throws Exception {
         // Εκτελεί τη μέθοδο για να ανακτήσει τις κριτικές
-        List<Review> retrievedReviews = Review.getReviewsByUserAndMovie(review.getUserId(), 389);
+        List<Review> retrievedReviews = Review.getReviewsByUserAndMovie(review.getUserId(),movie.getMd().getId());
 
        // Aυτό θα ελέγξει αν υπάρχει κάποια κριτική με το ίδιο reviewId στη λίστα retrievedReviews.
         assertTrue(retrievedReviews.stream().anyMatch(r -> r.getReviewId() == review.getReviewId()));
