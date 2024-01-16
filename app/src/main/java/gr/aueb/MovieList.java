@@ -169,32 +169,19 @@ public class MovieList {
     }
 
     // Get Movies From List Method
-    public Map<String, Integer> getMoviesFromList(String listName) throws Exception {
-        int listId;
+    public Map<String, Integer> getMoviesFromList() throws Exception {
         Map<String, Integer> movies = new HashMap<>();
 
         try (DB db = new DB(); Connection con = db.getConnection()) {
-            String query1 = "SELECT list_id FROM List WHERE name=?;";
-            String query2 = "SELECT movieName, movieId FROM MoviesList WHERE list_id=?;";
-
-            // Get the list ID
-            try (PreparedStatement stmt1 = con.prepareStatement(query1)) {
-                stmt1.setString(1, listName);
-                try (ResultSet rs1 = stmt1.executeQuery()) {
-                    if (!rs1.next()) {
-                        throw new Exception("List " + listName + " not found.");
-                    }
-                    listId = rs1.getInt("list_id");
-                }
-            }
+            String query = "SELECT movieName, movieId FROM MoviesList WHERE list_id=?;";
 
             // Get movies from the list
-            try (PreparedStatement stmt2 = con.prepareStatement(query2)) {
-                stmt2.setInt(1, listId);
-                try (ResultSet rs2 = stmt2.executeQuery()) {
-                    while (rs2.next()) {
-                        String movieName = rs2.getString("movieName");
-                        int movieId = rs2.getInt("movieId");
+            try (PreparedStatement stmt = con.prepareStatement(query)) {
+                stmt.setInt(1, listId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        String movieName = rs.getString("movieName");
+                        int movieId = rs.getInt("movieId");
                         movies.put(movieName, movieId);
                     }
                 }
