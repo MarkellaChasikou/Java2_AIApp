@@ -442,7 +442,7 @@ public class App {
                 break;
             case 1:
                 System.out.println("Remove a movie ");
-                movies = MovieList.getMoviesFromList(list);
+                movies = new ArrayList<>(); //MovieList.getMoviesFromList(list);
                 do {
                     for (int i = 0; i < movies.size(); i++) {
                         System.out.printf("%3d. %s", i + 1, movies.get(i));
@@ -455,7 +455,7 @@ public class App {
                 //break;
             case 2: 
                 System.out.println("See details for a movie ");
-                movies = MovieList.getMoviesFromList(list);
+                movies = new ArrayList<>(); //MovieList.getMoviesFromList(list);
                 do {
                     for (int i = 0; i < movies.size(); i++) {
                         System.out.printf("%3d. %s", i + 1, movies.get(i));
@@ -474,9 +474,9 @@ public class App {
     private static String chooseFollowerIng(Scanner scanner, String erIng) throws Exception {
         ArrayList<String> foll = new ArrayList<>();
         if(erIng.equals("Followers")) {
-            foll = currentUser.getFollowers();
+            //foll = currentUser.getFollowers();
         } else {
-            foll = currentUser.getFollowing();
+            //foll = currentUser.getFollowing();
         }
         for (int i = 0; i < foll.size(); i++) {
             System.out.printf("%3d. %s \n", i + 1, foll.get(i));
@@ -612,199 +612,66 @@ public class App {
                     displayFullContributorsMenu();
                     choice3 = scanner.nextInt();
                     scanner.nextLine();
-                    switch (choice3) {
-                        case 0:
-                            break;
-                        case 1:
-                            ArrayList<String> names = ((Movie) o).getPeopleName();
-                            ArrayList<String> jobs = ((Movie) o).getPeopleJob();
-                            ArrayList<Integer> originalIds = ((Movie) o).getPeopleId();
-                            ArrayList<Float> popularity = ((Movie) o).getPeoplePopularity();
-                            ArrayList<String> prints = new ArrayList<>();
-                            ArrayList<Integer> ids2 = new ArrayList<>();
-                            for (Integer id : originalIds) { // negative values for pick()
-                                ids2.add(-id);
-                            }
-                            int choice4;
-                            int choice5 = 1;
-                            do {
-                                // Display people related to the movie
-                                for (int i = 0; i < ids2.size(); i++) {
-                                    if (!jobs.get(i).isEmpty()) {
-                                        prints.add(String.format("%s (%s)", names.get(i), jobs.get(i)));
-                                    } else {
-                                        prints.add(String.format("%s (%s)", jobs.get(i),
-                                                "Known for department not available"));
-                                    }
-                                }
-                                sortResultsOnPopul(ids2, prints, popularity, true);
-                                Object ob = pick(scanner, ids2);
-                                if (ob instanceof Person) {
-                                    Person p = (Person) ob;
-                                    System.out.println(p);
-                                    do {
-                                        displayPersonMenu();
-                                        choice4 = scanner.nextInt();
-                                        scanner.nextLine();
-                                        personCase(scanner, choice4, ob);
-                                    } while (choice4 != 0);
-                                } else
-                                    choice5 = 0;
-                            } while (choice5 != 0);
-                            break;
-                        default:
-                            System.out.println("Invalid choice. Please enter a valid option");
-                            break;
-                    }
+                    fullContributorsCase(scanner, choice3, o);
                 } while (choice3 != 0);
                 break;
+            case 6: 
                 
-            case 2:
-                int x=-1;
-                do {
-                if (!guest){
-                    displayReviewContentMenu();
-                     x = scanner.nextInt();
-                        switch(x){
-                            case 0:
-                                break;
-                            case 1:
-                               System.out.println("Type your review:");
-                               String Reviewtext = scanner.nextLine(); // den to diavazei????
-                             float rating ;
-                              while (true) {
-                               System.out.println("Enter your rating 0-10:");
-                                 if (scanner.hasNextFloat()) {
-                                   rating = scanner.nextFloat();
-                                // Έλεγχος αν η βαθμολογία είναι έγκυρη (π.χ., μεταξύ 0 και 10) 
-                                       if (rating >= 0 && rating <= 10) {
-                                        break; // Έξοδος από το loop αν η βαθμολογία είναι έγκυρη
-                                     } else {
-                                   System.out.println("Invalid rating. Please enter a rating between 0 and 10.");
-                                    }
-                                } else {
-                                  System.out.println("Invalid input. Please enter a valid number.");
-                                scanner.nextLine(); // Καθαρισμός του buffer του Scanner
-                                 }
-                               }
-    
-                             
-                            /*  System.out.println("Does your review contain spoilers? ");
-                             System.out.println("1. Yes");
-                             System.out.println("2. No");
-                                                        edw kai afto lathos vgainei emfanizei exceptions */
-                             int spoil = scanner.nextInt();
-                             while (spoil !=1 || spoil !=2) {
-                                System.out.println("Invalid input");
-                                System.out.println("Does your review contain spoilers? ");
-                                System.out.println("1. Yes");
-                                System.out.println("2. No");
-                                spoil = scanner.nextInt();
-                             }
-                             boolean spoiler = false;
-                             if (spoil == 1 ){
-                                spoiler = true;
-                             }
-                                Review.addReview(((User)currentUser).getId(), ((Movie)o).getMd().getId(), Reviewtext, rating, spoiler);
-                            break;
-                            case 2:
-                                  // μεθοδος που επιστρεφει ολα τα reviews που εχει κανει ο χρηστης συγκεκριμενα για αυτην την ταινια
-                                  System.out.println("Choose the review you want to modify:");
-                                  /*for (int i =0 ;i<Arraylist.size; i++;) {       εδω βγαζω σε σειρα τα reviews 
-                          system.print.ln(i + "."+ Arraylist.get(i));  // kati pou legame me lago, des pws tha mporei na kanei modify o xrhsths ena review
-                                  } */
-                                  //  Review r = new Review(// review id , user id ,movie id , review text  , rating , spoiler  )
-                                  int modChoice = scanner.nextInt();
-                                  System.out.println("Type your review:");
-                                  String modReviewtext = scanner.nextLine();
-                                //  r.setReviewText(modReviewText);
-                                System.out.println("Enter your rating 0-10:");
-                               float modRating = scanner.nextFloat();
-                               while (modRating>10 && modRating<0){
-                                System.out.println("Invalid input");
-                                System.out.println("Enter your rating 0-10:");
-                               rating = scanner.nextFloat();
-                             }
-                             // r.setRating(modRating);
-                             System.out.println("Does your review contain spoilers? ");
-                             System.out.println("1. Yes");
-                             System.out.println("2. No");
-                             int modSpoil = scanner.nextInt();
-                             while (modSpoil !=1 || modSpoil !=2) {
-                                System.out.println("Invalid input");
-                                System.out.println("Does your review contain spoilers? ");
-                                System.out.println("1. Yes");
-                                System.out.println("2. No");
-                                spoil = scanner.nextInt();
-                             }
-                             boolean modSpoiler = false;
-                             if (modSpoil == 1 ){
-                                modSpoiler = true;
-                             }
-                             // r.setSpoiler(modSpoiler);
-    
-                            break;
-                            case 3:
-                               // μεθοδος που επιστρεφει ολα τα reviews που εχει κανει ο χρηστης συγκεκριμενα για αυτην την ταινια
-                               System.out.println("Choose the review you want to delete:");
-                          // for (int i =0 ;i<list.size; i++;)
-                          //system.print.ln(i + "."+ list.get(i));
-                          int delChoice = scanner.nextInt();
-                          Review.deleteReview(12345,12345);
-                          break;
-                            case 4:  // k afto edw to afhsa sthn mesh
-                                System.out.println("Do you want spoiler free reviews?");
-                                System.out.println("0. Back");
-                                System.out.println("1. Yes");
-                                System.out.println("2. No");
-                                int x1 = scanner.nextInt();
-                                while (x1 !=1 || x1 !=2 || x1 !=0) {
-                                   System.out.println("Invalid input");
-                                   System.out.println("Do you want spoiler free reviews?");
-                                   System.out.println("0. Back");
-                                   System.out.println("1. Yes");
-                                   System.out.println("2. No");
-                                   spoil = scanner.nextInt();
-                                }
-                               if (x1==1 || x1==2){
-                                    if (x1==1){
-                                    MovieDAO.getSpoilerFreeReviewsForMovie(((Movie)o).getMd().getId());
-                                    }else {
-                                    MovieDAO.getAllReviewsForMovie(((Movie)o).getMd().getId());
-                                    }
-                                }
-                            break;
-                            default:
-                                System.out.println("Invalid choice");
-                                System.out.println("Enter your choice");
-                                x = scanner.nextInt();
-                                break;
-                        }
-                    }
-    
-                }while (x!=0);
-                    break;
-                  
-                
-                
-               
-                
-                case 7: // afto trexei swsta mono an den dinetai to release date( dld pairnei monadiko orisma to title)
-                     printBonusContent(((Movie)o).getMd().getOriginal_title(),((Movie)o).getMd().getRelease_date());
-                     System.out.println("0.Back");
-                     System.out.println("Enter your choice:");
-                     int x2 = scanner.nextInt();
-                     while (x2!=0){
-                    System.out.println("Enter your choice:");
-                    x = scanner.nextInt();
-                     }
-                     break;
+                break;
             default:
                 System.out.println("choice2 " + choice2);
                 System.out.println("Invalid choice. Please enter a valid option");
                 break;
         }
     }
+
+    private static void fullContributorsCase(Scanner scanner, int choice3, Object o) throws Exception {
+        switch (choice3) {
+            case 0:
+                break;
+            case 1:
+                ArrayList<String> names = ((Movie) o).getPeopleName();
+                ArrayList<String> jobs = ((Movie) o).getPeopleJob();
+                ArrayList<Integer> originalIds = ((Movie) o).getPeopleId();
+                ArrayList<Float> popularity = ((Movie) o).getPeoplePopularity();
+                ArrayList<String> prints = new ArrayList<>();
+                ArrayList<Integer> ids2 = new ArrayList<>();
+                for (Integer id : originalIds) { // negative values for pick()
+                    ids2.add(-id);
+                }
+                int choice4;
+                int choice5 = 1;
+                do {
+                    // Display people related to the movie
+                    for (int i = 0; i < ids2.size(); i++) {
+                        if (!jobs.get(i).isEmpty()) {
+                            prints.add(String.format("%s (%s)", names.get(i), jobs.get(i)));
+                        } else {
+                            prints.add(String.format("%s (%s)", jobs.get(i),
+                                    "Known for department not available"));
+                        }
+                    }
+                    sortResultsOnPopul(ids2, prints, popularity, true);
+                    Object ob = pick(scanner, ids2);
+                    if (ob instanceof Person) {
+                        Person p = (Person) ob;
+                        System.out.println(p);
+                        do {
+                            displayPersonMenu();
+                            choice4 = scanner.nextInt();
+                            scanner.nextLine();
+                            personCase(scanner, choice4, ob);
+                        } while (choice4 != 0);
+                    } else
+                        choice5 = 0;
+                } while (choice5 != 0);
+                break;
+            default:
+                System.out.println("Invalid choice. Please enter a valid option");
+                break;
+        }
+    }
+
 
     /**
      * Loads API keys from files.
