@@ -240,8 +240,8 @@ public void unfollowUser(String unfollow_user) throws Exception {
 }
 
     //Get Followings Method
-    public List<String> getFollowing() throws Exception {
-        List<String> followings = new ArrayList<>();
+    public ArrayList<String> getFollowing() throws Exception {
+        ArrayList<String> followings = new ArrayList<>();
     
         try (DB db = new DB();
              Connection con = db.getConnection();
@@ -264,8 +264,8 @@ public void unfollowUser(String unfollow_user) throws Exception {
     }
     
     //Get Followers Method
-    public List<String> getFollowers() throws Exception {
-        List<String> followers = new ArrayList<>();
+    public ArrayList<String> getFollowers() throws Exception {
+        ArrayList<String> followers = new ArrayList<>();
     
         try (DB db = new DB();
              Connection con = db.getConnection();
