@@ -22,6 +22,19 @@ public class MovieList {
         this.listName = listName;
         this.listId = listId;
     }
+    public String getListType() {
+        return listType;
+    }
+    public int getCreatorId() {
+        return creatorId;
+    }
+    public String getListName() {
+        return listName;
+    }
+    public int getListId() {
+        return listId;
+    }
+
 
     public void setListType(String listType, int userId) throws Exception {
         if (userId == creatorId) {

@@ -1,14 +1,5 @@
 package gr.aueb;
 
-//import com.cloudurable.jai.OpenAIClient;
-//import com.cloudurable.jai.model.text.completion.chat.ChatRequest;
-//import com.cloudurable.jai.model.text.completion.chat.ChatResponse;
-//import com.cloudurable.jai.model.text.completion.chat.Message;
-//import com.cloudurable.jai.model.text.completion.chat.Role;
-//import com.cloudurable.jai.model.text.completion.chat.function.*;
-//import com.cloudurable.jai.util.JsonSerializer;
-//import io.nats.jparse.node.ObjectNode;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -25,7 +16,7 @@ import com.google.gson.JsonObject;
 
 import java.net.URISyntaxException;
 
-public class AiRecommendation2 {
+public class AiRecommendation {
 
     public static String testChatCompletions(String userMessage, String apiKey) throws URISyntaxException {
         String url = "https://api.openai.com/v1/chat/completions";
@@ -36,12 +27,12 @@ public class AiRecommendation2 {
             try {
                 // Create the HTTP POST request
                 URL obj = new URI(url).toURL();
-                //try {
-                    //obj = new URI(url).toURL(); // Handle URISyntaxException
-                //} catch (URISyntaxException e) {
-                    //e.printStackTrace();
-                    //return; 
-                //}
+                try {
+                    obj = new URI(url).toURL(); // Handle URISyntaxException
+                } catch (URISyntaxException e) {
+                    e.printStackTrace();
+                    return; 
+                }
 
                 HttpURLConnection con = (HttpURLConnection) obj.openConnection();
                 con.setRequestMethod("POST");
@@ -76,9 +67,9 @@ public class AiRecommendation2 {
                     in.close();
                     
                     // Print the response
-                    return AiRecommendation2.aiMessage(response);
+                    return AiRecommendation.aiMessage(response);
                     // Successful response, exit the retry loop
-                /* } else if (responseCode == 429) {
+                 } else if (responseCode == 429) {
                     // Retry after the specified duration
                     int retryAfter = con.getHeaderFieldInt("Retry-After", -1);
                     if (retryAfter > 0) {
@@ -88,7 +79,6 @@ public class AiRecommendation2 {
                         System.out.println("Too Many Requests. Retrying after a short delay.");
                         Thread.sleep(5000); // Retry after a short delay if Retry-After is not provided
                     }
-                    */
                 } else {
                     // Handle other response codes if needed
                     return("Unexpected response code: " + responseCode);
@@ -112,14 +102,4 @@ public class AiRecommendation2 {
 
         return "\n\n" + content;
     }
-    /*public static void chatGPT(String userMessage, String apiKey) {
-                
-        final var message = Message.builder().role(Role.USER)
-                .content(userMessage + "I want 10 movies suggestions and their tmdb ids of them").build();
-
-        final var chatBuilder = ChatRequest.builder()
-                .model("gpt-3.5-turbo-0613")
-                .addMessage(message)  
-                .functionalCall(ChatRequest.AUTO);
-    }*/
 }
