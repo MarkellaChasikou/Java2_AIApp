@@ -214,10 +214,10 @@ public class MovieList {
     }
 
     // Remove movie from List Method
-    public void removeMovie(String movieName, int userId) throws Exception {
+    public void removeMovie(String movieName, int movieId, int userId) throws Exception {
         try (DB db = new DB(); Connection con = db.getConnection()) {
             String query = "SELECT userId FROM List WHERE list_id=?;";
-            String sql = "DELETE FROM MoviesList WHERE list_id=? AND movieName=?;";
+            String sql = "DELETE FROM MoviesList WHERE list_id=? AND movieName=? AND movieId=?;";
 
             // Check if the user is the creator of the list
             try (PreparedStatement checkStmt = con.prepareStatement(query)) {
@@ -233,6 +233,7 @@ public class MovieList {
             try (PreparedStatement stmt = con.prepareStatement(sql)) {
                 stmt.setInt(1, listId);
                 stmt.setString(2, movieName);
+                stmt.setInt(3, movieId);
                 int rowsAffected = stmt.executeUpdate();
 
                 if (rowsAffected > 0) {
