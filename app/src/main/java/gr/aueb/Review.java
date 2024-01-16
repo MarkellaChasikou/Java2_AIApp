@@ -15,7 +15,6 @@ public class Review {
     private float rating;
     private boolean spoiler;
 
-
     public Review(int reviewId, int userId, int movieId, String reviewText, float rating, boolean spoiler) {
         this.reviewId = reviewId;
         this.userId = userId;
@@ -42,15 +41,19 @@ public class Review {
         return reviewText;
     }
 
-    public void setReviewText(String reviewText) throws Exception {
-        this.reviewText = reviewText;
-        updateReviewTextInDatabase();
+    public void setReviewText(String reviewText, int userId) throws Exception {
+        if (userId == this.userId) {
+            this.reviewText = reviewText;
+            updateReviewTextInDatabase();
+        } else {
+            throw new Exception("User does not have permission to update review text.");
+        }
     }
 
     private void updateReviewTextInDatabase() throws Exception {
         try (DB db = new DB();
-             Connection con = db.getConnection();
-             PreparedStatement stmt = con.prepareStatement("UPDATE Review SET review_text = ? WHERE reviewId = ?")) {
+                Connection con = db.getConnection();
+                PreparedStatement stmt = con.prepareStatement("UPDATE Review SET review_text = ? WHERE reviewId = ?")) {
 
             stmt.setString(1, reviewText);
             stmt.setInt(2, reviewId);
@@ -64,15 +67,19 @@ public class Review {
         return rating;
     }
 
-    public void setRating(float rating) throws Exception {
-        this.rating = rating;
-        updateRatingInDatabase();
+    public void setRating(float rating, int userId) throws Exception {
+        if (userId == this.userId) {
+            this.rating = rating;
+            updateRatingInDatabase();
+        } else {
+            throw new Exception("User does not have permission to update rating.");
+        }
     }
 
     private void updateRatingInDatabase() throws Exception {
         try (DB db = new DB();
-             Connection con = db.getConnection();
-             PreparedStatement stmt = con.prepareStatement("UPDATE Review SET rating = ? WHERE reviewId = ?")) {
+                Connection con = db.getConnection();
+                PreparedStatement stmt = con.prepareStatement("UPDATE Review SET rating = ? WHERE reviewId = ?")) {
 
             stmt.setFloat(1, rating);
             stmt.setInt(2, reviewId);
@@ -86,15 +93,19 @@ public class Review {
         return spoiler;
     }
 
-    public void setSpoiler(boolean spoiler) throws Exception {
-        this.spoiler = spoiler;
-        updateSpoilerInDatabase();
+    public void setSpoiler(boolean spoiler, int userId) throws Exception {
+        if (userId == this.userId) {
+            this.spoiler = spoiler;
+            updateSpoilerInDatabase();
+        } else {
+            throw new Exception("User does not have permission to update spoiler status.");
+        }
     }
 
     private void updateSpoilerInDatabase() throws Exception {
         try (DB db = new DB();
-             Connection con = db.getConnection();
-             PreparedStatement stmt = con.prepareStatement("UPDATE Review SET spoiler = ? WHERE reviewId = ?")) {
+                Connection con = db.getConnection();
+                PreparedStatement stmt = con.prepareStatement("UPDATE Review SET spoiler = ? WHERE reviewId = ?")) {
 
             stmt.setBoolean(1, spoiler);
             stmt.setInt(2, reviewId);
@@ -104,16 +115,16 @@ public class Review {
         }
     }
 
-    public static Review addReview(int userId, int movieId, String reviewText, float rating, boolean spoiler) throws Exception {
+    public static Review addReview(int userId, int movieId, String reviewText, float rating, boolean spoiler)
+            throws Exception {
         int reviewId;
 
         try (
-            DB db = new DB();
-            Connection con = db.getConnection();
-            PreparedStatement stmt1 = con.prepareStatement(
-                    "INSERT INTO Review(userId, movieId, review_text, rating, spoiler) VALUES (?, ?, ?, ?, ?)",
-                    Statement.RETURN_GENERATED_KEYS);
-        ) {
+                DB db = new DB();
+                Connection con = db.getConnection();
+                PreparedStatement stmt1 = con.prepareStatement(
+                        "INSERT INTO Review(userId, movieId, review_text, rating, spoiler) VALUES (?, ?, ?, ?, ?)",
+                        Statement.RETURN_GENERATED_KEYS);) {
             stmt1.setInt(1, userId);
             stmt1.setInt(2, movieId);
             stmt1.setString(3, reviewText);
@@ -132,33 +143,38 @@ public class Review {
 
         return new Review(reviewId, userId, movieId, reviewText, rating, spoiler);
     }
-    public static void deleteReview(int reviewId, int userId) throws Exception {
-        try (DB db = new DB();
-             Connection con = db.getConnection();
-             PreparedStatement stmt = con.prepareStatement(
-                     "DELETE FROM Review WHERE reviewId = ? AND userId = ?")) {
 
-            stmt.setInt(1, reviewId);
-            stmt.setInt(2, userId);
+    public void deleteReview(int userId) throws Exception {
+        if (userId == this.userId) {
+            try (DB db = new DB();
+                    Connection con = db.getConnection();
+                    PreparedStatement stmt = con.prepareStatement(
+                            "DELETE FROM Review WHERE reviewId = ? AND userId = ?")) {
 
-            int rowsAffected = stmt.executeUpdate();
+                stmt.setInt(1, reviewId);
+                stmt.setInt(2, userId);
 
-            if (rowsAffected > 0) {
-                System.out.println("Review deleted successfully");
-            } else {
-                System.out.println("Review not found or you do not have permission to delete it.");
+                int rowsAffected = stmt.executeUpdate();
+
+                if (rowsAffected > 0) {
+                    System.out.println("Review deleted successfully");
+                } else {
+                    System.out.println("Review not found or you do not have permission to delete it.");
+                }
             }
+        } else {
+            throw new Exception("User does not have permission to delete this review.");
         }
     }
-        public static List<Review> getReviewsByUserAndMovie(int userId, int movieId) throws Exception {
+
+    public static List<Review> getReviewsByUserAndMovie(int userId, int movieId) throws Exception {
         List<Review> reviews = new ArrayList<>();
 
         try (
-            DB db = new DB();
-            Connection con = db.getConnection();
-            PreparedStatement stmt = con.prepareStatement(
-                    "SELECT * FROM Review WHERE userId = ? AND movieId = ?");
-        ) {
+                DB db = new DB();
+                Connection con = db.getConnection();
+                PreparedStatement stmt = con.prepareStatement(
+                        "SELECT * FROM Review WHERE userId = ? AND movieId = ?");) {
             stmt.setInt(1, userId);
             stmt.setInt(2, movieId);
 

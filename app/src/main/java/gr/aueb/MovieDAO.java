@@ -130,4 +130,3 @@ public class MovieDAO {
         return averageRating;
     }
 }
-

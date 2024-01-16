@@ -466,6 +466,25 @@ public void unfollowUser(String unfollow_user) throws Exception {
     
         return users;
     }
+    public boolean isFollowing(User otherUser) {
+        try (DB db = new DB();
+             Connection con = db.getConnection();
+             PreparedStatement stmt = con.prepareStatement("SELECT 1 FROM Followers WHERE followerId = ? AND followedId = ?")) {
+    
+            stmt.setInt(1, this.getId()); 
+            stmt.setInt(2, otherUser.getId());
+    
+            ResultSet rs = stmt.executeQuery();
+            return rs.next(); // If rs.next() is true, the current user follows the other user; otherwise, they don't
+    
+        } catch (SQLException e) {
+            e.printStackTrace(); 
+            return false; // Return false in case of an exception
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false; // Return false in case of an exception
+        }
+    }    
     
     
     @Override

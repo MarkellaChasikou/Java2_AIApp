@@ -38,13 +38,6 @@ public class Message {
     /** The username of the user who sent the message. */
     private String username;
 
-    /*public Message(boolean spoiler, String text, int chatroomId, User user) {
-        this.spoiler = spoiler;
-        this.text = text;
-        this.chatroomId = chatroomId;
-        this.user = user;
-    } */     
-    
     /** Constructs a Message object with specified attributes. */
     public Message(int messageId, int userId, boolean spoiler, String text, int chatroomId, String username) {
         this.messageId = messageId;
@@ -283,18 +276,17 @@ public class Message {
     /**
      * Deletes a message from the database.
      * 
-     * @param message The message to be deleted.
-     * @param userId  The user ID attempting to delete the message.
+     * @param userId The user ID attempting to delete the message.
      * @throws Exception if the user does not have permission or if there is an
      *                   error during the deletion process.
      */
-    public static void deleteMessage(Message message, int userId) throws Exception {
-        if (message.getUserId() != userId) {
+    public void deleteMessage(int userId) throws Exception {
+        if (this.getUserId() != userId) {
             throw new Exception("User does not have permission to delete this message.");
         }
 
-        int messageId = message.getMessageId();
-        int chatroomId = message.getChatroomId();
+        int messageId = this.getMessageId();
+        int chatroomId = this.getChatroomId();
 
         try (
                 DB db = new DB();
