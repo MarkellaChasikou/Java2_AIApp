@@ -170,7 +170,7 @@ public class User {
     }
 
     // Add to Favorites Method
-    public void addToFavorites(String movieId, String movieName) throws Exception {
+    public void addToFavorites(int movieId, String movieName) throws Exception {
         try (DB db = new DB();
                 Connection con = db.getConnection();
                 PreparedStatement stmt1 = con
@@ -186,7 +186,7 @@ public class User {
                 // Add the movie to the "favorites" list
                 stmt2.setInt(1, listId);
                 stmt2.setString(2, movieName);
-                stmt2.setString(3, movieId);
+                stmt2.setInt(3, movieId);
                 stmt2.executeUpdate();
 
                 System.out.println(movieName + " added to your favorites.");

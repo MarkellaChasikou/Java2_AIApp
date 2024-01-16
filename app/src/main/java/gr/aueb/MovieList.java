@@ -136,7 +136,7 @@ public class MovieList {
     }
 
     // Add to List Method
-    public void addToList(String movieName, String movieId, int userId) throws Exception {
+    public void addToList(String movieName, int movieId, int userId) throws Exception {
         int listId;
 
         try (DB db = new DB(); Connection con = db.getConnection()) {
@@ -159,7 +159,7 @@ public class MovieList {
             try (PreparedStatement stmt1 = con.prepareStatement(sql)) {
                 stmt1.setInt(1, listId);
                 stmt1.setString(2, movieName);
-                stmt1.setString(3, movieId);
+                stmt1.setInt(3, movieId);
                 stmt1.executeUpdate();
                 System.out.println(movieName + " added to your list " + listName);
             }
@@ -169,9 +169,9 @@ public class MovieList {
     }
 
     // Get Movies From List Method
-    public Map<String, String> getMoviesFromList(String listName) throws Exception {
+    public Map<String, Integer> getMoviesFromList(String listName) throws Exception {
         int listId;
-        Map<String, String> movies = new HashMap<>();
+        Map<String, Integer> movies = new HashMap<>();
 
         try (DB db = new DB(); Connection con = db.getConnection()) {
             String query1 = "SELECT list_id FROM List WHERE name=?;";
@@ -194,7 +194,7 @@ public class MovieList {
                 try (ResultSet rs2 = stmt2.executeQuery()) {
                     while (rs2.next()) {
                         String movieName = rs2.getString("movieName");
-                        String movieId = rs2.getString("movieId");
+                        int movieId = rs2.getInt("movieId");
                         movies.put(movieName, movieId);
                     }
                 }
@@ -305,14 +305,14 @@ public class MovieList {
     }
 
     // Check if the movie with the given name or ID exists in the list
-    public boolean containsMovie(String movieName, String movieId) throws Exception {
+    public boolean containsMovie(String movieName, int movieId) throws Exception {
         try (DB db = new DB(); Connection con = db.getConnection()) {
             String sql = "SELECT COUNT(*) AS count FROM MoviesList WHERE list_id=? AND (movieName=? OR movieId=?);";
 
             try (PreparedStatement stmt = con.prepareStatement(sql)) {
                 stmt.setInt(1, listId);
                 stmt.setString(2, movieName);
-                stmt.setString(3, movieId);
+                stmt.setInt(3, movieId);
 
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {

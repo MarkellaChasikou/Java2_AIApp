@@ -101,7 +101,7 @@ CREATE TABLE List (
 CREATE TABLE MoviesList (
  list_id INT,
  movieName varchar(30),
- movieId varchar(20),
+ movieId INT,
  PRIMARY KEY (list_id, movieName, movieId),
  FOREIGN KEY (list_id) REFERENCES List(list_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
