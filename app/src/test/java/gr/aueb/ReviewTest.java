@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,16 +33,34 @@ public class ReviewTest {
         DB db = new DB(); 
         connection = db.getConnection();
         // αυτη εδω η review για να την κανω delete 
-        reviewDelete = new Review(1, 5, 1, "Sample review text", 8, false);
+        reviewDelete = new Review(1, 2, 1, "Sample review text", 8, false);
         try (BufferedReader br = new BufferedReader(new FileReader(tmdbFile))) {
             tmdbApiKey = br.readLine();
         } catch (Exception e) {
-            System.err.println("Error reading YouTube API key file.");
+            System.err.println("Error reading tmdb API key file.");
             System.exit(1);
         }
         movie = new Movie(389,tmdbApiKey );
     }
-   
+@BeforeEach
+public void InsertReviewTestSqlQueries(){
+    try (PreparedStatement insertStmt = connection.prepareStatement("INSERT INTO review (reviewId, userId, movieId, review_text, rating, spoiler) VALUES (1, 2, 1, 'Sample review text', 8, false)")) {
+        insertStmt.executeUpdate();
+    } catch (SQLException e) {
+        fail("Exception thrown during setup: " + e.getMessage());
+    }
+}
+   @AfterEach
+   public void DeleteReviewTestInsert(){
+    try (PreparedStatement insertStmt = connection.prepareStatement("DELETE FROM review WHERE userid = 2")) {
+        insertStmt.executeUpdate();
+    } catch (SQLException e) {
+        fail("Exception thrown during setup: " + e.getMessage());
+    }
+   }
+
+
+
     @AfterAll
     public static void DeleteInserts() throws Exception {
       // Καθαρισμός του πίνακα Reviews μετά τα tests
@@ -69,6 +88,111 @@ public class ReviewTest {
     }
     }
 
+@Test
+public void getReviewIdTest() throws SQLException {
+//  // Έλεγχος της μεθόδου getReviewId
+    try (PreparedStatement stmt = connection.prepareStatement("SELECT reviewid FROM review WHERE reviewId = 1")) {
+        try (ResultSet resultSet = stmt.executeQuery()) {
+            if (resultSet.next()) {
+                assertEquals(reviewDelete.getReviewId(), resultSet.getInt("reviewid"));
+            } else {
+                fail("the reviewid does not match");
+            }
+        } catch (SQLException e) {
+            fail("Exception thrown during select: " + e.getMessage());
+        }
+    }
+}
+
+@Test
+public void getUserIdTest() throws SQLException {
+//  // Έλεγχος της μεθόδου getUserId
+    try (PreparedStatement stmt = connection.prepareStatement("SELECT userid FROM review WHERE reviewId = 1")) {
+        try (ResultSet resultSet = stmt.executeQuery()) {
+            if (resultSet.next()) {
+                assertEquals(reviewDelete.getUserId(), resultSet.getInt("userid"));
+            } else {
+                fail("the userId does not match");
+            }
+        } catch (SQLException e) {
+            fail("Exception thrown during select: " + e.getMessage());
+        }
+    }
+}
+
+@Test
+public void getMovieIdTest() throws SQLException {
+//  // Έλεγχος της μεθόδου getUserId
+    try (PreparedStatement stmt = connection.prepareStatement("SELECT movieid FROM review WHERE reviewId = 1")) {
+        try (ResultSet resultSet = stmt.executeQuery()) {
+            if (resultSet.next()) {
+                assertEquals(reviewDelete.getMovieId(), resultSet.getInt("movieid"));
+            } else {
+                fail("the movieId does not match");
+            }
+        } catch (SQLException e) {
+            fail("Exception thrown during select: " + e.getMessage());
+        }
+    }
+}
+
+@Test
+public void getReviewTextTest() throws SQLException {
+//  // Έλεγχος της μεθόδου getUserId
+    try (PreparedStatement stmt = connection.prepareStatement("SELECT review_text FROM review WHERE reviewId = 1")) {
+        try (ResultSet resultSet = stmt.executeQuery()) {
+            if (resultSet.next()) {
+                assertEquals(reviewDelete.getReviewText(), resultSet.getString("review_text"));
+            } else {
+                fail("the review_text does not match");
+            }
+        } catch (SQLException e) {
+            fail("Exception thrown during select: " + e.getMessage());
+        }
+    }
+}
+
+@Test
+public void getRatingTest() throws SQLException {
+//  // Έλεγχος της μεθόδου getUserId
+    try (PreparedStatement stmt = connection.prepareStatement("SELECT rating FROM review WHERE reviewId = 1")) {
+        try (ResultSet resultSet = stmt.executeQuery()) {
+            if (resultSet.next()) {
+                assertEquals(reviewDelete.getRating(), resultSet.getFloat("rating"));
+            } else {
+                fail("the rating does not match");
+            }
+        } catch (SQLException e) {
+            fail("Exception thrown during select: " + e.getMessage());
+        }
+    }
+}
+
+@Test
+public void getSpoilerTest() throws SQLException {
+//  // Έλεγχος της μεθόδου getUserId
+boolean t = false;
+    try (PreparedStatement stmt = connection.prepareStatement("SELECT spoiler FROM review WHERE reviewId = 1")) {
+        try (ResultSet resultSet = stmt.executeQuery()) {
+
+            if (resultSet.next()) {
+                if (resultSet.getInt("spoiler")==0) {
+                    t = false;
+                    assertEquals(reviewDelete.isSpoiler(), t);
+                }else{
+                t = true;
+                 assertEquals(reviewDelete.isSpoiler(), t);
+                }
+            } else {
+                fail("the spoiler does not match");
+            }
+        } catch (SQLException e) {
+            fail("Exception thrown during select: " + e.getMessage());
+        }
+    }
+}
+
+
    @Test
         public void addReviewTest() throws Exception{
             user = User.register("TestName7","TestPassword","TestCountry");
@@ -89,7 +213,7 @@ public class ReviewTest {
 
         // Κλήση της setReviewText με νέο κείμενο
         String newReviewText = "Okey robert de niro isnt that bad";
-        review.setReviewText(newReviewText);
+        review.setReviewText(newReviewText,user.getId());
 
         // Ελέγχουμε αν το κείμενο της κριτικής έχει αλλάξει σωστά
         assertEquals(newReviewText, review.getReviewText());
@@ -100,7 +224,7 @@ public class ReviewTest {
        
         // Ελέγχουμε αν το κείμενο στη βάση έχει αλλάξει σωστά
         String newReviewText = "THE BEST MOVIE EVER! Robert de niro rules";
-        review.setReviewText(newReviewText);
+        review.setReviewText(newReviewText,user.getId());
         try (PreparedStatement stmt = connection.prepareStatement("SELECT review_text FROM review WHERE reviewId = ?")) {
             stmt.setInt(1, review.getReviewId());
             try (ResultSet resultSet = stmt.executeQuery()) {
@@ -120,7 +244,7 @@ public class ReviewTest {
 
         // Κλήση της setReviewText με νέο κείμενο
         float newRating = 9.9f;
-        review.setRating(newRating);
+        review.setRating(newRating,user.getId());
 
         // Ελέγχουμε αν το κείμενο της κριτικής έχει αλλάξει σωστά
         assertEquals(newRating, review.getRating());
@@ -131,7 +255,7 @@ public class ReviewTest {
      
         // Ελέγχουμε αν το κείμενο στη βάση έχει αλλάξει σωστά
         float newRating= 8.7f;
-        review.setRating(newRating);
+        review.setRating(newRating,user.getId());
         try (PreparedStatement stmt = connection.prepareStatement("SELECT rating FROM review WHERE reviewId = ?")) {
             stmt.setInt(1, review.getReviewId());
             try (ResultSet resultSet = stmt.executeQuery()) {
@@ -151,7 +275,7 @@ public class ReviewTest {
 
         // Κλήση της setReviewText με νέο κείμενο
         boolean newSpoiler = true;
-        review.setSpoiler(newSpoiler);
+        review.setSpoiler(newSpoiler,user.getId());
 
         // Ελέγχουμε αν το κείμενο της κριτικής έχει αλλάξει σωστά
         assertEquals(newSpoiler, review.isSpoiler());
@@ -162,7 +286,7 @@ public class ReviewTest {
        
         // Ελέγχουμε αν το κείμενο στη βάση έχει αλλάξει σωστά
         boolean newSpoiler= false;
-        review.setSpoiler(newSpoiler);
+        review.setSpoiler(newSpoiler,user.getId());
         try (PreparedStatement stmt = connection.prepareStatement("SELECT spoiler FROM review WHERE reviewId = ?")) {
             stmt.setInt(1, review.getReviewId());
             try (ResultSet resultSet = stmt.executeQuery()) {
@@ -181,7 +305,7 @@ public class ReviewTest {
     public void deleteReviewTest() throws Exception {
       
         // Εκτέλεση της διαγραφής 
-        Review.deleteReview(reviewDelete.getReviewId(), reviewDelete.getUserId());
+        reviewDelete.deleteReview(reviewDelete.getUserId());
 
         // Έλεγχος αν το reviewId δεν βρίσκεται πλέον στη βάση
         try (PreparedStatement stmt = connection.prepareStatement("SELECT * FROM Review WHERE reviewId = ?")) {
