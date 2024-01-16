@@ -28,12 +28,12 @@ public static void CreateInserts() throws Exception {
     try {
         // Προσθήκη χρήστη στη βάση δεδομένων
         user = User.register("testUser", "testPassword", "testCountry");
-
+       
     } catch (Exception e) {
         fail("Exception thrown: " + e.getMessage());
     }
     assertNotNull(user);
-}
+}   
 
 
     @AfterAll
