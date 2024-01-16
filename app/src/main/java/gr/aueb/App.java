@@ -545,7 +545,7 @@ public class App {
                     Object o  = pick(scanner, movieIds);
                     if(!o.equals(0)) {
                         Movie m = (Movie)o;
-                        list.removeMovie(m.getMd().getOriginal_title(), currentUser.getId()); //and movieID
+                        list.removeMovie(m.getMd().getOriginal_title(),m.getMd().getId(), currentUser.getId()); //and movieID
                     } else break;
                 } while (true);
                 break;
@@ -677,25 +677,34 @@ public class App {
      * Handles the user options related to a Movie.
      *
      * @param scanner The scanner object for user input.
-     * @param choice2 The user's choice.
+     * @param choice The user's choice.
      * @param o       The object representing a Movie.
      */
-    public static void movieCase(Scanner scanner, int choice2, Object o) throws Exception {
+    public static void movieCase(Scanner scanner, int choice, Object o) throws Exception {
         Movie m = (Movie) o;
-        switch (choice2) {
+        switch (choice) {
             case 0:
                 break;
             case 1:
-                int choice3;
+                int choice2;
                 do {
                     m.printFullCast();
                     displayFullContributorsMenu();
+                    choice2 = scanner.nextInt();
+                    scanner.nextLine();
+                    fullContributorsCase(scanner, choice2, o);
+                } while (choice2 != 0);
+                break;
+            case 2:
+                int choice3;
+                do {
+                    displayReviewContentMenu();
                     choice3 = scanner.nextInt();
                     scanner.nextLine();
-                    fullContributorsCase(scanner, choice3, o);
+                    reviewCase(scanner, choice3, o);
                 } while (choice3 != 0);
                 break;
-            case 6: 
+            case 5: 
                 Object l; //movielist
                 do {
                     System.out.println("Your lists");
@@ -713,15 +722,129 @@ public class App {
                     }
                 } while (!l.equals("0"));
                 break;
+            case 6: 
+                printBonusContent(((Movie)o).getMd().getOriginal_title(),((Movie)o).getMd().getRelease_date());
+                System.out.println("\nPress 0 to go back ");
+                int choice4 = scanner.nextInt();
+                scanner.nextLine();
+                while (choice4!=0){
+                    System.out.println("Invalid choice. Please enter a valid option ");
+                    choice4 = scanner.nextInt();
+                }
+                break;
             default:
-                System.out.println("choice2 " + choice2);
-                System.out.println("Invalid choice. Please enter a valid option");
+                System.out.println("Invalid choice. Please enter a valid option ");
                 break;
         }
     }
 
-    private static void fullContributorsCase(Scanner scanner, int choice3, Object o) throws Exception {
-        switch (choice3) {
+    private static void reviewCase(Scanner scanner, int choice, Object o) throws Exception {
+        Movie m = (Movie)o;
+        switch (choice) {
+            case 0:
+                break;
+            case 1:
+                do {
+                    System.out.println("All reviews: \n");
+                    ArrayList<Review> reviews = MovieDAO.getAllReviewsForMovie(m.getMd().getId());
+                    for (Review r : reviews) {
+                        System.out.println("Author " ); // +User name
+                        System.out.println("Rating: " + r.getRating());
+                        //upload date
+                        System.out.println(r.getReviewText() + "\n\n");
+                    }
+                    System.out.println("Press 0 to go back");
+                    int choice2 = scanner.nextInt();
+                    scanner.nextLine();
+                    while (choice2 != 0) {
+                        System.out.println("Invalid choice. Please enter a valid option ");
+                        choice2 = scanner.nextInt();
+                        scanner.nextLine();
+                    }
+                    break;
+                } while (true);
+                break;
+            case 2: 
+                do {
+                    System.out.println("Spoiler-free reviews: \n");
+                    ArrayList<Review> reviews = MovieDAO.getSpoilerFreeReviewsForMovie(m.getMd().getId());
+                    for (Review r : reviews) {
+                        System.out.println("Author " ); // +User name
+                        System.out.println("Rating: " + r.getRating());
+                        //upload date
+                        System.out.println(r.getReviewText() + "\n\n");
+                    }
+                    System.out.println("Press 0 to go back");
+                    int choice2 = scanner.nextInt();
+                    scanner.nextLine();
+                    while (choice2 != 0) {
+                        System.out.println("Invalid choice. Please enter a valid option ");
+                        choice2 = scanner.nextInt();
+                        scanner.nextLine();
+                    }
+                    break;
+                } while (true);
+                break;
+            case 3:
+            do {
+                System.out.println("Your reviews: \n");
+                ArrayList<Review> reviews = Review.getReviewsByUserAndMovie(currentUser.getId(), m.getMd().getId());
+                for (Review r : reviews) {
+                    System.out.println("Author " ); // +User name
+                    System.out.println("Rating: " + r.getRating());
+                    //upload date
+                    System.out.println(r.getReviewText() + "\n\n");
+                }
+                System.out.println("Press 0 to go back");
+                int choice2 = scanner.nextInt();
+                scanner.nextLine();
+                while (choice2 != 0) {
+                    System.out.println("Invalid choice. Please enter a valid option ");
+                    choice2 = scanner.nextInt();
+                    scanner.nextLine();
+                }
+                break;
+            } while (true);
+            break;
+            case 4: 
+                String reviewText;
+                float rating = -1;
+                boolean spoilers = false;
+                int choice2 = 0;
+                do {
+                    System.out.println("\nWrite your review or press 0 to go back");
+                    reviewText = scanner.nextLine();
+                    if(!reviewText.equals("0")) {
+                        displayAddReviewTypeMenu();
+                        choice2 = scanner.nextInt();
+                        scanner.nextLine();
+                        if (choice2 != 0) {
+                            if(choice2 == 1) {
+                                spoilers = true;
+                            }
+                            System.out.println("Enter your rating from a scale 1-10 or press 0 to go back ");
+                            rating = scanner.nextFloat();// check for int
+                            scanner.nextLine();
+                            while(rating < 0 || rating > 10) {
+                                System.out.println("Invalid choice. Please enter a valid option ");
+                                rating = scanner.nextFloat();// check for int
+                                scanner.nextLine();
+                            }
+                        }
+                    }
+                } while (!reviewText.equals("0") && (rating == 0 || choice2 == 0));        
+                if(!reviewText.equals("0") && rating != 0 && rating != -1) {
+                    Review r = Review.addReview(currentUser.getId(), m.getMd().getId(), reviewText, rating, spoilers); //?????
+                    System.out.println("Your review is published! ");
+                }
+                break; 
+            default:
+                break;
+        }
+    }
+
+    private static void fullContributorsCase(Scanner scanner, int choice, Object o) throws Exception {
+        switch (choice) {
             case 0:
                 break;
             case 1:
@@ -821,9 +944,8 @@ public class App {
         if (!guest) {
             System.out.println("3. Search for friends");
             System.out.println("4. Your profile");
-            //System.out.println("5. Create list");
-            System.out.println("6. Chatrooms");
-            System.out.println("7. Exit");
+            System.out.println("5. Chatrooms");
+            System.out.println("6. Exit");
         } else {
             System.out.println("3. Login/Sign up");
             System.out.println("4. Exit");
@@ -840,29 +962,15 @@ public class App {
     private static void displayMovieMenuUser() {
         System.out.println("0. Back");
         System.out.println("1. See full Cast and Crew");
-        System.out.println("2. Reviews");
-        System.out.println("3. Add to Watchlist");
-        System.out.println("4. Add to Seen");
-        System.out.println("5. Add to Favourites");
-        System.out.println("6. Add to list");
-        System.out.println("7. Get Bonus content");
+        if(!guest) {
+            System.out.println("2. Reviews");
+            System.out.println("3. Add to Watchlist");
+            System.out.println("4. Add to Favourites");
+            System.out.println("5. Add to list");
+            System.out.println("6. Get Bonus content");
+        }
+        
         System.out.println("Enter your choice ");
-    }
-
-    private static void displayMovieMenuGest() {
-        System.out.println("0. Back");
-        System.out.println("1. See full Cast and Crew");
-    }
-
-    /**
-     * Displays the menu options for selecting whether a review contains spoilers or
-     * not.
-     */
-    private static void displayReviewTypeMenu() {
-        System.out.println("Does your review contain spoilers?");
-        System.out.println("0. Back");
-        System.out.println("1. YES");
-        System.out.println("2. NO");
     }
 
     /**
@@ -898,6 +1006,37 @@ public class App {
             System.out.println("2. Follow");
         }
         System.out.println("Enter your choice ");
+    }
+
+    /**
+     * Displays the menu options for managing the content of a user's review.
+     */
+    private static void displayReviewMenu() {
+        System.out.println("0. Back");
+        System.out.println("1. Modify review");
+        System.out.println("2. Delete review");
+        System.out.println("3. Your reviews");
+        System.out.println("Enter your choice ");
+    }
+
+    private static void displayReviewContentMenu() {
+        System.out.println("0. Back");
+        System.out.println("1. See all reviews");
+        System.out.println("2. See all spoiler-free reviews");
+        System.out.println("3. Your reviews");
+        System.out.println("4. Add review");
+        System.out.println("Enter your choice ");
+    }
+
+    /**
+     * Displays the menu options for selecting whether a review contains spoilers or
+     * not.
+     */
+    private static void displayAddReviewTypeMenu() {
+        System.out.println("Does your review contain spoilers?");
+        System.out.println("0. Back");
+        System.out.println("1. YES");
+        System.out.println("2. NO");
     }
 
     /**
@@ -943,18 +1082,6 @@ public class App {
         System.out.println("1. Private");
         System.out.println("2. Public");
         System.out.println("3. Protected");
-        System.out.println("Enter your choice ");
-    }
-
-    /**
-     * Displays the menu options for managing the content of a user's review.
-     */
-    private static void displayReviewContentMenu() {
-        System.out.println("0. Back");
-        System.out.println("1. Add review");
-        System.out.println("2. Modify review");
-        System.out.println("3. Delete review");
-        System.out.println("4. View reviews");
         System.out.println("Enter your choice ");
     }
 
@@ -1018,7 +1145,7 @@ public class App {
         if (!userMessage.equals("0")) {
             boolean flag = false;
             for (int i = 0; i <= 2; i++) {
-                String result = AiRecommendation2.testChatCompletions(
+                String result = AiRecommendation.testChatCompletions(
                         userMessage + "Don't include summaries and firector names. Include release year",
                         chatgptApiKey);
                 ArrayList<String> movieTitles = extractMovieTitles(result);
@@ -1183,8 +1310,10 @@ public class App {
                             }
                         }
                     }
+                } else {
+                     System.out.println("No results found"); //FIX!!!!!
                 }
-            }
+            } 
             idsList = sortResultsOnPopul(idsList, prints, popularity, flag);
 
         } catch (IOException e) {
