@@ -52,8 +52,11 @@ CREATE TABLE Preferred_Genres (
 CREATE TABLE Review (
  reviewId INT AUTO_INCREMENT PRIMARY KEY,
  userId INT,
+ username varchar(25) NOT NULL,
  movieId INT NOT NULL,
+ movieName varchar(25) NOT NULL,
  review_text varchar(255) NOT NULL,
+ date DATE NOT NULL,
  rating FLOAT NOT NULL,
  spoiler BIT NOT NULL,
  FOREIGN KEY (userId) REFERENCES AppUser(userId)

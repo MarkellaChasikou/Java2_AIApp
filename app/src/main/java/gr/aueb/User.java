@@ -553,7 +553,13 @@ public class User {
         List<Review> userReviews = new ArrayList<>();
 
         try (DB db = new DB(); Connection con = db.getConnection()) {
-            String sql = "SELECT reviewId, movieId, reviewText, rating, spoiler FROM Review WHERE userId=? ORDER BY movieId;";
+            String sql = "SELECT Review.reviewId, Review.movieId, Review.reviewText, Review.rating, Review.spoiler, " +
+                    "AppUser.username, Review.date, Movie.movieName " +
+                    "FROM Review " +
+                    "JOIN AppUser ON Review.userId = AppUser.userId " +
+                    "JOIN Movie ON Review.movieId = Movie.movieId " +
+                    "WHERE Review.userId=? " +
+                    "ORDER BY Review.movieId;";
 
             try (PreparedStatement stmt = con.prepareStatement(sql)) {
                 stmt.setInt(1, id);
@@ -565,8 +571,12 @@ public class User {
                         String reviewText = rs.getString("reviewText");
                         float rating = rs.getFloat("rating");
                         boolean spoiler = rs.getBoolean("spoiler");
+                        String username = rs.getString("username");
+                        Timestamp date = rs.getTimestamp("date");
+                        String movieName = rs.getString("movieName");
 
-                        Review review = new Review(reviewId, id, movieId, reviewText, rating, spoiler);
+                        Review review = new Review(reviewId, id, movieId, reviewText, rating, spoiler,
+                                username, date, movieName);
                         userReviews.add(review);
                     }
                 }

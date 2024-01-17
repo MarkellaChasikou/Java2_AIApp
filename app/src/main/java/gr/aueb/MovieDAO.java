@@ -9,7 +9,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Data Access Object (DAO) for Movie-related database operations.
@@ -29,7 +28,7 @@ import java.util.List;
 public class MovieDAO {
     /**
      * Retrieves all reviews for a specific movie ID from the database.
-     * 
+     *
      * @param movieId The ID of the movie.
      * @return A list of reviews for the specified movie.
      * @throws Exception If an error occurs during database interaction.
@@ -39,8 +38,7 @@ public class MovieDAO {
 
         try (DB db = new DB();
                 Connection con = db.getConnection();
-                PreparedStatement stmt = con.prepareStatement(
-                        "SELECT * FROM Review WHERE movieId = ?")) {
+                PreparedStatement stmt = con.prepareStatement("SELECT * FROM Review WHERE movieId = ?")) {
 
             stmt.setInt(1, movieId);
 
@@ -51,8 +49,12 @@ public class MovieDAO {
                     String reviewText = rs.getString("review_text");
                     float rating = rs.getFloat("rating");
                     boolean spoiler = rs.getBoolean("spoiler");
+                    String username = rs.getString("username");
+                    java.sql.Date date = rs.getDate("date");
+                    String movieName = rs.getString("movieName");
 
-                    Review review = new Review(reviewId, userId, movieId, reviewText, rating, spoiler);
+                    Review review = new Review(reviewId, userId, movieId, reviewText, rating, spoiler, username,
+                            new java.util.Date(date.getTime()), movieName);
                     reviews.add(review);
                 }
             }
@@ -63,7 +65,7 @@ public class MovieDAO {
 
     /**
      * Retrieves spoiler-free reviews for a specific movie ID from the database.
-     * 
+     *
      * @param movieId The ID of the movie.
      * @return A list of spoiler-free reviews for the specified movie.
      * @throws Exception If an error occurs during database interaction.
@@ -73,8 +75,8 @@ public class MovieDAO {
 
         try (DB db = new DB();
                 Connection con = db.getConnection();
-                PreparedStatement stmt = con.prepareStatement(
-                        "SELECT * FROM Review WHERE movieId = ? AND spoiler = false")) {
+                PreparedStatement stmt = con
+                        .prepareStatement("SELECT * FROM Review WHERE movieId = ? AND spoiler = false")) {
 
             stmt.setInt(1, movieId);
 
@@ -85,8 +87,12 @@ public class MovieDAO {
                     String reviewText = rs.getString("review_text");
                     float rating = rs.getFloat("rating");
                     boolean spoiler = rs.getBoolean("spoiler");
+                    String username = rs.getString("username");
+                    java.sql.Date date = rs.getDate("date");
+                    String movieName = rs.getString("movieName");
 
-                    Review review = new Review(reviewId, userId, movieId, reviewText, rating, spoiler);
+                    Review review = new Review(reviewId, userId, movieId, reviewText, rating, spoiler, username,
+                            new java.util.Date(date.getTime()), movieName);
                     spoilerFreeReviews.add(review);
                 }
             }
@@ -98,7 +104,7 @@ public class MovieDAO {
     /**
      * Calculates the average rating for a specific movie ID based on reviews in the
      * database.
-     * 
+     *
      * @param movieId The ID of the movie.
      * @return The average rating for the specified movie.
      * @throws Exception If an error occurs during database interaction.
@@ -110,8 +116,7 @@ public class MovieDAO {
 
         try (DB db = new DB();
                 Connection con = db.getConnection();
-                PreparedStatement stmt = con.prepareStatement(
-                        "SELECT rating FROM Review WHERE movieId = ?")) {
+                PreparedStatement stmt = con.prepareStatement("SELECT rating FROM Review WHERE movieId = ?")) {
 
             stmt.setInt(1, movieId);
 
