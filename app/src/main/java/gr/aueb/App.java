@@ -370,6 +370,9 @@ public class App {
             case 5: 
                 caseLists(scanner);
                 break;
+            case 6:
+                caseReviews(scanner);
+                break;
             case 7: 
                 caseFollowers(scanner);
                 break;
@@ -382,6 +385,94 @@ public class App {
             default:
                 break;
         }
+    }
+
+    private static void caseReviews(Scanner scanner) throws Exception {
+        int choice;
+        do {
+            System.out.println();
+            displayReviewMenu();
+            choice = scanner.nextInt();
+            scanner.nextLine();
+            if(choice != 0) {
+                switch (choice) {
+                    case 0:
+                        break;
+                    case 1: 
+                        
+                        break;
+                    case 2: 
+                        caseDeleteReview(scanner);
+                        break;
+                    case 3: 
+                        caseUserAllReviews(scanner);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        } while (choice != 0);
+    }
+
+    private static void caseDeleteReview(Scanner scanner) throws Exception {
+        Object r;
+        do {
+            r = chooseReview(scanner);
+            if(r instanceof Review) {
+                Review review = (Review)r;
+                review.deleteReview(currentUser.getId());
+            } else {
+                break;
+            }
+        } while (true);
+    }
+
+    private static Object chooseReview(Scanner scanner) throws Exception {
+        ArrayList<Review> reviews = currentUser.getAllUserReviewsOrderedByMovieId();
+        if(!reviews.isEmpty()) {
+            int currrentId = 0;
+            int i = 0;
+            for (Review r : reviews) {
+                i++;
+                if(r.getMovieId() != currrentId) {
+                    System.out.println("Movie: " + r.getMovieId() + "\n"); //r.getMovieTitle !!!
+                    currrentId = r.getMovieId();
+                }
+                System.out.println(i + ".");
+                Review.printReview(r);
+            }
+            System.out.println("\nChoose a review or press 0 to go back ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+            if(choice != 0) {
+                return reviews.get(choice - 1);
+            } else {
+                return 0;
+            }
+            
+        } else {
+            System.out.println("You have not reviewed any movies! ");
+            return 0;
+        } 
+    }
+
+    private static void caseUserAllReviews(Scanner scanner) throws Exception {
+        do {
+            ArrayList<Review> reviews = currentUser.getAllUserReviewsOrderedByMovieId(); 
+            if(!reviews.isEmpty()) {
+                System.out.println("\nYour reviews: \n");
+                int currrentId = 0;
+                for (Review r : reviews) {
+                    if(r.getMovieId() != currrentId) {
+                        System.out.println("Movie: " + r.getMovieId() + "\n"); //r.getMovieTitle !!!
+                        currrentId = r.getMovieId();
+                    }
+                    Review.printReview(r);
+                }
+            } else {
+                System.out.println("You have not reviewed any movies! ");
+            } break;
+        } while(true);
     }
 
     private static void caseFollowers(Scanner scanner) throws Exception {
@@ -580,8 +671,10 @@ public class App {
         int i = 0;
         for (MovieList m : movieLists) {
              if(user.equals(currentUser)) {
-                i++;
-                System.out.printf("%3d. %s \n", i, m.getListName());
+                if(!m.getListName().equals("favorites") && !m.getListName().equals("watchlist")) {
+                    i++;
+                    System.out.printf("%3d. %s \n", i, m.getListName());
+                }
              } else {
                 String curentList = m.getListType();
                 if(currentUser.isFollowing(user)) {
@@ -596,7 +689,7 @@ public class App {
                     }
                 }
              }
-        }
+            }
         System.out.println("\nEnter your choice or press 0 to go back ");
         int choice = scanner.nextInt();
         scanner.nextLine();
@@ -701,7 +794,7 @@ public class App {
                     displayReviewContentMenu();
                     choice3 = scanner.nextInt();
                     scanner.nextLine();
-                    reviewCase(scanner, choice3, o);
+                    reviewMovieCase(scanner, choice3, o);
                 } while (choice3 != 0);
                 break;
             case 5: 
@@ -738,7 +831,7 @@ public class App {
         }
     }
 
-    private static void reviewCase(Scanner scanner, int choice, Object o) throws Exception {
+    private static void reviewMovieCase(Scanner scanner, int choice, Object o) throws Exception {
         Movie m = (Movie)o;
         switch (choice) {
             case 0:
@@ -768,12 +861,13 @@ public class App {
                 do {
                     System.out.println("Spoiler-free reviews: \n");
                     ArrayList<Review> reviews = MovieDAO.getSpoilerFreeReviewsForMovie(m.getMd().getId());
-                    for (Review r : reviews) {
-                        System.out.println("Author " ); // +User name
-                        System.out.println("Rating: " + r.getRating());
-                        //upload date
-                        System.out.println(r.getReviewText() + "\n\n");
-                    }
+                    if(!reviews.isEmpty()) {
+                        for (Review r : reviews) {
+                            Review.printReview(r);
+                        }
+                    } else {
+                        System.out.println("No reviews for this movie!");
+                    }   
                     System.out.println("Press 0 to go back");
                     int choice2 = scanner.nextInt();
                     scanner.nextLine();
@@ -786,26 +880,27 @@ public class App {
                 } while (true);
                 break;
             case 3:
-            do {
-                System.out.println("Your reviews: \n");
-                ArrayList<Review> reviews = Review.getReviewsByUserAndMovie(currentUser.getId(), m.getMd().getId());
-                for (Review r : reviews) {
-                    System.out.println("Author " ); // +User name
-                    System.out.println("Rating: " + r.getRating());
-                    //upload date
-                    System.out.println(r.getReviewText() + "\n\n");
-                }
-                System.out.println("Press 0 to go back");
-                int choice2 = scanner.nextInt();
-                scanner.nextLine();
-                while (choice2 != 0) {
-                    System.out.println("Invalid choice. Please enter a valid option ");
-                    choice2 = scanner.nextInt();
+                do {
+                    System.out.println("Your reviews: \n");
+                    ArrayList<Review> reviews = Review.getReviewsByUserAndMovie(currentUser.getId(), m.getMd().getId());
+                    if(!reviews.isEmpty()) {
+                        for (Review r : reviews) {
+                            Review.printReview(r);
+                        }
+                    } else {
+                        System.out.println("No reviews for this movie!");
+                    }   
+                    System.out.println("Press 0 to go back");
+                    int choice2 = scanner.nextInt();
                     scanner.nextLine();
-                }
+                    while (choice2 != 0) {
+                        System.out.println("Invalid choice. Please enter a valid option ");
+                        choice2 = scanner.nextInt();
+                        scanner.nextLine();
+                    }
+                    break;
+                } while (true);
                 break;
-            } while (true);
-            break;
             case 4: 
                 String reviewText;
                 float rating = -1;
@@ -1008,17 +1103,6 @@ public class App {
         System.out.println("Enter your choice ");
     }
 
-    /**
-     * Displays the menu options for managing the content of a user's review.
-     */
-    private static void displayReviewMenu() {
-        System.out.println("0. Back");
-        System.out.println("1. Modify review");
-        System.out.println("2. Delete review");
-        System.out.println("3. Your reviews");
-        System.out.println("Enter your choice ");
-    }
-
     private static void displayReviewContentMenu() {
         System.out.println("0. Back");
         System.out.println("1. See all reviews");
@@ -1056,6 +1140,17 @@ public class App {
         System.out.println("8. Users you follow");
         System.out.println("9. Your country");
         System.out.print("Enter your choice ");
+    }
+
+    /**
+     * Displays the menu options for managing the content of a user's review.
+     */
+    private static void displayReviewMenu() {
+        System.out.println("0. Back");
+        System.out.println("1. Modify review");
+        System.out.println("2. Delete review");
+        System.out.println("3. Your reviews");
+        System.out.println("Enter your choice ");
     }
 
     private static void displayListMenu() {
