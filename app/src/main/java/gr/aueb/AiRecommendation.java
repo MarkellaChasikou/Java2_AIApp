@@ -31,7 +31,7 @@ public class AiRecommendation {
                     obj = new URI(url).toURL(); // Handle URISyntaxException
                 } catch (URISyntaxException e) {
                     e.printStackTrace();
-                    return; 
+                    // return;
                 }
 
                 HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -39,12 +39,11 @@ public class AiRecommendation {
                 con.setRequestProperty("Authorization", "Bearer " + apiKey);
                 con.setRequestProperty("Content-Type", "application/json");
 
-                // Build the request body
+                // Build the request body with only the user's message
                 String body = "{"
                         + "\"model\": \"" + model + "\","
                         + "\"messages\": ["
-                        + "{\"role\": \"user\", \"content\": \"" + userMessage + "\"},"
-                        + "{\"role\": \"assistant\", \"content\": \"Here are 10 movie examples for you:\\n1. Movie 1 title\\n2. Movie 2 title\\n3. Movie 3 title\\n4. Movie 4 title\\n5. Movie 5 title\\n6. Movie 6 title\\n7. Movie 7 title\\n8. Movie 8 title\\n9. Movie 9 title\\n10. Movie 10 title\"}"
+                        + "{\"role\": \"user\", \"content\": \"" + userMessage + "\"}"
                         + "]"
                         + "}";
 
@@ -56,7 +55,7 @@ public class AiRecommendation {
 
                 // Get the response
                 int responseCode = con.getResponseCode();
-                
+
                 if (responseCode == HttpURLConnection.HTTP_OK) {
                     BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
                     String inputLine;
@@ -65,32 +64,25 @@ public class AiRecommendation {
                         response.append(inputLine);
                     }
                     in.close();
-                    
+
                     // Print the response
                     return AiRecommendation.aiMessage(response);
                     // Successful response, exit the retry loop
-                 } else if (responseCode == 429) {
+                } else if (responseCode == 429) {
                     // Retry after the specified duration
                     int retryAfter = con.getHeaderFieldInt("Retry-After", -1);
-                    if (retryAfter > 0) {
-                        System.out.println("Too Many Requests. Retrying after " + retryAfter + " seconds.");
-                        Thread.sleep(retryAfter * 1000);
-                    } else {
-                        System.out.println("Too Many Requests. Retrying after a short delay.");
-                        Thread.sleep(5000); // Retry after a short delay if Retry-After is not provided
-                    }
+                    // Handle retry logic if needed
                 } else {
                     // Handle other response codes if needed
-                    return("Unexpected response code: " + responseCode);
+                    return ("Unexpected response code: " + responseCode);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
                 return "";
             }
-        } return "";
+        }
+        return "";
     }
-     
-     
     public static String aiMessage(StringBuilder response) {
         Gson gson = new Gson();
         JsonObject jo = gson.fromJson(response.toString(), JsonObject.class);
