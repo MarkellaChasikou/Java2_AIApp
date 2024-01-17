@@ -169,8 +169,8 @@ public class MovieList {
     }
 
     // Get Movies From List Method
-    public Map<String, Integer> getMoviesFromList() throws Exception {
-        Map<String, Integer> movies = new HashMap<>();
+    public Map<Integer, String> getMoviesFromList() throws Exception {
+        Map<Integer, String> movies = new HashMap<>();
 
         try (DB db = new DB(); Connection con = db.getConnection()) {
             String query = "SELECT movieName, movieId FROM MoviesList WHERE list_id=?;";
@@ -182,7 +182,7 @@ public class MovieList {
                     while (rs.next()) {
                         String movieName = rs.getString("movieName");
                         int movieId = rs.getInt("movieId");
-                        movies.put(movieName, movieId);
+                        movies.put(movieId, movieName);
                     }
                 }
             }
