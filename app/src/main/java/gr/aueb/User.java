@@ -370,8 +370,8 @@ public class User {
         }
     }
 
-    public List<Chatroom> getJoinedChatrooms() throws Exception {
-        List<Chatroom> joinedChatrooms = new ArrayList<>();
+    public ArrayList<Chatroom> getJoinedChatrooms() throws Exception {
+        ArrayList<Chatroom> joinedChatrooms = new ArrayList<>();
         DB db = new DB();
 
         try (Connection con = db.getConnection();
@@ -399,8 +399,8 @@ public class User {
 
     // gets also called to check if the user can access the messages of a chatroom
     // in app
-    public List<Chatroom> getNotJoinedChatrooms() throws Exception {
-        List<Chatroom> notJoinedChatrooms = new ArrayList<>();
+    public ArrayList<Chatroom> getNotJoinedChatrooms() throws Exception {
+        ArrayList<Chatroom> notJoinedChatrooms = new ArrayList<>();
         DB db = new DB();
 
         try (Connection con = db.getConnection();
@@ -549,8 +549,8 @@ public class User {
     }
 
     // Method to get all user reviews ordered by movie ID
-    public List<Review> getAllUserReviewsOrderedByMovieId() throws Exception {
-        List<Review> userReviews = new ArrayList<>();
+    public ArrayList<Review> getAllUserReviewsOrderedByMovieId() throws Exception {
+        ArrayList<Review> userReviews = new ArrayList<>();
 
         try (DB db = new DB(); Connection con = db.getConnection()) {
             String sql = "SELECT Review.reviewId, Review.movieId, Review.reviewText, Review.rating, Review.spoiler, " +
@@ -568,7 +568,7 @@ public class User {
                     while (rs.next()) {
                         int reviewId = rs.getInt("reviewId");
                         int movieId = rs.getInt("movieId");
-                        String reviewText = rs.getString("reviewText");
+                        String reviewText = rs.getString("review_text");
                         float rating = rs.getFloat("rating");
                         boolean spoiler = rs.getBoolean("spoiler");
                         String username = rs.getString("username");
