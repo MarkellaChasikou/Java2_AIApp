@@ -439,7 +439,7 @@ public class App {
                     currrentId = r.getMovieId();
                 }
                 System.out.println(i + ".");
-                Review.printReview(r);
+                System.out.println(r.toString());;
             }
             System.out.println("\nChoose a review or press 0 to go back ");
             int choice = scanner.nextInt();
@@ -467,7 +467,7 @@ public class App {
                         System.out.println("Movie: " + r.getMovieId() + "\n"); //r.getMovieTitle !!!
                         currrentId = r.getMovieId();
                     }
-                    Review.printReview(r);
+                    System.out.println(r.toString());;
                 }
             } else {
                 System.out.println("You have not reviewed any movies! ");
@@ -863,7 +863,7 @@ public class App {
                     ArrayList<Review> reviews = MovieDAO.getSpoilerFreeReviewsForMovie(m.getMd().getId());
                     if(!reviews.isEmpty()) {
                         for (Review r : reviews) {
-                            Review.printReview(r);
+                            System.out.println(r.toString());;
                         }
                     } else {
                         System.out.println("No reviews for this movie!");
@@ -885,7 +885,7 @@ public class App {
                     ArrayList<Review> reviews = Review.getReviewsByUserAndMovie(currentUser.getId(), m.getMd().getId());
                     if(!reviews.isEmpty()) {
                         for (Review r : reviews) {
-                            Review.printReview(r);
+                            System.out.println(r.toString());;
                         }
                     } else {
                         System.out.println("No reviews for this movie!");

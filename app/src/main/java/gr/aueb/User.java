@@ -549,11 +549,11 @@ public class User {
     }
 
     // Method to get all user reviews ordered by movie ID
-    public List<Review> getAllUserReviewsOrderedByMovieId() throws Exception {
-        List<Review> userReviews = new ArrayList<>();
+    public ArrayList<Review> getAllUserReviewsOrderedByMovieId() throws Exception {
+        ArrayList<Review> userReviews = new ArrayList<>();
 
         try (DB db = new DB(); Connection con = db.getConnection()) {
-            String sql = "SELECT reviewId, movieId, reviewText, rating, spoiler FROM Review WHERE userId=? ORDER BY movieId;";
+            String sql = "SELECT reviewId, movieId, review_text, rating, spoiler FROM Review WHERE userId=? ORDER BY movieId;";
 
             try (PreparedStatement stmt = con.prepareStatement(sql)) {
                 stmt.setInt(1, id);
@@ -562,7 +562,7 @@ public class User {
                     while (rs.next()) {
                         int reviewId = rs.getInt("reviewId");
                         int movieId = rs.getInt("movieId");
-                        String reviewText = rs.getString("reviewText");
+                        String reviewText = rs.getString("review_text");
                         float rating = rs.getFloat("rating");
                         boolean spoiler = rs.getBoolean("spoiler");
 
