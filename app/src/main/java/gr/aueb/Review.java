@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.List;
 
 public class Review {
     private final int reviewId;
@@ -197,13 +196,10 @@ public class Review {
     // toString method
     @Override
     public String toString() {
-        return "Review{" +
-                "reviewId=" + reviewId +
-                ", userId=" + userId +
-                ", movieId=" + movieId +
-                ", reviewText='" + reviewText + '\'' +
-                ", rating=" + rating +
-                ", spoiler=" + spoiler +
-                '}';
+        return 
+            "Author: " + //username
+            "Rating: " + this.getRating()
+            + this.getReviewText() 
+            + "\n\n";
     }
 }
