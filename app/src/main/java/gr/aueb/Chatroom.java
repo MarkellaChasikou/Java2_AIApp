@@ -43,7 +43,7 @@ public class Chatroom {
         updateNameInDatabase();
     }
 
-    private boolean isChatroomCreator(int userId) {
+    public boolean isChatroomCreator(int userId) {
         DB db = new DB();
         try (Connection con = db.getConnection();
                 PreparedStatement stmt = con
@@ -155,8 +155,8 @@ public class Chatroom {
     }
 
     // Get chatrooms method
-    public static List<Chatroom> getChatrooms() throws Exception {
-        List<Chatroom> chatrooms = new ArrayList<>();
+    public static ArrayList<Chatroom> getChatrooms() throws Exception {
+        ArrayList<Chatroom> chatrooms = new ArrayList<>();
         DB db = new DB();
         Connection con = null;
         try {

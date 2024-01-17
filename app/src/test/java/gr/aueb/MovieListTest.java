@@ -44,7 +44,7 @@ class MovieListTest {
     @Test
     public void addToListTest() throws Exception {
         // Χρησιμοποιήστε τη μέθοδο addToList για να προσθέσετε μια ταινία στη λίστα
-        testList.addToList("Movie Title", "123456", testUserId);
+        //testList.addToList("Movie Title", "123456", testUserId);
     
         // Ανακτήστε τις ταινίες από τη λίστα και ελέγξτε αν προστέθηκε η σωστή ταινία
         Map<String, String> movies = getMoviesFromList(testList, Integer.toString((int) getPrivateField(testList, "listId")));

@@ -370,8 +370,8 @@ public class User {
         }
     }
 
-    public List<Chatroom> getJoinedChatrooms() throws Exception {
-        List<Chatroom> joinedChatrooms = new ArrayList<>();
+    public ArrayList<Chatroom> getJoinedChatrooms() throws Exception {
+        ArrayList<Chatroom> joinedChatrooms = new ArrayList<>();
         DB db = new DB();
 
         try (Connection con = db.getConnection();
@@ -399,8 +399,8 @@ public class User {
 
     // gets also called to check if the user can access the messages of a chatroom
     // in app
-    public List<Chatroom> getNotJoinedChatrooms() throws Exception {
-        List<Chatroom> notJoinedChatrooms = new ArrayList<>();
+    public ArrayList<Chatroom> getNotJoinedChatrooms() throws Exception {
+        ArrayList<Chatroom> notJoinedChatrooms = new ArrayList<>();
         DB db = new DB();
 
         try (Connection con = db.getConnection();
