@@ -33,7 +33,7 @@ private static Message message2;
         connection = db.getConnection();
         user = new User(1,"TestUser","TestPassword","TestCountry");
         chatroom = new Chatroom(1, "ChatroomTest", user.getId());
-        message = new Message(1, user.getId(), false, "TestText", 1, user.getUsername());
+
         try (PreparedStatement insertStmt1 = connection.prepareStatement("INSERT INTO appuser ( userId, username, pass_word, country) VALUES (1, 'TestUser', 'TestPassword', 'TestCountry')")) {
             insertStmt1.executeUpdate();
         } catch (SQLException e) {
@@ -46,11 +46,6 @@ private static Message message2;
         }
         try (PreparedStatement insertStmt3 = connection.prepareStatement("INSERT INTO chatroomuser (roomId, userId) VALUES (1, 1)")) {
             insertStmt3.executeUpdate();
-        } catch (SQLException e) {
-            fail("Exception thrown during setup: " + e.getMessage());
-        }
-        try (PreparedStatement insertStmt4 = connection.prepareStatement("INSERT INTO message ( userid, spoiler, text , roomid, username) VALUES (1, false, 'TestText', 1, 'TestUser')")) {
-            insertStmt4.executeUpdate();
         } catch (SQLException e) {
             fail("Exception thrown during setup: " + e.getMessage());
         }
@@ -72,23 +67,33 @@ private static Message message2;
         } catch (SQLException e) {
             fail("Exception thrown during setup: " + e.getMessage());
         }
-        try (PreparedStatement insertStmt4 = connection.prepareStatement("DELETE FROM chatroom WHERE creatorid = 1")) {
+        try (PreparedStatement insertStmt4 = connection.prepareStatement("DELETE FROM chatroomuser WHERE roomid = 1")) {
             insertStmt4.executeUpdate();
         } catch (SQLException e) {
             fail("Exception thrown during setup: " + e.getMessage());
         }
-        try (PreparedStatement insertStmt5 = connection.prepareStatement("DELETE FROM chatroom WHERE creatorid = 2")) {
+        try (PreparedStatement insertStmt5 = connection.prepareStatement("DELETE FROM chatroom WHERE creatorid = 1")) {
             insertStmt5.executeUpdate();
         } catch (SQLException e) {
             fail("Exception thrown during setup: " + e.getMessage());
         }
-        try (PreparedStatement insertStmt6 = connection.prepareStatement("DELETE FROM appuser WHERE userid = 2")) {
+        try (PreparedStatement insertStmt6 = connection.prepareStatement("DELETE FROM chatroom WHERE creatorid = 2")) {
             insertStmt6.executeUpdate();
         } catch (SQLException e) {
             fail("Exception thrown during setup: " + e.getMessage());
         }
-        try (PreparedStatement insertStmt7 = connection.prepareStatement("DELETE FROM appuser WHERE userid = 1")) {
+        try (PreparedStatement insertStmt7 = connection.prepareStatement("DELETE FROM appuser WHERE username = 'User1'")) {
             insertStmt7.executeUpdate();
+        } catch (SQLException e) {
+            fail("Exception thrown during setup: " + e.getMessage());
+        }
+        try (PreparedStatement insertStmt8 = connection.prepareStatement("DELETE FROM appuser WHERE username = 'User2'")) {
+            insertStmt8.executeUpdate();
+        } catch (SQLException e) {
+            fail("Exception thrown during setup: " + e.getMessage());
+        }
+        try (PreparedStatement insertStmt9 = connection.prepareStatement("DELETE FROM appuser WHERE userid = 1")) {
+            insertStmt9.executeUpdate();
         } catch (SQLException e) {
             fail("Exception thrown during setup: " + e.getMessage());
         }
@@ -334,42 +339,32 @@ public void testGetChatrooms() {
 
    
 
-@Test
-public void testGetMessages() {
+@Test // this is not correct, i will not be using the addMessage nor the register method since i cant check the messageid or the userid (Autoincremented variables )
+public void testGetMessages() throws Exception {
+    user2 = User.register("User1","Password2","Greece");
     try {
-        Message.addMessage(1, false, "great Movie!", 1, user.getUsername());
-        Message.addMessage(2, false, "Haha yeah agree", 1, user2.getUsername());
-        Message.addMessage(1, false, "Goodnight", 1, user.getUsername());
+        Message.addMessage(user.getId(), false, "great Movie!", 1, user.getUsername());
+        Message.addMessage(user2.getId(), false, "Haha yeah agree", 1, user2.getUsername());
 
         List<Message> messages = chatroom.getMessages();
 
         // Έλεγχος του αποτελέσματος
         assertNotNull(messages);
-        assertEquals(3, messages.size());
+        assertEquals(2, messages.size());
 
         // Έλεγχος του περιεχομένου του πρώτου μηνύματος 
         Message firstMessage = messages.get(0);
-        assertEquals(1, firstMessage.getMessageId());
-        assertEquals(1, firstMessage.getUserId());
         assertEquals("great Movie!", firstMessage.getText());
         assertFalse(firstMessage.getSpoiler());
         assertEquals("TestUser", firstMessage.getUsername());
 
         // Έλεγχος του περιεχομένου του δεύτερου μηνύματος
         Message secondMessage = messages.get(1);
-        assertEquals(2, secondMessage.getMessageId());
-        assertEquals(2, secondMessage.getUserId());
         assertEquals("Haha yeah agree", secondMessage.getText());
         assertFalse(secondMessage.getSpoiler());
-        assertEquals("User2", secondMessage.getUsername());
+        assertEquals("User1", secondMessage.getUsername());
 
-        // Έλεγχος του περιεχομένου του τρίτου μηνύματος
-        Message thirdMessage = messages.get(2);
-        assertEquals(3, thirdMessage.getMessageId());
-        assertEquals(1, thirdMessage.getUserId());
-        assertEquals("Goodnight", thirdMessage.getText());
-        assertFalse(thirdMessage.getSpoiler());
-        assertEquals("TestUser", thirdMessage.getUsername());
+    
 
     } catch (Exception e) {
         fail("Exception during test: " + e.getMessage());
