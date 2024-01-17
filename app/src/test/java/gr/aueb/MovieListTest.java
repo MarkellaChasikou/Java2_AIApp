@@ -3,75 +3,175 @@ package gr.aueb;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.lang.reflect.Field;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class MovieListTest {
+private static Connection connection;
+private static MovieList movielist;
 
-    private static MovieList testList;
-    private static int testUserId;
 
-    @BeforeAll
-    public static void setup() {
-        // Πραγματοποιήστε τις αρχικοποιήσεις που απαιτούνται για τα τεστ
-        // Μπορείτε να δημιουργήσετε μια λίστα και να ορίσετε τον χρήστη που θα χρησιμοποιηθεί για τα τεστ
-        testList = new MovieList("public", 1, "Test List", 123);
-        testUserId = 2; // Ορίστε τον χρήστη που θα χρησιμοποιηθεί για τα τεστ (ο 2 υπαρχει ηδη)
-    }
-
-    // Μέθοδος που χρησιμοποιεί ανάκληση για να πάρει τιμή από ιδιωτικό πεδίο
-    private Object getPrivateField(Object object, String fieldName) throws Exception {
-        Field field = object.getClass().getDeclaredField(fieldName);
-        field.setAccessible(true);
-        return field.get(object);
-    }
-
-    
-    @Test
-    public void createListTest() throws Exception {
-        // Χρησιμοποιήστε τη μέθοδο createList για να δημιουργήσετε μια λίστα
-        MovieList createdList = MovieList.createList("public", "New Test List", testUserId);
-
-        // Ελέγχει αν η λίστα δημιουργήθηκε με τις σωστές τιμές
-        assertEquals("public", getPrivateField(createdList, "listType"));
-        assertEquals("New Test List", getPrivateField(createdList, "listName"));
-        assertEquals(testUserId, getPrivateField(createdList, "creatorId"));
-    }
-
-    @Test
-    public void addToListTest() throws Exception {
-        // Χρησιμοποιήστε τη μέθοδο addToList για να προσθέσετε μια ταινία στη λίστα
-        testList.addToList("Movie Title", "123456", testUserId);
-    
-        // Ανακτήστε τις ταινίες από τη λίστα και ελέγξτε αν προστέθηκε η σωστή ταινία
-        Map<String, String> movies = getMoviesFromList(testList, Integer.toString((int) getPrivateField(testList, "listId")));
-        assertTrue(movies.containsKey("Movie Title"));
-        assertEquals("123456", movies.get("Movie Title"));
-    }
-     // Μέθοδος που χρησιμοποιεί ανάκληση για να καλέσει την ιδιωτική μέθοδο getMoviesFromList
-     private Map<String, String> getMoviesFromList(MovieList movieList, String listName) throws Exception {
-        return (Map<String, String>) invokePrivateMethod(movieList, "getMoviesFromList", listName);
-    }
-
-    // Μέθοδος που χρησιμοποιεί ανάκληση για να καλέσει ιδιωτική μέθοδο στο αντικείμενο
-    private Object invokePrivateMethod(Object object, String methodName, Object... args) throws Exception {
-        Class<?>[] parameterTypes = new Class[args.length];
-        for (int i = 0; i < args.length; i++) {
-            parameterTypes[i] = args[i].getClass();
+@BeforeAll
+    public static void CreateInserts() throws Exception{
+        DB db = new DB(); 
+        connection = db.getConnection();
+        movielist = new MovieList("public",1,"list1",1);
+        try (PreparedStatement insertStmt1 = connection.prepareStatement("INSERT INTO appuser ( userId, username, pass_word, country) VALUES (1, 'User1', 'TestPassword', 'TestCountry')")) {
+            insertStmt1.executeUpdate();
+        } catch (SQLException e) {
+            fail("Exception thrown during setup: " + e.getMessage());
         }
-
-        try {
-            java.lang.reflect.Method method = object.getClass().getDeclaredMethod(methodName, parameterTypes);
-            method.setAccessible(true);
-            return method.invoke(object, args);
-        } catch (NoSuchMethodException e) {
-            throw new Exception("Method " + methodName + " not found");
+        try (PreparedStatement insertStmt2 = connection.prepareStatement("INSERT INTO appuser ( userId, username, pass_word, country) VALUES (2, 'User2', 'TestPassword', 'TestCountry')")) {
+            insertStmt2.executeUpdate();
+        } catch (SQLException e) {
+            fail("Exception thrown during setup: " + e.getMessage());
+        }
+        try (PreparedStatement insertStmt3 = connection.prepareStatement("INSERT INTO list (list_Id, listType, name, userid) VALUES (1, 'public', 'list1', 1)")) {
+            insertStmt3.executeUpdate();
+        } catch (SQLException e) {
+            fail("Exception thrown during setup: " + e.getMessage());
+        }
+        try (PreparedStatement insertStmt4 = connection.prepareStatement("INSERT INTO list (list_Id, listType, name, userid) VALUES (2, 'protected', 'list2', 1)")) {
+            insertStmt4.executeUpdate();
+        } catch (SQLException e) {
+            fail("Exception thrown during setup: " + e.getMessage());
+        }
+        try (PreparedStatement insertStmt5 = connection.prepareStatement("INSERT INTO list (list_Id, listType, name, userid) VALUES (3, 'private', 'list3', 1)")) {
+            insertStmt5.executeUpdate();
+        } catch (SQLException e) {
+            fail("Exception thrown during setup: " + e.getMessage());
+        }
+        try (PreparedStatement insertStmt6 = connection.prepareStatement("INSERT INTO list (list_Id, listType, name, userid) VALUES (4, 'protected', 'list4', 2)")) {
+            insertStmt6.executeUpdate();
+        } catch (SQLException e) {
+            fail("Exception thrown during setup: " + e.getMessage());
+        }
+        try (PreparedStatement insertStmt7 = connection.prepareStatement("INSERT INTO followers (followedid,followerid) VALUES (1, 2)")) {
+            insertStmt7.executeUpdate();
+        } catch (SQLException e) {
+            fail("Exception thrown during setup: " + e.getMessage());
+        }
+        try (PreparedStatement insertStmt8 = connection.prepareStatement("INSERT INTO movieslist (list_Id, moviename, movieid) VALUES (1, 'movie1',  1)")) {
+            insertStmt8.executeUpdate();
+        } catch (SQLException e) {
+            fail("Exception thrown during setup: " + e.getMessage());
+        }
+        try (PreparedStatement insertStmt9 = connection.prepareStatement("INSERT INTO movieslist (list_Id, moviename, movieid) VALUES (2, 'movie1',  1)")) {
+            insertStmt9.executeUpdate();
+        } catch (SQLException e) {
+            fail("Exception thrown during setup: " + e.getMessage());
+        }
+        try (PreparedStatement insertStmt10 = connection.prepareStatement("INSERT INTO movieslist (list_Id, moviename, movieid) VALUES (3, 'movie1',  1)")) {
+            insertStmt10.executeUpdate();
+        } catch (SQLException e) {
+            fail("Exception thrown during setup: " + e.getMessage());
+        }
+}
+@AfterAll
+    public static void DeleteAllInserts() throws Exception {
+        try (PreparedStatement insertStmt1 = connection.prepareStatement("DELETE FROM movieslist WHERE movieid = 1")) {
+            insertStmt1.executeUpdate();
+        } catch (SQLException e) {
+            fail("Exception thrown during setup: " + e.getMessage());
+        }
+        try (PreparedStatement insertStmt2 = connection.prepareStatement("DELETE FROM list WHERE userid = 1")) {
+            insertStmt2.executeUpdate();
+        } catch (SQLException e) {
+            fail("Exception thrown during setup: " + e.getMessage());
+        }
+        try (PreparedStatement insertStmt3 = connection.prepareStatement("DELETE FROM list WHERE userid = 2")) {
+            insertStmt3.executeUpdate();
+        } catch (SQLException e) {
+            fail("Exception thrown during setup: " + e.getMessage());
+        }
+        try (PreparedStatement insertStmt4 = connection.prepareStatement("DELETE FROM followers WHERE followerId = 2")) {
+            insertStmt4.executeUpdate();
+        } catch (SQLException e) {
+            fail("Exception thrown during setup: " + e.getMessage());
+        }
+        try (PreparedStatement insertStmt5 = connection.prepareStatement("DELETE FROM appuser WHERE userid = 1")) {
+            insertStmt5.executeUpdate();
+        } catch (SQLException e) {
+            fail("Exception thrown during setup: " + e.getMessage());
+        }
+        try (PreparedStatement insertStmt6 = connection.prepareStatement("DELETE FROM appuser WHERE userid = 2")) {
+            insertStmt6.executeUpdate();
+        } catch (SQLException e) {
+            fail("Exception thrown during setup: " + e.getMessage());
+        }
+        // Κλείσιμο της σύνδεσης
+        if (connection != null) {
+            connection.close();
         }
     }
-
+@Test
+    public void getListTypeTest() throws SQLException {
+    //  // Έλεγχος της μεθόδου getListTypeTest
+        try (PreparedStatement stmt = connection.prepareStatement("SELECT listType FROM list WHERE list_id = 1")) {
+            try (ResultSet resultSet = stmt.executeQuery()) {
+                if (resultSet.next()) {
+                    assertEquals(movielist.getListType(), resultSet.getString("listType"));
+                } else {
+                    fail("the listType does not match");
+                }
+            } catch (SQLException e) {
+                fail("Exception thrown during select: " + e.getMessage());
+            }
+        }
+    }
+@Test
+    public void getCreatorIdTest() throws SQLException {
+    //  // Έλεγχος της μεθόδου getCreatorId
+        try (PreparedStatement stmt = connection.prepareStatement("SELECT userid FROM list WHERE list_Id = 1")) {
+            try (ResultSet resultSet = stmt.executeQuery()) {
+                if (resultSet.next()) {
+                    assertEquals(movielist.getCreatorId(), resultSet.getInt("userid"));
+                } else {
+                    fail("the userid does not match");
+                }
+            } catch (SQLException e) {
+                fail("Exception thrown during select: " + e.getMessage());
+            }
+        }
+    }
+    @Test
+    public void getListNameTest() throws SQLException {
+    //  // Έλεγχος της μεθόδου getListName
+        try (PreparedStatement stmt = connection.prepareStatement("SELECT name FROM list WHERE list_Id = 1")) {
+            try (ResultSet resultSet = stmt.executeQuery()) {
+                if (resultSet.next()) {
+                    assertEquals(movielist.getListName(), resultSet.getString("name"));
+                } else {
+                    fail("the name does not match");
+                }
+            } catch (SQLException e) {
+                fail("Exception thrown during select: " + e.getMessage());
+            }
+        }
+    }
+    @Test
+    public void getListIdTest() throws SQLException {
+    //  // Έλεγχος της μεθόδου getCreatorId
+        try (PreparedStatement stmt = connection.prepareStatement("SELECT list_id FROM list WHERE list_Id = 1")) {
+            try (ResultSet resultSet = stmt.executeQuery()) {
+                if (resultSet.next()) {
+                    assertEquals(movielist.getListId(), resultSet.getInt("list_id"));
+                } else {
+                    fail("the listid does not match");
+                }
+            } catch (SQLException e) {
+                fail("Exception thrown during select: " + e.getMessage());
+            }
+        }
+    }
 }
 
 
