@@ -197,8 +197,8 @@ public class Review {
     @Override
     public String toString() {
         return 
-            "Author: " + //username
-            "Rating: " + this.getRating()
+            "Author: " + "\n" //+username 
+            +"Rating: " + this.getRating() + "\n"
             + this.getReviewText() 
             + "\n\n";
     }
