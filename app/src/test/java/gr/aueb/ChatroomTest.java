@@ -1,9 +1,6 @@
 package gr.aueb;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -32,27 +29,57 @@ private static Message message2;
         DB db = new DB(); 
         connection = db.getConnection();
         user = new User(1,"TestUser","TestPassword","TestCountry");
+        user2 = new User(2,"TestUser2","TestPassword","TestCountry");
         chatroom = new Chatroom(1, "ChatroomTest", user.getId());
+        message = new Message(1,user.getId(),false,"TestText",chatroom.getRoomId(),user.getUsername());
+        message2 = new Message(2,user2.getId(),true,"TestText2",chatroom.getRoomId(),user2.getUsername());
+
 
         try (PreparedStatement insertStmt1 = connection.prepareStatement("INSERT INTO appuser ( userId, username, pass_word, country) VALUES (1, 'TestUser', 'TestPassword', 'TestCountry')")) {
             insertStmt1.executeUpdate();
         } catch (SQLException e) {
             fail("Exception thrown during setup: " + e.getMessage());
         }
-        try (PreparedStatement insertStmt2 = connection.prepareStatement("INSERT INTO chatroom (roomId, name, creatorId) VALUES (1, 'ChatroomTest', 1)")) {
+        try (PreparedStatement insertStmt2 = connection.prepareStatement("INSERT INTO appuser ( userId, username, pass_word, country) VALUES (2, 'TestUser2', 'TestPassword', 'TestCountry')")) {
             insertStmt2.executeUpdate();
         } catch (SQLException e) {
             fail("Exception thrown during setup: " + e.getMessage());
         }
-        try (PreparedStatement insertStmt3 = connection.prepareStatement("INSERT INTO chatroomuser (roomId, userId) VALUES (1, 1)")) {
+        try (PreparedStatement insertStmt3 = connection.prepareStatement("INSERT INTO chatroom (roomId, name, creatorId) VALUES (1, 'ChatroomTest', 1)")) {
             insertStmt3.executeUpdate();
         } catch (SQLException e) {
             fail("Exception thrown during setup: " + e.getMessage());
         }
+        try (PreparedStatement insertStmt4 = connection.prepareStatement("INSERT INTO chatroomuser (roomId, userId) VALUES (1, 1)")) {
+            insertStmt4.executeUpdate();
+        } catch (SQLException e) {
+            fail("Exception thrown during setup: " + e.getMessage());
+        }
+        try (PreparedStatement insertStmt4 = connection.prepareStatement("INSERT INTO chatroomuser (roomId, userId) VALUES (1, 2)")) {
+            insertStmt4.executeUpdate();
+        } catch (SQLException e) {
+            fail("Exception thrown during setup: " + e.getMessage());
+        }
+        try (PreparedStatement insertStmt5 = connection.prepareStatement("INSERT INTO message (id, roomid, userId, spoiler, text, username) VALUES (1, 1, 1, false, 'TestText', 'TestUser')")) {
+            insertStmt5.executeUpdate();
+        } catch (SQLException e) {
+            fail("Exception thrown during setup: " + e.getMessage());
+        }
+        try (PreparedStatement insertStmt6 = connection.prepareStatement("INSERT INTO message (id, roomid, userId, spoiler, text, username) VALUES (2, 1, 2, true, 'TestText2', 'TestUser2')")) {
+            insertStmt6.executeUpdate();
+        } catch (SQLException e) {
+            fail("Exception thrown during setup: " + e.getMessage());
+        }
+
         }
 @AfterAll
     public static void DeleteAllInserts() throws Exception {
-        try (PreparedStatement insertStmt1 = connection.prepareStatement("DELETE FROM message WHERE id = 1")) {
+        try (PreparedStatement insertStmt1 = connection.prepareStatement("DELETE FROM message WHERE userid = 1")) {
+            insertStmt1.executeUpdate();
+        } catch (SQLException e) {
+            fail("Exception thrown during setup: " + e.getMessage());
+        }
+        try (PreparedStatement insertStmt1 = connection.prepareStatement("DELETE FROM message WHERE userid = 2")) {
             insertStmt1.executeUpdate();
         } catch (SQLException e) {
             fail("Exception thrown during setup: " + e.getMessage());
@@ -67,33 +94,18 @@ private static Message message2;
         } catch (SQLException e) {
             fail("Exception thrown during setup: " + e.getMessage());
         }
-        try (PreparedStatement insertStmt4 = connection.prepareStatement("DELETE FROM chatroomuser WHERE roomid = 1")) {
+        try (PreparedStatement insertStmt4 = connection.prepareStatement("DELETE FROM chatroom WHERE creatorid = 1")) {
             insertStmt4.executeUpdate();
         } catch (SQLException e) {
             fail("Exception thrown during setup: " + e.getMessage());
         }
-        try (PreparedStatement insertStmt5 = connection.prepareStatement("DELETE FROM chatroom WHERE creatorid = 1")) {
-            insertStmt5.executeUpdate();
-        } catch (SQLException e) {
-            fail("Exception thrown during setup: " + e.getMessage());
-        }
-        try (PreparedStatement insertStmt6 = connection.prepareStatement("DELETE FROM chatroom WHERE creatorid = 2")) {
+        try (PreparedStatement insertStmt6 = connection.prepareStatement("DELETE FROM appuser WHERE userid = 1")) {
             insertStmt6.executeUpdate();
         } catch (SQLException e) {
             fail("Exception thrown during setup: " + e.getMessage());
         }
-        try (PreparedStatement insertStmt7 = connection.prepareStatement("DELETE FROM appuser WHERE username = 'User1'")) {
+        try (PreparedStatement insertStmt7 = connection.prepareStatement("DELETE FROM appuser WHERE userid = 2")) {
             insertStmt7.executeUpdate();
-        } catch (SQLException e) {
-            fail("Exception thrown during setup: " + e.getMessage());
-        }
-        try (PreparedStatement insertStmt8 = connection.prepareStatement("DELETE FROM appuser WHERE username = 'User2'")) {
-            insertStmt8.executeUpdate();
-        } catch (SQLException e) {
-            fail("Exception thrown during setup: " + e.getMessage());
-        }
-        try (PreparedStatement insertStmt9 = connection.prepareStatement("DELETE FROM appuser WHERE userid = 1")) {
-            insertStmt9.executeUpdate();
         } catch (SQLException e) {
             fail("Exception thrown during setup: " + e.getMessage());
         }
@@ -180,7 +192,7 @@ private static Message message2;
             PreparedStatement stmt = con
             .prepareStatement("SELECT COUNT(*) FROM Chatroom WHERE roomId = ? AND creatorId = ?")) {
             stmt.setInt(1, chatroom.getRoomId());
-            stmt.setInt(2, 2);  // δεν υπαρχει ο χρηστης 2/ακομα και αν υπηρχε δεν ειναι ο creator του chatroom με id = 1
+            stmt.setInt(2, 2);  // δεν υπαρχει ο χρηστης 2 /ακομα και αν υπηρχε δεν ειναι ο creator του chatroom με id = 1
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                    assertFalse( rs.getInt(1) > 0);
@@ -337,14 +349,11 @@ public void testGetChatrooms() {
         }
     }
 
-   
+    
 
 @Test // this is not correct, i will not be using the addMessage nor the register method since i cant check the messageid or the userid (Autoincremented variables )
 public void testGetMessages() throws Exception {
-    user2 = User.register("User1","Password2","Greece");
     try {
-        Message.addMessage(user.getId(), false, "great Movie!", 1, user.getUsername());
-        Message.addMessage(user2.getId(), false, "Haha yeah agree", 1, user2.getUsername());
 
         List<Message> messages = chatroom.getMessages();
 
