@@ -10,7 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-
+import java.util.Date;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -24,7 +24,7 @@ public class ReviewTest {
     private static Review reviewDelete;
     private static Review review3;
     static File tmdbFile = new File("c:/Users/Βασιλης/OneDrive/Υπολογιστής/apiKeys/tmdb_api_key.txt");
-
+    private static Date d;
    
     @BeforeAll
     public static void CreateInserts() throws Exception {
@@ -32,9 +32,9 @@ public class ReviewTest {
         connection = db.getConnection();
          user = new User(1000,"TestUser","TestPassword","Greece"); // φτιαχνω εναν user
         // αυτη εδω η review για να την κανω delete 
-        reviewDelete = new Review(1, 1000, 1, "Sample review text", 8, false);
+        reviewDelete = new Review(1, 1000, 1, "Sample review text", 8, false ,"TestUser",  d=new Date(),"Movie");
         // αυτη εδω ειναι η review για να την τροποποιησω
-        review = new Review(150,1000,389, "VERY BAD , why is robert de niro still acting????", 9, false);
+        review = new Review(150,1000,389, "bad movie", 9, false,"TestUser",d = new Date(),"Movie");
         try (BufferedReader br = new BufferedReader(new FileReader(tmdbFile))) {
             tmdbApiKey = br.readLine();
         } catch (Exception e) {
@@ -49,12 +49,12 @@ public class ReviewTest {
         } catch (SQLException e) {
             fail("Exception thrown during setup: " + e.getMessage());
         }
-        try (PreparedStatement insertStmt2 = connection.prepareStatement("INSERT INTO review (reviewId, userId, movieId, review_text, rating, spoiler) VALUES (1, 1000, 1, 'Sample review text', 8, false)")) {
+        try (PreparedStatement insertStmt2 = connection.prepareStatement("INSERT INTO review (reviewId, userId, movieId, review_text, rating, spoiler, username, date, movieName) VALUES (1, 1000, 1, 'Sample review text', 8, false,'TestUser','2024-01-19','Movie')")) {
             insertStmt2.executeUpdate();
         } catch (SQLException e) {
             fail("Exception thrown during setup: " + e.getMessage());
         }
-        try (PreparedStatement insertStmt3 = connection.prepareStatement("INSERT INTO review (reviewId, userId, movieId, review_text, rating, spoiler) VALUES (150, 1000, 389, 'VERY BAD , why is robert de niro still acting????', 9, false)")) {
+        try (PreparedStatement insertStmt3 = connection.prepareStatement("INSERT INTO review (reviewId, userId, movieId, review_text, rating, spoiler, username, date ,  movieName) VALUES (150, 1000, 389, 'bad movie', 9, false, 'TestUser', '2024-01-19' , 'Movie')")) {
             insertStmt3.executeUpdate();
         } catch (SQLException e) {
             fail("Exception thrown during setup: " + e.getMessage());
@@ -187,7 +187,7 @@ boolean t = false;
 
    @Test
         public void addReviewTest() throws Exception{
-            review3 = Review.addReview (1000,389, "Added test review", 9, false);
+            review3 = Review.addReview (1000,389, "Added test review", 9, false,user.getUsername(),"Movie");
             try {
             // Έλεγχος αν η εγγραφή έγινε σωστά
             assertNotNull(review3);
