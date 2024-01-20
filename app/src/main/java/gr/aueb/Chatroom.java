@@ -229,7 +229,7 @@ public class Chatroom {
         try (
                 Connection con = new DB().getConnection();
                 PreparedStatement stmt = con.prepareStatement(
-                        "SELECT id, userId, text, spoiler, username " +
+                        "SELECT id, Message.userId, text, spoiler, Message.username " +
                                 "FROM Message " +
                                 "JOIN AppUser ON Message.userId = AppUser.userId " +
                                 "WHERE roomId=?");) {
