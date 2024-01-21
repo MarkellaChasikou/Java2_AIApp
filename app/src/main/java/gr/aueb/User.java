@@ -588,6 +588,30 @@ public class User {
         return userReviews;
     }
 
+    public void deleteChatroom(int chatroomId) throws Exception {
+        try (DB db = new DB(); Connection con = db.getConnection()) {
+
+            String checkCreatorSql = "SELECT 1 FROM Chatroom WHERE roomId=? AND creatorId=?";
+            try (PreparedStatement checkCreatorStmt = con.prepareStatement(checkCreatorSql)) {
+                checkCreatorStmt.setInt(1, chatroomId);
+                checkCreatorStmt.setInt(2, this.id);
+                ResultSet rs = checkCreatorStmt.executeQuery();
+                if (!rs.next()) {
+                    throw new Exception("You are not the creator of the chatroom or the chatroom doesn't exist.");
+                }
+            }
+
+            String deleteChatroomSql = "DELETE FROM Chatroom WHERE roomId=?";
+            try (PreparedStatement deleteChatroomStmt = con.prepareStatement(deleteChatroomSql)) {
+                deleteChatroomStmt.setInt(1, chatroomId);
+                deleteChatroomStmt.executeUpdate();
+                System.out.println("Chatroom deleted successfully.");
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+    }
+
     @Override
     public String toString() {
         return "User{" +
