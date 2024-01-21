@@ -139,6 +139,9 @@ public class User {
                         PreparedStatement.RETURN_GENERATED_KEYS);
                 PreparedStatement stmt3 = con.prepareStatement(
                         "INSERT INTO List (listType, name, userId) VALUES('private', 'favorites', ?)",
+                        PreparedStatement.RETURN_GENERATED_KEYS);
+                PreparedStatement stmt4 = con.prepareStatement(
+                        "INSERT INTO List (listType, name, userId) VALUES('private', 'watchlist', ?)",
                         PreparedStatement.RETURN_GENERATED_KEYS)) {
 
             stmt1.setString(1, username);
@@ -159,6 +162,10 @@ public class User {
                 // Create "favorites" list for the user
                 stmt3.setInt(1, userId);
                 stmt3.executeUpdate();
+
+                // Create "watchlist" list for the user
+                stmt4.setInt(1, userId);
+                stmt4.executeUpdate();
 
                 return new User(userId, username, password, country);
             } else {
@@ -183,6 +190,11 @@ public class User {
             if (rs.next()) {
                 int listId = rs.getInt("list_id");
 
+                // Check if the movie is already in favorites
+                if (isMovieInList(listId, movieId)) {
+                    throw new Exception("Movie is already in favorites.");
+                }
+
                 // Add the movie to the "favorites" list
                 stmt2.setInt(1, listId);
                 stmt2.setString(2, movieName);
@@ -192,6 +204,153 @@ public class User {
                 System.out.println(movieName + " added to your favorites.");
             } else {
                 throw new Exception("User's 'favorites' list not found.");
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+    }
+    // Remove movie from Favorites
+    public void removeFromFavorites(int movieId) throws Exception {
+        try (DB db = new DB();
+                Connection con = db.getConnection();
+                PreparedStatement stmt1 = con
+                        .prepareStatement("SELECT list_id FROM List WHERE userId=? AND name='favorites'");
+                PreparedStatement stmt2 = con
+                        .prepareStatement("DELETE FROM MoviesList WHERE list_id=? AND movieId=?")) {
+
+            stmt1.setInt(1, this.getId());
+            ResultSet rs = stmt1.executeQuery();
+            if (rs.next()) {
+                int listId = rs.getInt("list_id");
+
+                // Check if the movie is in favorites before removing
+                if (!isMovieInList(listId, movieId)) {
+                    throw new Exception("Movie is not in favorites.");
+                }
+
+                // Remove the movie from the "favorites" list
+                stmt2.setInt(1, listId);
+                stmt2.setInt(2, movieId);
+                stmt2.executeUpdate();
+
+                System.out.println("Movie removed from your favorites.");
+            } else {
+                throw new Exception("User's 'favorites' list not found.");
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+    }
+
+    // Add movie to Watchlist
+    public void addToWatchlist(int movieId, String movieName) throws Exception {
+        try (DB db = new DB();
+                Connection con = db.getConnection();
+                PreparedStatement stmt1 = con
+                        .prepareStatement("SELECT list_id FROM List WHERE userId=? AND name='watchlist'");
+                PreparedStatement stmt2 = con.prepareStatement(
+                        "INSERT INTO MoviesList (list_id, movieName, movieId) VALUES (?, ?, ?)")) {
+
+            stmt1.setInt(1, this.getId());
+            ResultSet rs = stmt1.executeQuery();
+            if (rs.next()) {
+                int listId = rs.getInt("list_id");
+
+                // Check if the movie is already in watchlist
+                if (isMovieInList(listId, movieId)) {
+                    throw new Exception("Movie is already in watchlist.");
+                }
+
+                // Add the movie to the "watchlist" list
+                stmt2.setInt(1, listId);
+                stmt2.setString(2, movieName);
+                stmt2.setInt(3, movieId);
+                stmt2.executeUpdate();
+
+                System.out.println(movieName + " added to your watchlist.");
+            } else {
+                throw new Exception("User's 'watchlist' list not found.");
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+    }
+
+    // Remove movie from Watchlist
+    public void removeFromWatchlist(int movieId) throws Exception {
+        try (DB db = new DB();
+                Connection con = db.getConnection();
+                PreparedStatement stmt1 = con
+                        .prepareStatement("SELECT list_id FROM List WHERE userId=? AND name='watchlist'");
+                PreparedStatement stmt2 = con
+                        .prepareStatement("DELETE FROM MoviesList WHERE list_id=? AND movieId=?")) {
+
+            stmt1.setInt(1, this.getId());
+            ResultSet rs = stmt1.executeQuery();
+            if (rs.next()) {
+                int listId = rs.getInt("list_id");
+
+                // Check if the movie is in watchlist before removing
+                if (!isMovieInList(listId, movieId)) {
+                    throw new Exception("Movie is not in watchlist.");
+                }
+
+                // Remove the movie from the "watchlist" list
+                stmt2.setInt(1, listId);
+                stmt2.setInt(2, movieId);
+                stmt2.executeUpdate();
+
+                System.out.println("Movie removed from your watchlist.");
+            } else {
+                throw new Exception("User's 'watchlist' list not found.");
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+    }
+
+    // Check if movie is in Favorites
+    public boolean isMovieInFavorites(int movieId) throws Exception {
+        return isMovieInList(getListId("favorites"), movieId);
+    }
+
+    // Check if movie is in Watchlist
+    public boolean isMovieInWatchlist(int movieId) throws Exception {
+        return isMovieInList(getListId("watchlist"), movieId);
+    }
+
+    private boolean isMovieInList(int listId, int movieId) throws Exception {
+        try (DB db = new DB();
+                Connection con = db.getConnection();
+                PreparedStatement stmt = con
+                        .prepareStatement("SELECT 1 FROM MoviesList WHERE list_id=? AND movieId=?")) {
+
+            stmt.setInt(1, listId);
+            stmt.setInt(2, movieId);
+
+            ResultSet rs = stmt.executeQuery();
+            return rs.next(); // If rs.next() is true, the movie is in the list; otherwise, it's not.
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private int getListId(String listName) throws Exception {
+        try (DB db = new DB();
+                Connection con = db.getConnection();
+                PreparedStatement stmt = con
+                        .prepareStatement("SELECT list_id FROM List WHERE userId=? AND name=?")) {
+
+            stmt.setInt(1, this.getId());
+            stmt.setString(2, listName);
+
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("list_id");
+            } else {
+                throw new Exception("User's '" + listName + "' list not found.");
             }
         } catch (Exception e) {
             throw new Exception(e.getMessage());
@@ -590,7 +749,7 @@ public class User {
 
     public void deleteChatroom(int chatroomId) throws Exception {
         try (DB db = new DB(); Connection con = db.getConnection()) {
-            
+
             // Checks if the user is the creator of the chatroom
             String checkCreatorSql = "SELECT 1 FROM Chatroom WHERE roomId=? AND creatorId=?";
             try (PreparedStatement checkCreatorStmt = con.prepareStatement(checkCreatorSql)) {

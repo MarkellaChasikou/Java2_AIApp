@@ -228,16 +228,9 @@ public class Review {
     // toString method
     @Override
     public String toString() {
-        return "Review{" +
-                "reviewId=" + reviewId +
-                ", userId=" + userId +
-                ", movieId=" + movieId +
-                ", reviewText='" + reviewText + '\'' +
-                ", rating=" + rating +
-                ", spoiler=" + spoiler +
-                ", username='" + username + '\'' +
-                ", date=" + date +
-                ", movieName='" + movieName + '\'' +
-                '}';
+        String spoilerStatus = spoiler ? "Yes" : "No";
+    
+        return String.format("Username: \"%s\"\nMovie Name: \"%s\"\nSpoiler: %s\nDate: \"%s\"\nRating: \"%s\"\nReview Text: \"%s\"",
+                username, movieName, spoilerStatus, date, rating, reviewText);
     }
 }

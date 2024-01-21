@@ -222,7 +222,7 @@ public class Chatroom {
         try (
                 Connection con = new DB().getConnection();
                 PreparedStatement stmt = con.prepareStatement(
-                        "SELECT id, Message.userId, text, spoiler, username " +
+                        "SELECT id, Message.userId, text, spoiler, Message.username " +
                                 "FROM Message " +
                                 "JOIN AppUser ON Message.userId = AppUser.userId " +
                                 "WHERE roomId=?");) {
@@ -313,6 +313,23 @@ public class Chatroom {
         return chatroom;
     }
 
+    public boolean isUserInChatroom(int userId) throws Exception {
+        try (DB db = new DB(); Connection con = db.getConnection()) {
+            String sql = "SELECT COUNT(*) FROM ChatroomUser WHERE roomId = ? AND userId = ?";
+            try (PreparedStatement stmt = con.prepareStatement(sql)) {
+                stmt.setInt(1, roomId);
+                stmt.setInt(2, userId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt(1) > 0;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        return false;
+    }
     @Override
     public String toString() {
         return "Chatroom{" +
