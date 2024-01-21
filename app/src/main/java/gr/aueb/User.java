@@ -590,17 +590,27 @@ public class User {
 
     public void deleteChatroom(int chatroomId) throws Exception {
         try (DB db = new DB(); Connection con = db.getConnection()) {
-
+            
+            // Checks if the user is the creator of the chatroom
             String checkCreatorSql = "SELECT 1 FROM Chatroom WHERE roomId=? AND creatorId=?";
             try (PreparedStatement checkCreatorStmt = con.prepareStatement(checkCreatorSql)) {
                 checkCreatorStmt.setInt(1, chatroomId);
                 checkCreatorStmt.setInt(2, this.id);
                 ResultSet rs = checkCreatorStmt.executeQuery();
+
                 if (!rs.next()) {
                     throw new Exception("You are not the creator of the chatroom or the chatroom doesn't exist.");
                 }
             }
 
+            // Delete every member of the chatroom from ChatroomUser table
+            String deleteChatroomUserSql = "DELETE FROM ChatroomUser WHERE roomId=?";
+            try (PreparedStatement deleteChatroomUserStmt = con.prepareStatement(deleteChatroomUserSql)) {
+                deleteChatroomUserStmt.setInt(1, chatroomId);
+                deleteChatroomUserStmt.executeUpdate();
+            }
+
+            // Delete chatroom from Chatroom table
             String deleteChatroomSql = "DELETE FROM Chatroom WHERE roomId=?";
             try (PreparedStatement deleteChatroomStmt = con.prepareStatement(deleteChatroomSql)) {
                 deleteChatroomStmt.setInt(1, chatroomId);
