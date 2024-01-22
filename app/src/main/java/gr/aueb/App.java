@@ -259,15 +259,19 @@ public class App {
         do {
             System.out.println(o);
             if (o instanceof Movie) {
-                displayMovieMenuUser();
+                Movie m = (Movie)o;
+                boolean flag1 = currentUser.isMovieInWatchlist(m.getMd().getId());
+                boolean flag2 = currentUser.isMovieInFavorites(m.getMd().getId());
+                displayMovieMenuUser(flag1, flag2);
                 choice2 = scanner.nextInt();
                 scanner.nextLine();
-                movieCase(scanner, choice2, o);
+                movieCase(scanner, choice2, m, flag1, flag2);
             } else {
+                Person p = (Person)o;
                 displayPersonMenu();
                 choice2 = scanner.nextInt();
                 scanner.nextLine();
-                personCase(scanner, choice2, o);
+                personCase(scanner, choice2, p);
             }
         } while (choice2 != 0);
     }
@@ -331,7 +335,7 @@ public class App {
             case 0:
                 break;
             case 1: 
-                caseShowLists(scanner, u);
+                caseShowLists(scanner, u, 1);
                 break;
             case 2: 
                 if(flag) {
@@ -369,19 +373,25 @@ public class App {
                 currentUser = null;
                 skipStartMenu = false;
                 break;
-            case 5: 
+            case 2:
+                caseShowLists(scanner, currentUser, 2);
+                break;
+            case 3:
+            caseShowLists(scanner, currentUser, 3);
+                break;
+            case 4: 
                 caseLists(scanner);
                 break;
-            case 6:
+            case 5:
                 caseReviews(scanner);
                 break;
-            case 7: 
+            case 6: 
                 caseFollowers(scanner);
                 break;
-            case 8: 
+            case 7: 
                 caseFollowing(scanner);
                 break;
-            case 9: 
+            case 8: 
                 caseCountry(scanner);
                 break;
             default:
@@ -525,7 +535,7 @@ public class App {
                     case 0:
                         break;
                     case 1: 
-                        caseShowLists(scanner, currentUser);
+                        caseShowLists(scanner, currentUser, 1); //1 = all lists
                         break;
                     case 2: 
                         caseDeleteList(scanner);
@@ -563,7 +573,7 @@ public class App {
     private static void caseDeleteList(Scanner scanner) throws Exception {
         Object l;
         do {
-            l = chooseList(scanner, currentUser);
+            l = chooseList(scanner, currentUser, 1);
             if(!l.equals("0")) {
                 MovieList list = (MovieList)l;
                 list.deleteList(currentUser.getId());
@@ -571,10 +581,10 @@ public class App {
         } while(!l.equals("0"));
     }
 
-    private static void caseShowLists(Scanner scanner, User u) throws Exception {
+    private static void caseShowLists(Scanner scanner, User u, int allLists) throws Exception {
         Object l;
         do {
-            l = chooseList(scanner, u);
+            l = chooseList(scanner, u, allLists);
             if(!l.equals("0")) {
                 int choice;
                 do { 
@@ -589,7 +599,7 @@ public class App {
                     scanner.nextLine();
                     if(choice != 0) caseListContent(scanner, choice, list);
                 } while(choice != 0);
-            }
+            } if(allLists == 2 || allLists == 3) break;
          } while(!l.equals("0"));
     }
 
@@ -664,8 +674,22 @@ public class App {
         }
     }
 
-    private static Object chooseList(Scanner scanner, User user) throws Exception {
+    private static Object chooseList(Scanner scanner, User user, int allLists) throws Exception {
         ArrayList<MovieList> movieLists = user.getLists();
+        if(allLists == 2) {
+            for (MovieList m : movieLists) {
+                if(m.getListName().equals("watchlist")) {
+                    return m;
+                }
+            }
+        }
+        if(allLists == 3) {
+            for (MovieList m : movieLists) {
+                if(m.getListName().equals("favorites")) {
+                    return m;
+                }
+            }
+        }
         System.out.println();
         int i = 0;
         for (MovieList m : movieLists) {
@@ -721,16 +745,16 @@ public class App {
      * @param choice2 The user's choice.
      * @param o       The object representing a Person.
      */
-    public static void personCase(Scanner scanner, int choice2, Object o) throws Exception {
+    public static void personCase(Scanner scanner, int choice2, Person p) throws Exception {
         switch (choice2) {
             case 0:
                 break;
             case 1:
                 // Display movies related to the person
-                ArrayList<Integer> ids2 = ((Person) o).getMovieIds();
-                ArrayList<String> titles = ((Person) o).getMovieTitles();
-                ArrayList<String> dates = ((Person) o).getMovieDates();
-                ArrayList<Float> popularity = ((Person) o).getMoviePopularity();
+                ArrayList<Integer> ids2 = p.getMovieIds();
+                ArrayList<String> titles = p.getMovieTitles();
+                ArrayList<String> dates = p.getMovieDates();
+                ArrayList<Float> popularity = p.getMoviePopularity();
                 ArrayList<String> prints = new ArrayList<>();
                 int choice3;
                 int choice4 = 1;
@@ -750,10 +774,12 @@ public class App {
                         Movie m = (Movie) ob;
                         System.out.println(m);
                         do {
-                            displayMovieMenuUser();
+                            boolean flag1 = currentUser.isMovieInWatchlist(m.getMd().getId());
+                            boolean flag2 = currentUser.isMovieInFavorites(m.getMd().getId());
+                            displayMovieMenuUser(flag1, flag2);
                             choice3 = scanner.nextInt();
                             scanner.nextLine();
-                            movieCase(scanner, choice3, ob);
+                            movieCase(scanner, choice3, m, flag1, flag2);
                         } while (choice3 != 0);
                     } else
                         choice4 = 0;
@@ -772,8 +798,7 @@ public class App {
      * @param choice The user's choice.
      * @param o       The object representing a Movie.
      */
-    public static void movieCase(Scanner scanner, int choice, Object o) throws Exception {
-        Movie m = (Movie) o;
+    public static void movieCase(Scanner scanner, int choice, Movie m, boolean flag1, boolean flag2) throws Exception {
         switch (choice) {
             case 0:
                 break;
@@ -784,7 +809,7 @@ public class App {
                     displayFullContributorsMenu();
                     choice2 = scanner.nextInt();
                     scanner.nextLine();
-                    fullContributorsCase(scanner, choice2, o);
+                    fullContributorsCase(scanner, choice2, m);
                 } while (choice2 != 0);
                 break;
             case 2:
@@ -793,14 +818,28 @@ public class App {
                     displayReviewContentMenu();
                     choice3 = scanner.nextInt();
                     scanner.nextLine();
-                    reviewMovieCase(scanner, choice3, o);
+                    reviewMovieCase(scanner, choice3, m);
                 } while (choice3 != 0);
+                break;
+            case 3: 
+                if(!flag1) {
+                    currentUser.addToWatchlist(m.getMd().getId(), m.getMd().getOriginal_title());
+                } else {
+                    currentUser.removeFromWatchlist(m.getMd().getId());
+                }
+                break;
+            case 4: 
+                if(!flag2) {
+                    currentUser.addToFavorites(m.getMd().getId(), m.getMd().getOriginal_title());
+                } else {
+                    currentUser.removeFromFavorites(m.getMd().getId());
+                }
                 break;
             case 5: 
                 Object l; //movielist
                 do {
                     System.out.println("Your lists");
-                    l = chooseList(scanner, currentUser);
+                    l = chooseList(scanner, currentUser, 1);
                     if (!l.equals("0")) {
                         MovieList list = (MovieList)l;
                         boolean flag = list.containsMovie(m.getMd().getOriginal_title(), m.getMd().getId());
@@ -815,7 +854,7 @@ public class App {
                 } while (!l.equals("0"));
                 break;
             case 6: 
-                printBonusContent(((Movie)o).getMd().getOriginal_title(),((Movie)o).getMd().getRelease_date());
+                printBonusContent(m.getMd().getOriginal_title(), m.getMd().getRelease_date());
                 System.out.println("\nPress 0 to go back ");
                 int choice4 = scanner.nextInt();
                 scanner.nextLine();
@@ -830,8 +869,7 @@ public class App {
         }
     }
 
-    private static void reviewMovieCase(Scanner scanner, int choice, Object o) throws Exception {
-        Movie m = (Movie)o;
+    private static void reviewMovieCase(Scanner scanner, int choice, Movie m) throws Exception {
         switch (choice) {
             case 0:
                 break;
@@ -840,10 +878,7 @@ public class App {
                     System.out.println("All reviews: \n");
                     ArrayList<Review> reviews = MovieDAO.getAllReviewsForMovie(m.getMd().getId());
                     for (Review r : reviews) {
-                        System.out.println("Author " ); // +User name
-                        System.out.println("Rating: " + r.getRating());
-                        //upload date
-                        System.out.println(r.getReviewText() + "\n\n");
+                        System.out.println(r);
                     }
                     System.out.println("Press 1 to delete a review or 0 to go back");
                     int choice2 = scanner.nextInt();
@@ -941,15 +976,15 @@ public class App {
         }
     }
 
-    private static void fullContributorsCase(Scanner scanner, int choice, Object o) throws Exception {
+    private static void fullContributorsCase(Scanner scanner, int choice, Movie m) throws Exception {
         switch (choice) {
             case 0:
                 break;
             case 1:
-                ArrayList<String> names = ((Movie) o).getPeopleName();
-                ArrayList<String> jobs = ((Movie) o).getPeopleJob();
-                ArrayList<Integer> originalIds = ((Movie) o).getPeopleId();
-                ArrayList<Float> popularity = ((Movie) o).getPeoplePopularity();
+                ArrayList<String> names = m.getPeopleName();
+                ArrayList<String> jobs = m.getPeopleJob();
+                ArrayList<Integer> originalIds = m.getPeopleId();
+                ArrayList<Float> popularity = m.getPeoplePopularity();
                 ArrayList<String> prints = new ArrayList<>();
                 ArrayList<Integer> ids2 = new ArrayList<>();
                 for (Integer id : originalIds) { // negative values for pick()
@@ -976,7 +1011,7 @@ public class App {
                             displayPersonMenu();
                             choice4 = scanner.nextInt();
                             scanner.nextLine();
-                            personCase(scanner, choice4, ob);
+                            personCase(scanner, choice4, p);
                         } while (choice4 != 0);
                     } else
                         choice5 = 0;
@@ -1056,20 +1091,24 @@ public class App {
                     if(!chatroomName.equals("0")) {
                         chatroom = Chatroom.getChatroomByName(chatroomName);
                         if(chatroom != null) {
-                            //if not already in
-                            System.out.println("Press 1 to join chatroom or 0 to go back");
-                            int choice2 = scanner.nextInt();
-                            scanner.nextLine();
-                            switch (choice2) {
-                                case 0:
-                                    break;
-                                case 1: 
-                                    currentUser.joinChatroom(chatroom.getRoomId());
-                                    caseYourChatroom(scanner, chatroom);
-                                    break;
-                                default:
-                                    break;
-                            }
+                            boolean flag = chatroom.isUserInChatroom(currentUser.getId());
+                            if(!flag) {
+                                System.out.println("Press 1 to join chatroom or 0 to go back");
+                                int choice2 = scanner.nextInt();
+                                scanner.nextLine();
+                                switch (choice2) {
+                                    case 0:
+                                        break;
+                                    case 1: 
+                                        currentUser.joinChatroom(chatroom.getRoomId());
+                                        caseYourChatroom(scanner, chatroom);
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            } else {
+                                caseYourChatroom(scanner, chatroom);
+                            } 
                         } else System.out.println("Invalid search");
                     }
                 } while (!chatroomName.equals("0"));
@@ -1219,6 +1258,7 @@ public class App {
                 case 7:
                     if(flag) {
                         currentUser.deleteChatroom(chatroom.getRoomId());
+                        System.out.println("Deleting chatroom " + chatroom.getName() + "\n");
                         choice = 0;
                     } else {
                         currentUser.leaveChatroom(chatroom.getRoomId());
@@ -1324,13 +1364,21 @@ public class App {
      * adding reviews, managing watchlist and seen status, adding to favorites and
      * lists, and getting bonus content.
      */
-    private static void displayMovieMenuUser() {
+    private static void displayMovieMenuUser(boolean flag1, boolean flag2) {
         System.out.println("0. Back");
         System.out.println("1. See full Cast and Crew");
         if(!guest) {
             System.out.println("2. Reviews");
-            System.out.println("3. Add to Watchlist");
-            System.out.println("4. Add to Favorites");
+            if(flag1) {
+                System.out.println("3. Remove from Watchlist");
+            } else {
+                System.out.println("3. Add to Watchlist");
+            }
+            if(flag2) {
+                System.out.println("4. Remove from Favorites");
+            } else {
+                System.out.println("4. Add to Favorites");
+            }
             System.out.println("5. Add to list");
             System.out.println("6. Get Bonus content");
         }
@@ -1403,13 +1451,12 @@ public class App {
         System.out.println("0. Back");
         System.out.println("1. Logout");
         System.out.println("2. Watchlist");
-        System.out.println("3. Seen");
-        System.out.println("4. Favorites");
-        System.out.println("5. Your lists");
-        System.out.println("6. Your reviews");
-        System.out.println("7. Your followers");
-        System.out.println("8. Users you follow");
-        System.out.println("9. Your country");
+        System.out.println("3. Favorites");
+        System.out.println("4. Your lists");
+        System.out.println("5. Your reviews");
+        System.out.println("6. Your followers");
+        System.out.println("7. Users you follow");
+        System.out.println("8. Your country");
         System.out.print("Enter your choice ");
     }
 
