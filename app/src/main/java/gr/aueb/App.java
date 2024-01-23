@@ -29,6 +29,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+//φτιαξε μεθοδο για ελεγχο εγκυροτητας
+
 /**
  * main application class for a movie recommendation system
  * Main application class that serves as the entry point for the movie
@@ -391,7 +393,7 @@ public class App {
         int choice;
         do {
             System.out.println();
-            displayReviewMenu();
+            displayYourReviewMenu();
             choice = scanner.nextInt();
             scanner.nextLine();
             if(choice != 0) {
@@ -399,13 +401,10 @@ public class App {
                     case 0:
                         break;
                     case 1: 
-                        
+                        caseUserAllReviews(scanner);
                         break;
                     case 2: 
                         caseDeleteReview(scanner);
-                        break;
-                    case 3: 
-                        caseUserAllReviews(scanner);
                         break;
                     default:
                         break;
@@ -435,7 +434,7 @@ public class App {
             for (Review r : reviews) {
                 i++;
                 if(r.getMovieId() != currrentId) {
-                    System.out.println("Movie: " + r.getMovieId() + "\n"); //r.getMovieTitle !!!
+                    System.out.println("Movie: " + r.getMovieName() + "\n");
                     currrentId = r.getMovieId();
                 }
                 System.out.println(i + ".");
@@ -464,7 +463,7 @@ public class App {
                 int currrentId = 0;
                 for (Review r : reviews) {
                     if(r.getMovieId() != currrentId) {
-                        System.out.println("Movie: " + r.getMovieId() + "\n"); //r.getMovieTitle !!!
+                        System.out.println("Movie: " + r.getMovieName() + "\n");
                         currrentId = r.getMovieId();
                     }
                     System.out.println(r.toString());;
@@ -481,7 +480,7 @@ public class App {
             Object f = chooseFollowerIng(scanner, "Followers");
             if(!f.equals("0")) {
                 User follower = (User)f;
-                caseUser(scanner, follower); //follower must be a User!!!
+                caseUser(scanner, follower);
             } else break;
         } while(true);
     }
@@ -492,7 +491,7 @@ public class App {
             Object f = chooseFollowerIng(scanner, "Following");
             if(!f.equals("0")) {
                 User following = (User)f;
-                caseUser(scanner, following); //following must be a User!!!
+                caseUser(scanner, following);
             } else break;
         } while(true);
     }
@@ -846,13 +845,17 @@ public class App {
                         //upload date
                         System.out.println(r.getReviewText() + "\n\n");
                     }
-                    System.out.println("Press 0 to go back");
+                    System.out.println("Press 1 to delete a review or 0 to go back");
                     int choice2 = scanner.nextInt();
                     scanner.nextLine();
-                    while (choice2 != 0) {
-                        System.out.println("Invalid choice. Please enter a valid option ");
-                        choice2 = scanner.nextInt();
-                        scanner.nextLine();
+                    switch (choice2) {
+                        case 0:
+                            break;
+                        case 1: 
+                            caseDeleteReview(scanner);
+                            break;
+                        default:
+                            break;
                     }
                     break;
                 } while (true);
@@ -888,7 +891,7 @@ public class App {
                             System.out.println(r.toString());;
                         }
                     } else {
-                        System.out.println("No reviews for this movie!");
+                        System.out.println("You have not reviewed for this movie!");
                     }   
                     System.out.println("Press 0 to go back");
                     int choice2 = scanner.nextInt();
@@ -918,18 +921,18 @@ public class App {
                                 spoilers = true;
                             }
                             System.out.println("Enter your rating from a scale 1-10 or press 0 to go back ");
-                            rating = scanner.nextFloat();// check for int
+                            rating = scanner.nextFloat();
                             scanner.nextLine();
                             while(rating < 0 || rating > 10) {
                                 System.out.println("Invalid choice. Please enter a valid option ");
-                                rating = scanner.nextFloat();// check for int
+                                rating = scanner.nextFloat();
                                 scanner.nextLine();
                             }
                         }
                     }
                 } while (!reviewText.equals("0") && (rating == 0 || choice2 == 0));        
                 if(!reviewText.equals("0") && rating != 0 && rating != -1) {
-                    Review r = Review.addReview(currentUser.getId(), m.getMd().getId(), reviewText, rating, spoilers); //?????
+                    Review r = Review.addReview(currentUser.getId(), m.getMd().getId(), reviewText, rating, spoilers, currentUser.getUsername(), m.getMd().getOriginal_title());
                     System.out.println("Your review is published! ");
                 }
                 break; 
@@ -988,6 +991,7 @@ public class App {
     private static void mainCase5(Scanner scanner) throws Exception {
         int choice = 0;
         do {
+            System.out.println();
             displayChatroomMenu();
             choice = scanner.nextInt();
             scanner.nextLine();
@@ -1001,69 +1005,85 @@ public class App {
                 break;
             case 1: 
                 String name;
+                
                 do {
                     System.out.println("Enter a name for your chatroom or press 0 to go back"); 
                     name = scanner.nextLine();
-                } while (!name.equals("0"));
+                    boolean flag = Chatroom.isNameUnique(name);
+                    if(!flag) {
+                        System.out.println("Name is taken");
+                        name = "0";
+                    }
+                } while (name.equals("0"));
+                Chatroom.createChatroom(name, currentUser.getId());
                 break;
             case 2:
                 Chatroom chatroom;
                 do {
-                    ArrayList<Chatroom> chatrooms = currentUser.getNotJoinedChatrooms();
+                    ArrayList<Chatroom> chatrooms = currentUser.getJoinedChatrooms();
                     chatroom = chooseChatroom(scanner, chatrooms);
                     if(chatroom != null) {
-
+                        caseYourChatroom(scanner, chatroom);
                     }
                 } while (chatroom != null);
                 break;
             case 3 :
-                caseNewChatrooms(scanner);
+                do {
+                    ArrayList<Chatroom> chatrooms = currentUser.getNotJoinedChatrooms();
+                    chatroom = chooseChatroom(scanner, chatrooms);
+                    if(chatroom != null) {
+                        System.out.println("Press 1 to join chatroom or 0 to go back");
+                        int choice2 = scanner.nextInt();
+                        scanner.nextLine();
+                        switch (choice2) {
+                            case 0:
+                                break;
+                            case 1: 
+                                currentUser.joinChatroom(chatroom.getRoomId());
+                                caseYourChatroom(scanner, chatroom);
+                                break;
+                            default:
+                                break;
+                        }
+                    } 
+                } while (chatroom != null);
+                break;
+            case 4:
+                String chatroomName;
+                do {
+                    System.out.println("Type your search or press 0 to go back");
+                    chatroomName = scanner.nextLine();
+                    if(!chatroomName.equals("0")) {
+                        chatroom = Chatroom.getChatroomByName(chatroomName);
+                        if(chatroom != null) {
+                            //if not already in
+                            System.out.println("Press 1 to join chatroom or 0 to go back");
+                            int choice2 = scanner.nextInt();
+                            scanner.nextLine();
+                            switch (choice2) {
+                                case 0:
+                                    break;
+                                case 1: 
+                                    currentUser.joinChatroom(chatroom.getRoomId());
+                                    caseYourChatroom(scanner, chatroom);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        } else System.out.println("Invalid search");
+                    }
+                } while (!chatroomName.equals("0"));
                 break;
             default:
                 break;
         }
     }
 
-    private static void caseNewChatrooms(Scanner scanner) throws Exception {
-        int choice;
-        do {
-            displayChatroomFindMenu();
-            choice = scanner.nextInt();
-            switch (choice) {
-                case 0:
-                    break;
-                case 1:
-                    String name;
-                    do {
-                        System.out.println("Type your search or press 0 to go back");
-                        name = scanner.nextLine();
-                        if(!name.equals("0")) {
-                            Chatroom chatroom = Chatroom.getChatroomByName(name);
-                            if(chatroom != null) {
-                                currentUser.joinChatroom(chatroom.getRoomId()); //check!!!!!!
-                            } else System.out.println("Invalid search");
-                        }
-                    } while (!name.equals("0"));
-                    
-                case 2: 
-                    Chatroom chatroom;
-                    do {
-                        ArrayList<Chatroom> chatrooms = currentUser.getNotJoinedChatrooms();
-                        chatroom = chooseChatroom(scanner, chatrooms);
-                        if(chatroom != null) {
-                            currentUser.joinChatroom(chatroom.getRoomId()); //check!!!!!!
-                        }
-                    } while (chatroom != null);
-                default:
-                    break;
-            }
-        } while (choice != 0);
-    }
-
     private static Chatroom chooseChatroom(Scanner scanner, ArrayList<Chatroom> chatrooms) throws Exception {
         System.out.println();
         int i = 0;
         for (Chatroom c : chatrooms) {
+            i++;
             System.out.printf("%3d. %s \n", i, c.getName());
         }   
         System.out.println("\nEnter your choice or press 0 to go back ");
@@ -1087,32 +1107,153 @@ public class App {
                 case 0:
                     break;
                 case 1 :
-                    
+                    String messageText;
+                    boolean spoilers = false;
+                    int choice2 = 0;
+                    do {
+                        System.out.println("\nWrite your message or press 0 to go back");
+                        messageText = scanner.nextLine();
+                        if(!messageText.equals("0")) {
+                            displayAddMessageTypeMenu();
+                            choice2 = scanner.nextInt();
+                            scanner.nextLine();
+                            if (choice2 != 0) {
+                                if(choice2 == 1) {
+                                    spoilers = true;
+                                }
+                            }
+                        }
+                    } while (!messageText.equals("0") && choice2 == 0);        
+                    if(!messageText.equals("0")) {
+                        Message.addMessage(currentUser.getId(), spoilers, messageText, chatroom.getRoomId(), currentUser.getUsername());
+                        System.out.println("Your message is published! ");
+                    }
                     break;
                 case 2:
-                    
+                    ArrayList<Message> messages = chatroom.getMessages();
+                    System.out.println();
+                    int i = 0;
+                    for (Message m : messages) {
+                        if(currentUser.getId() == m.getUserId()) {
+                            i++;
+                            System.out.println(i + ".");
+                            System.out.println(m);
+                        } 
+                    }
+                    if(i == 0) {
+                        System.out.println("You have no messages in this chatroom");
+                    }  
+                    int back;
+                    do {
+                        System.out.println("\nPress 0 to go back");
+                        back = scanner.nextInt();
+                    } while (back != 0);
+
                     break;
                 case 3:
-                    
+                    messages = chatroom.getUnseenMessages(currentUser.getId());
+                    if(!messages.isEmpty()) {
+                        int choice3;
+                        for (Message m : messages) {
+                            System.out.println(m);
+                        }
+                        System.out.println("Press 0 to go back");
+                        choice3 = scanner.nextInt();
+                        scanner.nextLine();
+                        while(choice3 != 0) {
+                            System.out.println("Invalid choice. Please enter a valid option");
+                        }
+                    }
                     break;
                 case 4:
-                    
+                    messages = chatroom.getMessages();
+                    if(!messages.isEmpty()) {
+                        int choice4;
+                        for (Message m : messages) {
+                            System.out.println(m);
+                        }
+                        System.out.println("Press 0 tp go back");
+                        choice4 = scanner.nextInt();
+                        scanner.nextLine();
+                        while(choice4 != 0) {
+                            System.out.println("Invalid choice. Please enter a valid option");
+                        }
+                    }
                     break;
                 case 5:
-                    
+                    ArrayList<User> users = chatroom.showChatroomMembers();
+                    do {
+                        if (users.size() > 1) {
+                            int j = 0;
+                            for (User u : users) {
+                                if(u.getId() != currentUser.getId()) {
+                                    System.out.printf("%3d. %s \n", j + 1, u.getUsername());
+                                }
+                            }
+                            Object o = pickUser(users, scanner);
+                            if (!o.equals(0)) {
+                                //int choice;
+                                caseUser(scanner, o);
+                            } else
+                                break;
+                        } else if(users.size() == 1) {
+                            System.out.println("You are the only member in this chatroom");
+                            break;
+                        } else {
+                            System.out.println("No members");
+                            break;
+                        }
+                    } while (true);
                     break;
                 case 6:
+                    messages = chatroom.getMessages();
+                    Message message;
+                    do {
+                        message = chooseMessage(messages, scanner);
+                        if(message != null) {
+                            message.deleteMessage(currentUser.getId());
+                            break;
+                        }
+                    } while (message != null);
+                    break;
+                case 7:
                     if(flag) {
-                        
+                        currentUser.deleteChatroom(chatroom.getRoomId());
+                        choice = 0;
                     } else {
-                        
+                        currentUser.leaveChatroom(chatroom.getRoomId());
+                        System.out.println("Leaving chatroom " + chatroom.getName() + "\n");
+                        choice = 0;
                     }
-                    
                     break;
                 default:
                     break;
             }
         } while (choice != 0);
+    }
+
+    private static Message chooseMessage(ArrayList<Message> messages, Scanner scanner) {
+        System.out.println();
+        int i = 0;
+        for (Message m : messages) {
+            if(currentUser.getId() == m.getUserId()) {
+                i++;
+                System.out.println(i + ".");
+                System.out.println(m);
+            } 
+        }
+        if(i == 0) {
+            System.out.println("You have no messages in this chatroom");
+            return null;
+        }   
+        System.out.println("\nEnter your choice or press 0 to go back ");
+        int choice = scanner.nextInt();
+        scanner.nextLine();
+        if(choice == 0) {
+            return null;
+        } else {
+            return messages.get(choice - 1);
+        }
     }
 
     /**
@@ -1250,6 +1391,7 @@ public class App {
         System.out.println("0. Back");
         System.out.println("1. YES");
         System.out.println("2. NO");
+        System.out.println("Enter your choice ");
     }
 
     /**
@@ -1274,11 +1416,10 @@ public class App {
     /**
      * Displays the menu options for managing the content of a user's review.
      */
-    private static void displayReviewMenu() {
+    private static void displayYourReviewMenu() {
         System.out.println("0. Back");
-        System.out.println("1. Modify review");
+        System.out.println("1. All your reviews");
         System.out.println("2. Delete review");
-        System.out.println("3. Your reviews");
         System.out.println("Enter your choice ");
     }
 
@@ -1328,6 +1469,7 @@ public class App {
         System.out.println("1. Create a chatroom");
         System.out.println("2. See your chatrooms"); 
         System.out.println("3. New chatrooms");
+        System.out.println("4. Search for a chatroom");
         System.out.println("Enter your choice ");
     }
     /**
@@ -1336,25 +1478,25 @@ public class App {
     private static void displayYourChatroomMenu(boolean flag) {
         System.out.println("0. Back");
         System.out.println("1. Add a message");
-        System.out.println("2. Delete a message");
-        System.out.println("3. Modify a message");
-        System.out.println("4. See unread messages");
-        System.out.println("5. See all messages");
+        System.out.println("2. Your messages");
+        System.out.println("3. See unread messages");
+        System.out.println("4. See all messages");
+        System.out.println("5. See chatroom members");
+        System.out.println("6. Delete a message");
         if (flag) {
-            System.out.println("6. Delete chatroom"); 
+            System.out.println("7. Delete chatroom"); 
         } else {
-            System.out.println("6. Leave chatroom");
+            System.out.println("7. Leave chatroom");
         }
         System.out.println("Enter your choice ");
     }
 
-    /**
-     * Displays the menu options for finding and interacting with chatrooms.
-     */
-    private static void displayChatroomFindMenu() {
+    private static void displayAddMessageTypeMenu() {
+        System.out.println("Does your message contain spoilers?");
         System.out.println("0. Back");
-        System.out.println("1. Search for a chatroom");
-        System.out.println("2. See existing chatrooms");
+        System.out.println("1. YES");
+        System.out.println("2. NO");
+        System.out.println("Enter your choice ");
     }
 
     /**
