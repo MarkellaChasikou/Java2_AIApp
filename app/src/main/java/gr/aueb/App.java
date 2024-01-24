@@ -272,9 +272,18 @@ public class App {
                     searchMoviePerson(scanner);
                     break;
                 case 3:
+                    if(guest) {
+                        currentUser = null;
+                        skipStartMenu = false;
+                        break;
+                    }
                     handleSearchForUserCase(scanner);
                     break;
                 case 4:
+                    if(guest) {
+                        System.out.println("Exiting the application.");
+                        System.exit(0);
+                    }
                     handleMainCase4(scanner);
                     break; 
                 case 5: 
@@ -588,8 +597,9 @@ public class App {
             }
             System.out.println("5. Add to list");
             System.out.println("6. Get Bonus content");
+            System.out.println("7. Home");
         }
-        
+        System.out.println("2. Home");
         System.out.print("Enter your choice ");
     }
 
@@ -611,14 +621,17 @@ public class App {
                 if(!guest) {
                     flag1 = currentUser.isMovieInWatchlist(m.getMd().getId());
                     flag2 = currentUser.isMovieInFavorites(m.getMd().getId());
+                    displayMovieMenu(flag1, flag2);
+                    choice2 = choose(0, 7, scanner);
+                } else {
+                    displayMovieMenu(flag1, flag2);
+                    choice2 = choose(0, 2, scanner);
                 }
-                displayMovieMenu(flag1, flag2);
-                choice2 = choose(0, 6, scanner);
                 handleMovieCase(scanner, choice2, m, flag1, flag2);
             } else {
                 Person p = (Person)o;
                 displayPersonMenu();
-                choice2 = choose(0, 1, scanner);
+                choice2 = choose(0, 2, scanner);
                 handlePersonCase(scanner, choice2, p);
             }
         } while (choice2 != 0);
@@ -631,6 +644,7 @@ public class App {
     private static void displayPersonMenu() {
         System.out.println("0. Back");
         System.out.println("1. Details for a movie");
+        System.out.println("2. Home");
         System.out.print("Enter your choice ");
     }
 
@@ -673,9 +687,12 @@ public class App {
                             if(!guest) {
                                 flag1 = currentUser.isMovieInWatchlist(m.getMd().getId());
                                 flag2 = currentUser.isMovieInFavorites(m.getMd().getId());
+                                displayMovieMenu(flag1, flag2);
+                                choice3 = choose(0, 7, scanner);
+                            } else {
+                                displayMovieMenu(flag1, flag2);
+                                choice3 = choose(0, 2, scanner);
                             }
-                            displayMovieMenu(flag1, flag2);
-                            choice3 = choose(0, 6, scanner);
                             handleMovieCase(scanner, choice3, m, flag1, flag2);
                         } while (choice3 != 0);
                     } else
@@ -704,15 +721,19 @@ public class App {
                 do {
                     m.printFullCast();
                     displayFullContributorsMenu();
-                    choice2 = choose(0, 1, scanner);
+                    choice2 = choose(0, 2, scanner);
                     handleFullContributorsCase(scanner, choice2, m);
                 } while (choice2 != 0);
                 break;
             case 2:
+                if(guest) {
+                    handleMainMenu(scanner);
+                    break;
+                }
                 int choice3;
                 do {
                     displayReviewContentMenu();
-                    choice3 = choose(0, 4, scanner);
+                    choice3 = choose(0, 5, scanner);
                     handleReviewMovieCase(scanner, choice3, m);
                 } while (choice3 != 0);
                 break;
@@ -760,8 +781,8 @@ public class App {
                     choice4 = scanner.nextInt();
                 }
                 break;
-            default:
-                System.out.print("Invalid choice. Please enter a valid option ");
+            case 7: 
+                handleMainMenu(scanner);
                 break;
         }
     }
@@ -772,6 +793,7 @@ public class App {
     private static void displayFullContributorsMenu() {
         System.out.println("0. Back");
         System.out.println("1. Details for a contributor");
+        System.out.println("2. Home");
         System.out.print("Enter your choice ");
     }
 
@@ -807,7 +829,7 @@ public class App {
                             Person p = (Person) ob;
                             System.out.println(p);
                             displayPersonMenu();
-                            choice4 = choose(0, 1, scanner);
+                            choice4 = choose(0, 2, scanner);
                             handlePersonCase(scanner, choice4, p);
                         } while (choice4 != 0);
                     } else
@@ -826,6 +848,7 @@ public class App {
         System.out.println("2. See all spoiler-free reviews");
         System.out.println("3. Your reviews");
         System.out.println("4. Add review");
+        System.out.println("5. Home");
         System.out.print("Enter your choice ");
     }
 
@@ -1058,6 +1081,7 @@ public class App {
         } else {
             System.out.println("2. Follow");
         }
+        System.out.println("3. Home");
         System.out.print("Enter your choice ");
     }
 
@@ -1066,7 +1090,7 @@ public class App {
         do {
             boolean flag = currentUser.isFollowing(u);
             displayUserMenu(flag);
-            choice = choose(0, 2, scanner);
+            choice = choose(0, 3, scanner);
             switch (choice) {
                 case 0:
                     break;
@@ -1095,12 +1119,12 @@ public class App {
                     System.out.println("\n" + l.getListName() + "\n");
                     if(u.equals(currentUser)) {
                         displayListContentMenu(true);
-                        choice = choose(0, 2, scanner);
+                        choice = choose(0, 3, scanner);
                     } else {
                         displayListContentMenu(false);
-                        choice = choose(0, 1, scanner);
+                        choice = choose(0, 2, scanner);
                     }
-                    handleListContentCase(scanner, choice, l);
+                    handleListContentCase(scanner, choice, l, u);
                 } while(choice != 0);
             } 
             if(allLists == 2 || allLists == 3) break;
@@ -1115,6 +1139,9 @@ public class App {
         System.out.println("1. Details for a movie");
         if (flag) {
             System.out.println("2. Remove a movie");
+            System.out.println("3. Home");
+        } else {
+            System.out.println("2. Home");
         }
         System.out.print("Enter your choice ");
     }
@@ -1175,7 +1202,7 @@ public class App {
         }  
     }
 
-    private static void handleListContentCase(Scanner scanner, int choice, MovieList list) throws Exception {
+    private static void handleListContentCase(Scanner scanner, int choice, MovieList list, User u) throws Exception {
         Map<Integer, String> movies = new HashMap<>();
         movies = list.getMoviesFromList();
         if(!movies.isEmpty()) {
@@ -1202,6 +1229,10 @@ public class App {
                     } while (true);
                     break;
                 case 2: 
+                    if(currentUser == u) {
+                        handleMainMenu(scanner);
+                        break;
+                    }
                     System.out.println("Remove a movie ");
                     do {
                         movies = list.getMoviesFromList();
@@ -1222,7 +1253,8 @@ public class App {
                         } else break;
                     } while (true);
                     break;
-                default:
+                case 3: 
+                    handleMainMenu(scanner);
                     break;
             }
         } else System.out.println("\nList is empty!");
@@ -1243,6 +1275,7 @@ public class App {
         System.out.println("6. Your followers");
         System.out.println("7. Users you follow");
         System.out.println("8. Your country");
+        System.out.println("9. Home");
         System.out.print("Enter your choice ");
     }
 
@@ -1254,7 +1287,7 @@ public class App {
             int choice;
             do {
                 displayProfileMenu();
-                choice = choose(0, 8, scanner);
+                choice = choose(0, 9, scanner);
                 handleProfileCase(scanner, choice);
             } while (choice != 0 && choice != 1);
         } 
@@ -1289,7 +1322,8 @@ public class App {
             case 8: 
                 handleCountryCase(scanner);
                 break;
-            default:
+            case 9:
+                handleMainMenu(scanner);
                 break;
         }
     }
@@ -1299,6 +1333,7 @@ public class App {
         System.out.println("1. See your lists");
         System.out.println("2. Delete a list");
         System.out.println("3. Create list");
+        System.out.println("4. Home");
         System.out.print("Enter your choice ");
     }
 
@@ -1307,7 +1342,7 @@ public class App {
         do {
             System.out.println();
             displayListMenu();
-            choice = choose(0, 3, scanner);
+            choice = choose(0, 4, scanner);
             if(choice != 0) {
                 switch (choice) {
                     case 0:
@@ -1320,7 +1355,8 @@ public class App {
                         break;
                     case 3: 
                         createListCase(scanner);
-                    default:
+                    case 4:
+                        handleMainMenu(scanner);
                         break;
                 }
             }
@@ -1387,6 +1423,7 @@ public class App {
         System.out.println("0. Back");
         System.out.println("1. All your reviews");
         System.out.println("2. Delete review");
+        System.out.println("3. Home");
         System.out.print("Enter your choice ");
     }
 
@@ -1395,7 +1432,7 @@ public class App {
         do {
             System.out.println();
             displayYourReviewMenu();
-            choice = choose(0, 2, scanner);
+            choice = choose(0, 3, scanner);
             if(choice != 0) {
                 switch (choice) {
                     case 0:
@@ -1407,7 +1444,8 @@ public class App {
                         ArrayList<Review> reviews = currentUser.getAllUserReviewsOrderedByMovieId();
                         handleDeleteReviewCase(scanner, reviews);
                         break;
-                    default:
+                    case 3: 
+                        handleMainMenu(scanner);
                         break;
                 }
             }
@@ -1486,6 +1524,7 @@ public class App {
     private static void displayCountryMenu() {
         System.out.println("0. Back");
         System.out.println("1. Change country");
+        System.out.println("2. Home");
         System.out.print("Enter your choice ");
     }
 
@@ -1495,13 +1534,20 @@ public class App {
             TreeMap<String, String> countries = Country.allCountriesNames(tmdbApiKey);
             System.out.println("\nYour country: " + countries.get(currentUser.getCountry()) + "\n");
             displayCountryMenu();
-            choice = choose(0, countries.size(), scanner);
-            if(choice == 1) {
-                String newCountry = chooseCountry(scanner);
-                if(!newCountry.equals("0")) {
-                    currentUser.setCountry(newCountry, currentUser.getPassword());
-                }
-            } else break;
+            choice = choose(0, 2, scanner);
+            switch(choice) {
+                case 0:
+                    break;
+                case 1:
+                    String newCountry = chooseCountry(scanner);
+                    if(!newCountry.equals("0")) {
+                        currentUser.setCountry(newCountry, currentUser.getPassword());
+                    }
+                    break;
+                case 2: 
+                    handleMainMenu(scanner);
+                    break;
+            } 
         } while(true);
     }
 
@@ -1515,6 +1561,7 @@ public class App {
         System.out.println("2. See your chatrooms"); 
         System.out.println("3. New chatrooms");
         System.out.println("4. Search for a chatroom");
+        System.out.println("5. Home ");
         System.out.print("Enter your choice ");
     }
 
@@ -1523,7 +1570,7 @@ public class App {
         do {
             System.out.println();
             displayChatroomMenu();
-            choice = choose(0, 4, scanner);
+            choice = choose(0, 5, scanner);
             handleChatroomCase(choice, scanner);
         } while (choice != 0);
     }
@@ -1615,7 +1662,8 @@ public class App {
                     }
                 } while (!chatroomName.equals("0"));
                 break;
-            default:
+            case 5: 
+                handleMainMenu(scanner);
                 break;
         }
     }
@@ -1652,6 +1700,7 @@ public class App {
         } else {
             System.out.println("7. Leave chatroom");
         }
+        System.out.println("8. Home ");
         System.out.print("Enter your choice ");
     }
 
@@ -1660,7 +1709,7 @@ public class App {
         do {
             boolean flag = chatroom.isChatroomCreator(currentUser.getId());
             displayYourChatroomMenu(flag);
-            choice = choose(0, 7, scanner);
+            choice = choose(0, 8, scanner);
             switch (choice) {
                 case 0:
                     break;
@@ -1785,7 +1834,8 @@ public class App {
                         choice = 0;
                     }
                     break;
-                default:
+                case 8:
+                    handleMainMenu(scanner);
                     break;
             }
         } while (choice != 0);
