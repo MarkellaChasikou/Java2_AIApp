@@ -58,6 +58,8 @@ public class Movie {
     private HashMap<Integer, Object[]> people;
     /** The list of people popularity values associated with the movie. */
     private ArrayList<Float> peoplePopularity;
+    /** The FilmBro rating of the movie. */
+    private double filmBroRating;
 
     /**
      * Constructs a Movie object for the given movie ID using the provided API key.
@@ -65,8 +67,9 @@ public class Movie {
      * 
      * @param id     The ID of the movie.
      * @param apiKey The API key for accessing TMDb.
+     * @throws Exception 
      */
-    public Movie(int id, String apiKey) {
+    public Movie(int id, String apiKey) throws Exception {
         Gson gson = new Gson();
         peopleId = new ArrayList<>();
         peopleName = new ArrayList<>();
@@ -127,6 +130,8 @@ public class Movie {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        filmBroRating = MovieDAO.getAverageRatingForMovie(this.getMd().getId());
 
         imdbRating = getImdbRatingFromID(md.getImdb_id());
 
@@ -273,8 +278,16 @@ public class Movie {
             returnString.append("\n\n");
         }
 
+        if (this.filmBroRating != 0.0) {
+            returnString.append("FilmBro rating: " + this.getFilmBroRating() + "\n");
+        }
+
         if (this.getImdbRating() != -1)
-            returnString.append("Imdb Rating: " + this.getImdbRating() + "\n \n");
+            returnString.append("Imdb Rating: " + this.getImdbRating() + "\n");
+
+        if (this.md.getVote_average() != 0.0) {
+            returnString.append("Tmdb rating: " + this.getMd().getVote_average() + "\n\n");
+        }
 
         if (this.md.getRuntime() != 0) {
             returnString.append("Runtime: " + this.md.getRuntime() + "m" + "\n\n");
@@ -425,6 +438,19 @@ public class Movie {
      */
     public HashMap<Integer, Object[]> getPeople() {
         return people;
+    }
+
+    /**
+     * Gets the FilmBro rating of the movie.
+     * 
+     * @return The FilmBro rating.
+     */
+    public double getFilmBroRating() {
+        return filmBroRating;
+    }
+
+    public void setFilmBroRating(double filmBroRating) {
+        this.filmBroRating = filmBroRating;
     }
 
     /**
