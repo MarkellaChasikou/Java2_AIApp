@@ -596,8 +596,9 @@ public class App {
             System.out.println("5. Add to list");
             System.out.println("6. Get Bonus content");
             System.out.println("7. Home");
+        } else {
+            System.out.println("2. Home");
         }
-        System.out.println("2. Home");
         System.out.print("Enter your choice ");
     }
 
@@ -611,9 +612,9 @@ public class App {
     private static void checkObjectType(Scanner scanner, Object o) throws Exception {
         int choice2;
         do {
-            System.out.println(o);
             if (o instanceof Movie) {
                 Movie m = (Movie)o;
+                System.out.println(m);
                 boolean flag1 = true;
                 boolean flag2 = true;
                 if(!guest) {
@@ -628,6 +629,7 @@ public class App {
                 handleMovieCase(scanner, choice2, m, flag1, flag2);
             } else {
                 Person p = (Person)o;
+                System.out.println(p);
                 displayPersonMenu();
                 choice2 = choose(0, 2, scanner);
                 handlePersonCase(scanner, choice2, p);
@@ -945,6 +947,7 @@ public class App {
                 if(!reviewText.equals("0") && rating != 0 && rating != -1) {
                     Review.addReview(currentUser.getId(), m.getMd().getId(), reviewText, rating, spoilers, currentUser.getUsername(), m.getMd().getOriginal_title());
                     System.out.println("Your review is published! ");
+                    m.setFilmBroRating(MovieDAO.getAverageRatingForMovie(m.getMd().getId()));
                 }
                 break;
         }
