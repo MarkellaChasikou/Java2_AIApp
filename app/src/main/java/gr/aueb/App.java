@@ -292,8 +292,6 @@ public class App {
                 case 6: 
                     System.out.println("Exiting the application.");
                     System.exit(0);
-                default:
-                    System.out.print("Invalid choice. Please enter a valid option ");
             }
         }
     }
@@ -699,9 +697,6 @@ public class App {
                         choice4 = 0;
                 } while (choice4 != 0);
                 break;
-            default:
-                System.out.print("Invalid choice. Please enter a valid option");
-                break;
         }
     }
 
@@ -836,9 +831,6 @@ public class App {
                         choice5 = 0;
                 } while (choice5 != 0);
                 break;
-            default:
-                System.out.print("Invalid choice. Please enter a valid option ");
-                break;
         }
     }
 
@@ -917,8 +909,6 @@ public class App {
                                 ArrayList<Review> reviews2 = Review.getReviewsByUserAndMovie(currentUser.getId(), m.getMd().getId());
                                 handleDeleteReviewCase(scanner, reviews2);
                                 break;
-                            default:
-                                break;
                         }
                     } else {
                         System.out.println("You have not reviewed this movie!");
@@ -956,8 +946,6 @@ public class App {
                     Review.addReview(currentUser.getId(), m.getMd().getId(), reviewText, rating, spoilers, currentUser.getUsername(), m.getMd().getOriginal_title());
                     System.out.println("Your review is published! ");
                 }
-                break; 
-            default:
                 break;
         }
     }
@@ -1103,8 +1091,6 @@ public class App {
                     } else {
                         currentUser.followUser(u.getUsername());
                     }
-                default:
-                    break;
             }
         } while(choice != 0);
     }
@@ -1622,8 +1608,6 @@ public class App {
                                     currentUser.joinChatroom(chatroom.getRoomId());
                                     handleYourChatroomCase(scanner, chatroom);
                                     break;
-                                default:
-                                    break;
                             }
                         } 
                     } else {
@@ -1651,8 +1635,6 @@ public class App {
                                     case 1: 
                                         currentUser.joinChatroom(chatroom.getRoomId());
                                         handleYourChatroomCase(scanner, chatroom);
-                                        break;
-                                    default:
                                         break;
                                 }
                             } else {
