@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.List;
 
 public class Chatroom {
     private final int roomId;
@@ -96,7 +95,7 @@ public class Chatroom {
         }
     }
 
-    private boolean isNameUnique(String newName) {
+    public static boolean isNameUnique(String newName) {
         DB db = new DB();
         try (Connection con = db.getConnection();
                 PreparedStatement stmt = con.prepareStatement("SELECT COUNT(*) FROM Chatroom WHERE name = ?")) {
@@ -188,48 +187,41 @@ public class Chatroom {
     }
 
     // Show chatroom members method
-    public List<String> showChatroomMembers() throws Exception {
-        List<String> members = new ArrayList<>();
-        DB db = new DB();
-        Connection con = null;
-        try {
-            con = db.getConnection();
+    public ArrayList<User> showChatroomMembers() throws Exception {
+        ArrayList<User> members = new ArrayList<>();
+        try (DB db = new DB(); Connection con = db.getConnection()) {
             try (PreparedStatement stmt = con.prepareStatement(
-                    "SELECT AppUser.username FROM AppUser "
-                            + "JOIN ChatroomUser ON AppUser.userId = ChatroomUser.userId "
-                            + "WHERE ChatroomUser.roomId = ?;")) {
+                    "SELECT AppUser.userId, AppUser.username, AppUser.pass_word, AppUser.country " +
+                            "FROM AppUser " +
+                            "JOIN ChatroomUser ON AppUser.userId = ChatroomUser.userId " +
+                            "WHERE ChatroomUser.roomId = ?;")) {
 
                 stmt.setInt(1, roomId);
-                ResultSet rs = stmt.executeQuery();
-
-                while (rs.next()) {
-                    members.add(rs.getString("username"));
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        int userId = rs.getInt("userId");
+                        String username = rs.getString("username");
+                        String password = rs.getString("pass_word");
+                        String country = rs.getString("country");
+                        User user = new User(userId, username, password, country);
+                        members.add(user);
+                    }
                 }
-
             } catch (Exception e) {
                 throw new Exception(e.getMessage());
-            }
-        } finally {
-            try {
-                if (con != null) {
-                    con.close();
-                }
-                db.close();
-            } catch (Exception e) {
-                e.printStackTrace();
             }
         }
         return members;
     }
 
     // Get messages method
-    public List<Message> getMessages() throws Exception {
-        List<Message> messages = new ArrayList<>();
+    public ArrayList<Message> getMessages() throws Exception {
+        ArrayList<Message> messages = new ArrayList<>();
 
         try (
                 Connection con = new DB().getConnection();
                 PreparedStatement stmt = con.prepareStatement(
-                        "SELECT id, Message.userId, text, spoiler, username " +
+                        "SELECT id, Message.userId, text, spoiler, Message.username " +
                                 "FROM Message " +
                                 "JOIN AppUser ON Message.userId = AppUser.userId " +
                                 "WHERE roomId=?");) {
@@ -254,8 +246,8 @@ public class Chatroom {
     }
 
     // Get unseen Messages method
-    public List<Message> getUnseenMessages(int userId) throws Exception {
-        List<Message> messages = new ArrayList<>();
+    public ArrayList<Message> getUnseenMessages(int userId) throws Exception {
+        ArrayList<Message> messages = new ArrayList<>();
 
         try (DB db = new DB();
                 Connection con = db.getConnection();
@@ -318,6 +310,24 @@ public class Chatroom {
         }
 
         return chatroom;
+    }
+
+    public boolean isUserInChatroom(int userId) throws Exception {
+        try (DB db = new DB(); Connection con = db.getConnection()) {
+            String sql = "SELECT COUNT(*) FROM ChatroomUser WHERE roomId = ? AND userId = ?";
+            try (PreparedStatement stmt = con.prepareStatement(sql)) {
+                stmt.setInt(1, roomId);
+                stmt.setInt(2, userId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt(1) > 0;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        return false;
     }
 
     @Override

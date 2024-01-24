@@ -754,7 +754,7 @@ public class App {
                 printBonusContent(m.getMd().getOriginal_title(), year);
                 System.out.print("\nPress 0 to go back ");
                 int choice4 = scanner.nextInt();
-                scanner.nextLine();
+                scanner.nextLine(); // consume newline character
                 while (choice4!=0){
                     System.out.print("Invalid choice. Please enter a valid option ");
                     choice4 = scanner.nextInt();
@@ -846,11 +846,11 @@ public class App {
                     }
                     System.out.println("Press 0 to go back");
                     int choice2 = scanner.nextInt();
-                    scanner.nextLine();
+                    scanner.nextLine(); // consume newline character
                     while (choice2 != 0) {
                         System.out.print("Invalid choice. Please enter a valid option ");
                         choice2 = scanner.nextInt();
-                        scanner.nextLine();
+                        scanner.nextLine(); // consume newline character
                     }
                     break;
                 } while (true);
@@ -868,11 +868,11 @@ public class App {
                     }   
                     System.out.println("Press 0 to go back");
                     int choice2 = scanner.nextInt();
-                    scanner.nextLine();
+                    scanner.nextLine(); // consume newline character
                     while (choice2 != 0) {
                         System.out.print("Invalid choice. Please enter a valid option ");
                         choice2 = scanner.nextInt();
-                        scanner.nextLine();
+                        scanner.nextLine(); // consume newline character
                     }
                     break;
                 } while (true);
@@ -920,11 +920,11 @@ public class App {
                             }
                             System.out.print("Enter your rating from a scale 1-10 or press 0 to go back ");
                             rating = scanner.nextFloat();
-                            scanner.nextLine();
+                            scanner.nextLine(); // consume newline character
                             while(rating < 0 || rating > 10) {
                                 System.out.print("Invalid choice. Please enter a valid option ");
                                 rating = scanner.nextFloat();
-                                scanner.nextLine();
+                                scanner.nextLine(); // consume newline character
                             }
                         }
                     }
@@ -1705,7 +1705,7 @@ public class App {
                     while (back != 0) {
                         System.out.println("\nPress 0 to go back");
                         back = scanner.nextInt();
-                        scanner.nextLine();
+                        scanner.nextLine(); // consume newline character
                     }
                     break;
                 case 3:
@@ -1718,7 +1718,7 @@ public class App {
                         while (back2 != 0) {
                             System.out.println("\nPress 0 to go back");
                             back = scanner.nextInt();
-                            scanner.nextLine();
+                            scanner.nextLine(); // consume newline character
                         }
                     } else {
                         System.out.println("You have no new messages!");
@@ -1734,7 +1734,7 @@ public class App {
                         while (back3 != 0) {
                             System.out.println("\nPress 0 to go back");
                             back = scanner.nextInt();
-                            scanner.nextLine();
+                            scanner.nextLine(); // consume newline character
                         }
                     } else {
                         System.out.println("There are no messages!");

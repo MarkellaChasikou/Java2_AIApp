@@ -315,13 +315,7 @@ public class Message {
      */
     @Override
     public String toString() {
-        return "Message{" +
-                "messageId=" + messageId +
-                ", userId=" + userId +
-                ", spoiler=" + spoiler +
-                ", text='" + text + '\'' +
-                ", chatroomId=" + chatroomId +
-                ", username='" + username + '\'' +
-                '}';
+        String spoilerStatus = spoiler ? "Yes" : "No";
+        return String.format("Publisher: \"%s\"\nSpoiler: %s\ntext: %s", username, spoilerStatus, text);
     }
 }
