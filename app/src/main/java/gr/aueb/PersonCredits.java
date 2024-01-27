@@ -15,7 +15,7 @@ public class PersonCredits {
     @Override
     public String toString() {
         StringBuilder returnString = new StringBuilder();
-        if(cast != null){
+        if(cast.length > 0){
             returnString.append("Actor\n" );
             for (Cast c : cast) {
                 returnString.append("Title: " + c.getTitle() + "\n" + "Character name: " + c.getCharacter() + "\n\n");

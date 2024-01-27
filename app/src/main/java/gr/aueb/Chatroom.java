@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.List;
 
 public class Chatroom {
     private final int roomId;
@@ -96,7 +95,7 @@ public class Chatroom {
         }
     }
 
-    private boolean isNameUnique(String newName) {
+    public static boolean isNameUnique(String newName) {
         DB db = new DB();
         try (Connection con = db.getConnection();
                 PreparedStatement stmt = con.prepareStatement("SELECT COUNT(*) FROM Chatroom WHERE name = ?")) {
@@ -188,8 +187,8 @@ public class Chatroom {
     }
 
     // Show chatroom members method
-    public List<User> showChatroomMembers() throws Exception {
-        List<User> members = new ArrayList<>();
+    public ArrayList<User> showChatroomMembers() throws Exception {
+        ArrayList<User> members = new ArrayList<>();
         try (DB db = new DB(); Connection con = db.getConnection()) {
             try (PreparedStatement stmt = con.prepareStatement(
                     "SELECT AppUser.userId, AppUser.username, AppUser.pass_word, AppUser.country " +
@@ -216,8 +215,8 @@ public class Chatroom {
     }
 
     // Get messages method
-    public List<Message> getMessages() throws Exception {
-        List<Message> messages = new ArrayList<>();
+    public ArrayList<Message> getMessages() throws Exception {
+        ArrayList<Message> messages = new ArrayList<>();
 
         try (
                 Connection con = new DB().getConnection();
@@ -247,8 +246,8 @@ public class Chatroom {
     }
 
     // Get unseen Messages method
-    public List<Message> getUnseenMessages(int userId) throws Exception {
-        List<Message> messages = new ArrayList<>();
+    public ArrayList<Message> getUnseenMessages(int userId) throws Exception {
+        ArrayList<Message> messages = new ArrayList<>();
 
         try (DB db = new DB();
                 Connection con = db.getConnection();

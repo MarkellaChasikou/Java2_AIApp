@@ -33,8 +33,8 @@ public class PersonDetails {
     @Override
     public String toString() {
         StringBuilder returnString = new StringBuilder();
-        if(this.name != null) returnString.append("Name: " +this.name+"\n\n");
-        if(this.biography != null) returnString.append(this.biography+"\n\n");
+        if(this.name != null) returnString.append("Name: " +this.name);
+        if(this.biography != null) returnString.append("\n\n" + this.biography+"\n\n");
         if(this.birthday != null) returnString.append("Birthday: " +this.birthday+"\n");
         if(this.deathday != null) {
             returnString.append("Deathday: " +this.name+"\n\n");

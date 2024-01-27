@@ -17,8 +17,6 @@ public class MovieDetails {
     private int runtime;
     @SerializedName("vote_average")
     private float vote_average;
-    @SerializedName("poster_path")
-    private String poster_path;
     @SerializedName("imdb_id")
     private String imdb_id;
     
@@ -42,9 +40,6 @@ public class MovieDetails {
     }
     public float getVote_average() {
         return vote_average;
-    }
-    public String getPoster_path() {
-        return poster_path;
     }
     public String getImdb_id() {
         return imdb_id;
