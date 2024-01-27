@@ -2,5 +2,6 @@
     "java.project.referencedLibraries": [
         "lib/**/*.jar",
         "c:\\Users\\Βασιλης\\Downloads\\jsoup-1.8.1.jar"
-    ]
+    ],
+    "java.configuration.updateBuildConfiguration": "interactive"
 }
