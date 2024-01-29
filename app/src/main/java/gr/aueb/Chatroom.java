@@ -454,7 +454,7 @@ public class Chatroom {
         return "Chatroom{" +
                 "roomId=" + roomId +
                 ", name='" + name + '\'' +
-                ", createorId=" + createorId +
+                ", createorId=" + creatorId +
                 '}';
     }
 }
