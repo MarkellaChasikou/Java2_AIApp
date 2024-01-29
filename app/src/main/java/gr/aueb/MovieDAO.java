@@ -5,6 +5,8 @@
  */
 package gr.aueb;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -129,6 +131,8 @@ public class MovieDAO {
             }
             if (totalReviews > 0) {
                 averageRating = totalRating / totalReviews;
+                BigDecimal bd = new BigDecimal(averageRating).setScale(2, RoundingMode.HALF_UP);
+                averageRating = bd.doubleValue();
             }
         }
 

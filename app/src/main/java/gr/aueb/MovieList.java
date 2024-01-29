@@ -315,6 +315,28 @@ public class MovieList {
         return false;
     }
 
+    // Check if a list name already exists for a specific user
+    public static boolean isListNameExists(String listName, int userId) throws Exception {
+        try (DB db = new DB(); Connection con = db.getConnection()) {
+            String sql = "SELECT COUNT(*) AS count FROM List WHERE name=? AND userId=?;";
+
+            try (PreparedStatement stmt = con.prepareStatement(sql)) {
+                stmt.setString(1, listName);
+                stmt.setInt(2, userId);
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        int count = rs.getInt("count");
+                        return count > 0;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        return false;
+    }
+
     @Override
     public String toString() {
         return "MovieList{" +

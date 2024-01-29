@@ -64,7 +64,8 @@ public class MovieTest {
     }
 
     @Test
-    public void testToString() {
+    public void testToString() throws Exception {
+      {
         Movie movie = new Movie(movieId, apiKey);
         assertNotNull(movie.toString());
     }
