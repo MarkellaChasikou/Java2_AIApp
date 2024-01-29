@@ -116,6 +116,26 @@ public class App {
         }
         return choice;
     }
+
+    private static float chooseFloat(int lowBound, int upBound, Scanner scanner) {
+        boolean validInput = false;
+        float choice = -1;
+        while (!validInput) {
+            try {
+                choice = scanner.nextFloat();
+                if (choice < lowBound || choice > upBound) {
+                    System.out.print("\nInvalid choice. Please enter a valid option ");
+                } else {
+                    validInput = true;
+                }
+            } catch (java.util.InputMismatchException e) {
+                System.out.print("\nInvalid choice. Please enter a valid option ");
+            } finally {
+                scanner.nextLine(); // consume the newline character
+            }
+        }
+        return choice;
+    }
     
     /**
      * Handles the display of the start menu.
@@ -211,7 +231,7 @@ public class App {
     }
 
     private static String chooseCountry(Scanner scanner) {
-        TreeMap<String, String> countries = Country.allCountriesNames(tmdbApiKey);
+        TreeMap<String, String> countries = Country.getAllCountriesNames(tmdbApiKey);
         int i = 0;
         String[] keys = new String[countries.size()];
         System.out.println();
@@ -315,7 +335,7 @@ public class App {
                             userMessage + "Don't include summaries and firector names. Include release year",
                             chatgptApiKey);
                     ArrayList<String> movieTitles = extractMovieTitles(result);
-                    if (movieTitles != null) {
+                    if (!movieTitles.isEmpty()) {
                         String title = "1";
                         do {
                             System.out.println(result);
@@ -333,7 +353,7 @@ public class App {
                 }
                 if (flag == false) {
                     System.out.println(
-                        "Something went wrong. Try to be more specific and limit your message to movie recommendations.");
+                        "\nSomething went wrong. Try to be more specific and limit your message to movie recommendations. ");
                 }
             }
         }while(!userMessage.equals("0"));
@@ -614,7 +634,9 @@ public class App {
         do {
             if (o instanceof Movie) {
                 Movie m = (Movie)o;
-                System.out.println(m);
+                TreeMap<String, String> countries = Country.getAllCountriesNames(tmdbApiKey);//temporary!!!!!
+                String countryName = countries.get(currentUser.getCountry());
+                System.out.println(m.toString(countryName, currentUser.getCountry())); 
                 boolean flag1 = true;
                 boolean flag2 = true;
                 if(!guest) {
@@ -680,7 +702,9 @@ public class App {
                     Object ob = chooseMoviePerson(scanner, ids2);
                     if (ob instanceof Movie) {
                         Movie m = (Movie) ob;
-                        System.out.println(m);
+                        TreeMap<String, String> countries = Country.getAllCountriesNames(tmdbApiKey);//temporary!!!!!
+                        String countryName = countries.get(currentUser.getCountry());
+                        System.out.println(m.toString(countryName, currentUser.getCountry())); 
                         do {
                             boolean flag1 = true;
                             boolean flag2 = true;
@@ -928,7 +952,7 @@ public class App {
                     reviewText = scanner.nextLine();
                     if(!reviewText.equals("0")) {
                         displayAddReviewTypeMenu();
-                        choice2 = choose(0, 1, scanner);
+                        choice2 = choose(0, 2, scanner);
                         if (choice2 != 0) {
                             if(choice2 == 1) {
                                 spoilers = true;
@@ -938,8 +962,7 @@ public class App {
                             scanner.nextLine(); // consume newline character
                             while(rating < 0 || rating > 10) {
                                 System.out.print("Invalid choice. Please enter a valid option ");
-                                rating = scanner.nextFloat();
-                                scanner.nextLine(); // consume newline character
+                                rating = chooseFloat(1, 10, scanner);
                             }
                         }
                     }
@@ -1011,7 +1034,7 @@ public class App {
      * @param movieTitle The title of the movie.
      * @param year       The release year of the movie, or null if not available.
      */
-    public static void printBonusContent(String movieTitle, int year) {
+    private static void printBonusContent(String movieTitle, int year) {
         if (year != 0) {
             BonusContent.searchAndPrintVideo(movieTitle + "  movie " + year, "Fun Facts", youtubeApiKey); // edw den tha to vgazei swsta logw toy thematos p legame
             BonusContent.searchAndPrintVideo(movieTitle + "  movie " + year, "Behind the Scenes", youtubeApiKey);
@@ -1289,6 +1312,7 @@ public class App {
             case 1:
                 currentUser = null;
                 skipStartMenu = false;
+                handleStartMenu(scanner);
                 break;
             case 2:
                 showListsCase(scanner, currentUser, 2);
@@ -1520,7 +1544,7 @@ public class App {
     private static void handleCountryCase(Scanner scanner) throws Exception {
         int choice;
         do {
-            TreeMap<String, String> countries = Country.allCountriesNames(tmdbApiKey);
+            TreeMap<String, String> countries = Country.getAllCountriesNames(tmdbApiKey);
             System.out.println("\nYour country: " + countries.get(currentUser.getCountry()) + "\n");
             displayCountryMenu();
             choice = choose(0, 2, scanner);
@@ -1751,7 +1775,7 @@ public class App {
                         int back2 = 1;
                         while (back2 != 0) {
                             System.out.println("\nPress 0 to go back");
-                            back = scanner.nextInt();
+                            back2 = scanner.nextInt();
                             scanner.nextLine(); // consume newline character
                         }
                     } else {
@@ -1767,7 +1791,7 @@ public class App {
                         int back3 = 1;
                         while (back3 != 0) {
                             System.out.println("\nPress 0 to go back");
-                            back = scanner.nextInt();
+                            back3 = scanner.nextInt();
                             scanner.nextLine(); // consume newline character
                         }
                     } else {

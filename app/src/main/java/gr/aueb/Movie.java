@@ -256,7 +256,7 @@ public class Movie {
      * 
      * @return The string with movie details.
      */
-    private String printResult() {
+    private String printResult(String countryName, String countryKey) {
         StringBuilder returnString = new StringBuilder();
         if (this.md.getOriginal_title() != null) {
             returnString.append("Title: " + this.md.getOriginal_title() + "\n\n");
@@ -279,7 +279,7 @@ public class Movie {
         }
 
         if (this.filmBroRating != 0.0) {
-            returnString.append("FilmBro rating: " + this.getFilmBroRating() + "\n");
+            returnString.append("FilmBro Eating: " + this.getFilmBroRating() + "\n");
         }
 
         if (this.getImdbRating() != -1)
@@ -330,7 +330,7 @@ public class Movie {
             returnString.append("\n\n");
         }
 
-        returnString.append(av.toString("GR")); // Temporarily using "GR" for language; modify as needed
+        returnString.append(av.toString(countryName, countryKey));
         return returnString.toString();
     }
 
@@ -362,9 +362,8 @@ public class Movie {
      * 
      * @return A string containing movie details.
      */
-    @Override
-    public String toString() {
-        String s = printResult();
+    public String toString(String countryName, String countryKey) {
+        String s = printResult(countryName, countryKey);
         return "\n\n" + s;
     }
 

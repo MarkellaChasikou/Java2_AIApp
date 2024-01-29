@@ -26,7 +26,7 @@ public class Country {
     private ArrayList<Provider> rent;
 
 
-    public static TreeMap<String, String> allCountriesNames(String apiKey)  {
+    public static TreeMap<String, String> getAllCountriesNames(String apiKey)  {
         TreeMap<String, String> countries = new TreeMap<>();
         
         HttpRequest request = HttpRequest.newBuilder()

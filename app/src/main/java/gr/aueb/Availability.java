@@ -74,10 +74,11 @@ public class Availability {
      * @param country The country for which availability information is requested.
      * @return The string representation of availability for the specified country.
      */
-    public String toString(String country) {
+    public String toString(String countryName, String countryKey) {
         StringBuilder result = new StringBuilder();
-        Country c = results.get(country);
-        if (results.containsKey(country)) {
+        Country c = results.get(countryKey);
+        if (results.containsKey(countryKey)) {
+            result.append("Availability for: " + countryName + "\n");
             result.append(formatAvailability("Free", c.getFree()));
             result.append(formatAvailability("Ads", c.getAds()));
             result.append(formatAvailability("Buy", c.getBuy()));
@@ -85,6 +86,6 @@ public class Availability {
             result.append(formatAvailability("Rent", c.getRent()));
             return result.toString();
         } else
-            return "\nNot available in " + country;
+            return "\nNot available in " + countryName;
     }
 }
